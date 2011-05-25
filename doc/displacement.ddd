@@ -10,18 +10,21 @@ font "Arial"
 font_size 16 
 
 displaced_plane -> 
-    mapping 
+    locally 
         translatey 200 
         rotatey -20 
         rotatex -65 
         rotatez 45 
         // Set texture maps
-        color_map COLOR_MAP 
-        displacement_map DISPLACEMENT_MAP 
+        texture_unit 0 
+        texture COLOR_MAP 
+        texture_unit 1 
+        texture DISPLACEMENT_MAP 
         // Apply displacement mapping
         displacement_mapping 200 
         // Define subdivided plane
         plane -50, 0, 500, 500, 200, 200 
+
 
 // Legend to the color map
 legend_color -> 

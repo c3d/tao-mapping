@@ -12,24 +12,6 @@ module_description
     version 1.0
 
 // -------------------------------------------------------------------------------------------------------------------
-//   GENERAL MAPPING PARAMETERS
-// -------------------------------------------------------------------------------------------------------------------
-
-color_map id:text ->
-    /**
-    * Set id as color map.
-    **/
-    texture_unit 0
-    texture id
-
-mapping t:tree ->
-    /**
-    * Apply mapping.
-    **/
-    locally
-        do t
-
-// -------------------------------------------------------------------------------------------------------------------
 //   ALPHA MAPPING
 // -------------------------------------------------------------------------------------------------------------------
 
@@ -43,13 +25,6 @@ alpha_mapping n:real ->
     **/
     ALPHA_THRESHOLD := n
     alpha_shader
-
-alpha_map id:text ->
-    /**
-    * Set id as alpha map.
-    **/
-    texture_unit 1
-    texture id
 
 alpha_shader ->
     /**
@@ -102,13 +77,6 @@ displacement_mapping ratio:real ->
     DISPLACEMENT_RATIO := ratio
     displacement_shader
 
-displacement_map id:text ->
-    /**
-    * Set id as displacement map.
-    **/
-    texture_unit 1
-    texture id
-
 displacement_shader ->
     /**
     * Define displacement shader.
@@ -148,7 +116,6 @@ displacement_shader ->
     shader_set displacementMap := 1
     shader_set ratio := DISPLACEMENT_RATIO
 
-
 // -------------------------------------------------------------------------------------------------------------------
 //   NORMAL MAPPING
 //   For further informations, see http://en.wikipedia.org/wiki/Normal_mapping
@@ -159,13 +126,6 @@ normal_mapping ->
     * Apply normal mapping.
     **/
     normal_shader
-
-normal_map id:text ->
-    /**
-    * Set id as normal map.
-    **/
-    texture_unit 1
-    texture id
 
 normal_shader ->
     /**
@@ -262,7 +222,6 @@ normal_shader ->
     shader_set colorMap := 0
     shader_set normalMap := 1
 
-
 // -------------------------------------------------------------------------------------------------------------------
 //   NOISE MAPPING
 //   For further informations, see http://en.wikipedia.org/wiki/Image_noise
@@ -278,18 +237,10 @@ noise_mapping n->
     NOISE_RATIO := n
     noise_shader
 
-noise_map id:text ->
-    /**
-    * Set id as noise map.
-    **/
-    texture_unit 1
-    texture id
-
 noise_map w:integer, h:integer->
     /**
-    * Generate a random noise map.
+    * Generate a random noise image.
     **/
-    texture_unit 1
     frame_texture w, h,
         color "white"
         generate_noise

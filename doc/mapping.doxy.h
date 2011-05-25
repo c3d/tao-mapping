@@ -21,13 +21,16 @@
  *       - sphere mapping
  *       - etc.
  *
+ * @attention All these techniques use multitexturing to obtain good results.
+ * @attention Thus, color and texture map must be bind respectively on first and second texture units before applying the effect.
+ *
+ * @note Multitexturing is a particular case of texture mapping.
  *
  * The example below presents a use case of displacement mapping.
  * @include displacement.ddd
  *
  * @image html displacement.png "Output from displacement.ddd"
- * 
- * @note Multitexturing is a particular case of texture mapping.
+ *
  *
  * @{
  */
@@ -44,40 +47,13 @@
 plane(x:real, y:real, w:real, h:real, l:integer, c:integer);
 
 /**
- * Creates a local mapping.
- *
- * Define and evaluate the mapping tree while
- * preserving the current graphical state like a @ref locally.
- *
- * @param contents defines code applied on the current mapping
- */
-mapping(contents:tree);
-
-/**
- * Selects the color map.
- * Build a color texture out of image file @p filename like @ref texture
- * to use it during a mapping.
- *
- */
-color_map(filename:text);
-
-/**
- * Selects the displacement map.
- * Build a displacement texture out of image file @p filename like @ref texture
- * to use it during a displacement mapping.
- * The whitest points of the map are the most "displaced",
- * contrary to the most black which are not at all.
- *
- */
-displacement_map(filename:text);
-
-/**
  * Makes displacement mapping.
  *
  * Displace geometric position of points over the textured
  * surface defined by @ref displacement_map and set the
  * other map specified by @ref color_map as main texture.
- *
+ * The whitest points of the texture map are the most "displaced",
+ * contrary to the most black which are not at all.
  *
  * @param ratio displacement ratio
  *
@@ -88,40 +64,18 @@ displacement_map(filename:text);
 displacement_mapping(ratio:real);
 
 /**
- * Selects the alpha map.
- * Build an alpha texture out of image file @p filename like @ref texture
- * to use it during an alpha mapping.
- * The most dark points of the texture allow to define
- * a transparent area during the mapping.
- *
- */
-alpha_map(filename:text);
-
-/**
  * Makes alpha mapping.
  *
  * Allow to define certain area of an objet as transparent or translucent thanks to
  * the texture defined by @ref alpha_map and set the
  * other map specified by @ref color_map as main texture.
- *
+ * The most dark points of the texture map allow to define
+ * a transparent area during the mapping.
  *
  * @param threshold alpha threshold
  *
  */
 alpha_mapping(threshold:real);
-
-/**
- * Selects the normal map.
- * Build an normal texture out of image file @p filename like @ref texture
- * to use it during a normal mapping.
- *
- * @note This texture is a particular image, which allows to define normals used during mapping.
- * @note There is an example of such an image below.
- *
- * @image html normal.jpg "Example of normal map"
- *
- */
-normal_map(filename:text);
 
 /**
  * Makes normal mapping.
@@ -135,28 +89,19 @@ normal_map(filename:text);
  *
  * @note This effect support only light zero.
  * @note Contrary to displacement mapping, normal mapping doesn't modify geometric positions.
+ * @note This mapping use a particular texture, which allows to define normals used during mapping.
+ * @note There is an example of such an image below.
+ *
+ * @image html normal.jpg "Example of normal map"
  *
  * @see http://en.wikipedia.org/wiki/Normal_mapping
  */
 normal_mapping();
 
 /**
- * Selects the noise map.
- * Build a noise texture out of image file @p filename like @ref texture
- * to use it during a noise mapping.
- *
- * @note This texture is a particular image, which allows to define noise used during mapping.
- * @note There is an example of such an image below.
- *
- * @image html noise.png "Example of noise map"
- *
- */
-noise_map(filename:text);
-
-/**
- * Generates a random noise map.
- * Make a random noise texture with width @p w and height @p h
- * to use it during a noise mapping.
+ * Generates a random noise image.
+ * Make a random noise texture with width @p w and height @p h.
+ * This one can be use to make a noise mapping.
  *
  */
 noise_map(w:integer, h:integer);
@@ -170,6 +115,10 @@ noise_map(w:integer, h:integer);
  * @param ratio noise ratio
  *
  * @note @ref noise_map(w:integer, h:integer) can be used to generate directly random noise map.
+ * @note This texture is a particular image, which allows to define noise used during mapping.
+ * @note There is an example of such an image below.
+ *
+ * @image html noise.png "Example of noise map"
  *
  * @see http://en.wikipedia.org/wiki/Image_noise
  */
