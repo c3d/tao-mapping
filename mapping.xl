@@ -17,7 +17,7 @@ module_description
 
 color_map id:text ->
     /**
-    * Set color map.
+    * Set id as color map.
     **/
     texture_unit 0
     texture id
@@ -46,7 +46,7 @@ alpha_mapping n:real ->
 
 alpha_map id:text ->
     /**
-    * Set alpha map.
+    * Set id as alpha map.
     **/
     texture_unit 1
     texture id
@@ -91,20 +91,20 @@ alpha_shader ->
 //   or http://http.developer.nvidia.com/GPUGems2/gpugems2_chapter08.html
 // -------------------------------------------------------------------------------------------------------------------
 
-// Define displacement offset
-DISPLACEMENT_OFFSET -> 0.0
-DISPLACEMENT_OFFSET := 0.0
+// Define displacement ratio
+DISPLACEMENT_RATIO -> 0.0
+DISPLACEMENT_RATIO := 0.0
 
-displacement_mapping offset:real ->
+displacement_mapping ratio:real ->
     /**
-    * Apply displacement.
+    * Apply displacement mapping.
     **/
-    DISPLACEMENT_OFFSET := offset
+    DISPLACEMENT_RATIO := ratio
     displacement_shader
 
 displacement_map id:text ->
     /**
-    * Set displacement map.
+    * Set id as displacement map.
     **/
     texture_unit 1
     texture id
@@ -116,7 +116,7 @@ displacement_shader ->
     shader_program
         vertex_shader <<
             // Mapping paramaters
-            uniform float     coeff;
+            uniform float     ratio;
             uniform sampler2D displacementMap;
 
             void main()
@@ -131,7 +131,7 @@ displacement_shader ->
                // Calculate new vertex position according to its normal and its texture coordinates
                dv     = texture2D( displacementMap, gl_TexCoord[1].st );
                df     = 0.30 * dv.x + 0.59 * dv.y + 0.11 * dv.z;
-               newPos = vec4(df * coeff * gl_Normal, 0.0) + gl_Vertex;
+               newPos = vec4(df * ratio * gl_Normal, 0.0) + gl_Vertex;
 
                // Compute position
                gl_Position = gl_ModelViewProjectionMatrix * newPos;
@@ -146,7 +146,7 @@ displacement_shader ->
         >>
     shader_set colorMap := 0
     shader_set displacementMap := 1
-    shader_set coeff := DISPLACEMENT_OFFSET
+    shader_set ratio := DISPLACEMENT_RATIO
 
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -156,13 +156,13 @@ displacement_shader ->
 
 normal_mapping ->
     /**
-    * Define displacement shader.
+    * Apply normal mapping.
     **/
     normal_shader
 
 normal_map id:text ->
     /**
-    * Set normal map.
+    * Set id as normal map.
     **/
     texture_unit 1
     texture id
@@ -262,3 +262,99 @@ normal_shader ->
     shader_set colorMap := 0
     shader_set normalMap := 1
 
+
+// -------------------------------------------------------------------------------------------------------------------
+//   NOISE MAPPING
+//   For further informations, see http://en.wikipedia.org/wiki/Image_noise
+// -------------------------------------------------------------------------------------------------------------------
+// Define displacement offset
+NOISE_RATIO -> 0.0
+NOISE_RATIO := 0.0
+
+noise_mapping n->
+    /**
+    * Apply noise mapping.
+    **/
+    NOISE_RATIO := n
+    noise_shader
+
+noise_map id:text ->
+    /**
+    * Set id as noise map.
+    **/
+    texture_unit 1
+    texture id
+
+noise_map w:integer, h:integer->
+    /**
+    * Generate a random noise map.
+    **/
+    texture_unit 1
+    frame_texture w, h,
+        color "white"
+        generate_noise
+        rectangle 0, 0, w, h
+
+noise_shader ->
+    /**
+    * Define noise shader.
+    **/
+    shader_program
+        vertex_shader <<
+            varying vec3 v;
+            void main()
+            {
+                gl_Position = ftransform();
+                gl_TexCoord[0] = gl_TextureMatrix[0] * gl_MultiTexCoord0;
+                gl_TexCoord[1] = gl_TextureMatrix[1] * gl_MultiTexCoord1;
+            }
+        >>
+        fragment_shader <<
+            // Mapping parameters
+            uniform sampler2D colorMap;
+            uniform sampler2D noiseMap;
+            uniform float ratio;
+
+            void main()
+            {
+                // Get noise value from noise map.
+                vec4 noise = texture2D(noiseMap, gl_TexCoord[1].st );
+
+                // Compute noise coordinates
+                vec2 noiseCoord = gl_TexCoord[0].st + vec2( noise.r * 0.065, -noise.g * 0.025 ) *  ratio / 10;
+
+                // Apply noise coordinates to color map
+                gl_FragColor = texture2D(colorMap, noiseCoord );
+            }
+        >>
+    shader_set colorMap := 0
+    shader_set noiseMap := 1
+    shader_set ratio := NOISE_RATIO
+
+generate_noise ->
+    /**
+    * Generate noise effect.
+    **/
+    shader_program
+        vertex_shader <<
+            varying vec3 v;
+            void main()
+            {
+               gl_TexCoord[0] = gl_Vertex;
+               gl_Position = ftransform();
+            }
+        >>
+        fragment_shader <<
+            // Pseudo random number base generator use to make noise
+            float noise(vec2 v)
+            {
+                int n = v.x * 40 + v.y * 6400;
+                n = (n << 13) ^ n;
+                return 1.0 - float( (n * (n * n * 15731 + 789221) + 1376312589) & 0x7fffffff) / 1073741824.0;
+            }
+            void main()
+            {
+                 float noiseColor = (noise(gl_TexCoord[0].st) + 1.0) * 0.5;
+                 gl_FragColor = vec4(noiseColor, noiseColor, noiseColor, 1);
+            }
+        >>

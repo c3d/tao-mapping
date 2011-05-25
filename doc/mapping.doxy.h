@@ -79,12 +79,13 @@ displacement_map(filename:text);
  * other map specified by @ref color_map as main texture.
  *
  *
- * @param offset displacement offset
+ * @param ratio displacement ratio
  *
- * @note In order to obtain a good displacement, the used shapes must have important geometrical subdivision.
+ * @attention In order to obtain a good displacement, the used shapes must have important geometrical subdivision.
+ *
  * @note For that reason, this module includes a new 2D shape, @ref plane , which can be easily subdivided.
  */
-displacement_mapping(offset:real);
+displacement_mapping(ratio:real);
 
 /**
  * Selects the alpha map.
@@ -114,7 +115,7 @@ alpha_mapping(threshold:real);
  * Build an normal texture out of image file @p filename like @ref texture
  * to use it during a normal mapping.
  *
- * @note This texture is a particular image, which allows to define normals in a texture.
+ * @note This texture is a particular image, which allows to define normals used during mapping.
  * @note There is an example of such an image below.
  *
  * @image html normal.jpg "Example of normal map"
@@ -129,8 +130,8 @@ normal_map(filename:text);
  * with some light and material effets.
  * Set the other map specified by @ref color_map as main texture.
  *
- * @attention As normal mapping uses lights and materials, it is largely recommended to add some
- * of them to the current scene to increase its effect.
+ * @attention As normal mapping uses a light and some materials, it is largely recommended to add it
+ * to the current scene to increase effects.
  *
  * @note This effect support only light zero.
  * @note Contrary to displacement mapping, normal mapping doesn't modify geometric positions.
@@ -138,6 +139,42 @@ normal_map(filename:text);
  * @see http://en.wikipedia.org/wiki/Normal_mapping
  */
 normal_mapping();
+
+/**
+ * Selects the noise map.
+ * Build a noise texture out of image file @p filename like @ref texture
+ * to use it during a noise mapping.
+ *
+ * @note This texture is a particular image, which allows to define noise used during mapping.
+ * @note There is an example of such an image below.
+ *
+ * @image html noise.png "Example of noise map"
+ *
+ */
+noise_map(filename:text);
+
+/**
+ * Generates a random noise map.
+ * Make a random noise texture with width @p w and height @p h
+ * to use it during a noise mapping.
+ *
+ */
+noise_map(w:integer, h:integer);
+
+/**
+ * Makes noise mapping.
+ *
+ * Add noise to a main texture define by @ref color_map according to the textured
+ * surface defined by @ref noise_map.
+ *
+ * @param ratio noise ratio
+ *
+ * @note @ref noise_map(w:integer, h:integer) can be used to generate directly random noise map.
+ *
+ * @see http://en.wikipedia.org/wiki/Image_noise
+ */
+noise_mapping(ratio:integer);
+
 
 
 

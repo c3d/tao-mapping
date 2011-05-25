@@ -1,58 +1,55 @@
 
-import Mapping 1.0
-clear_color 1, 1, 1, 1
+import Mapping 1.0 
+clear_color 1, 1, 1, 1 
 
 //Define texture maps
-COLOR_MAP -> "colorMap.png"
-DISPLACEMENT_MAP -> "displacementMap.png"
+COLOR_MAP -> "colorMap.png" 
+DISPLACEMENT_MAP -> "displacementMap.png" 
 
-font "Arial"
-font_size 16
+font "Arial" 
+font_size 16 
 
-draw_scene ->
-    color "white"
-    locally
-        translatey 200
-        rotatey -20
-        rotatex -65
-        rotatez 45
+displaced_plane -> 
+    mapping 
+        translatey 200 
+        rotatey -20 
+        rotatex -65 
+        rotatez 45 
+        // Set texture maps
+        color_map COLOR_MAP 
+        displacement_map DISPLACEMENT_MAP 
         // Apply displacement mapping
-        displacement
+        displacement_mapping 200 
+        // Define subdivided plane
+        plane -50, 0, 500, 500, 200, 200 
+
+// Legend to the color map
+legend_color -> 
+    locally 
+        texture COLOR_MAP 
+        rectangle 400, 400, 150, 150 
+    text_box 400, 300, 150, 150, 
+        color "black" 
+        align_center 
+        vertical_align_center 
+        text "Color map" 
+
+// Legend to the displacement map
+legend_height -> 
+    locally 
+        texture DISPLACEMENT_MAP 
+        rectangle 400, 170, 150, 150 
+    text_box 400, 60, 150, 150, 
+        color "black" 
+        align_center 
+        vertical_align_center 
+        text "Displacement map" 
+
+draw_scene -> 
+    color "white" 
+    displaced_plane 
     // Set legends
-    legend_color
-    legend_height
-
-displacement ->
-    mapping
-        // Set mapping parameters
-        color_map COLOR_MAP
-        displacement_map DISPLACEMENT_MAP
-        displacement_mapping 200
-        // Define a subdivided plane
-        plane -50, 0, 500, 500, 200, 200
-
-// Legend of color map
-legend_color ->
-    locally
-        texture COLOR_MAP
-        rectangle 400, 400, 150, 150
-    text_box 400, 300, 150, 150,
-        color "black"
-        align_center
-        vertical_align_center
-        text "Color map"
-
-// Legend of displacement map
-legend_height ->
-    locally
-        texture DISPLACEMENT_MAP
-        rectangle 400, 170, 150, 150
-    text_box 400, 60, 150, 150,
-        color "black"
-        align_center
-        vertical_align_center
-        text "Displacement map"
-
-
+    legend_color 
+    legend_height 
 
 draw_scene
