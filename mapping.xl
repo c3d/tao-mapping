@@ -56,8 +56,8 @@ alpha_shader ->
                 gl_FragColor  = texture2D(colorMap, gl_TexCoord[0].st);
             }
         >>
-    shader_set colorMap := 0
-    shader_set alphaMap := 1
+    shader_set colorMap  := 0
+    shader_set alphaMap  := 1
     shader_set threshold := ALPHA_THRESHOLD
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -112,9 +112,9 @@ displacement_shader ->
                gl_FragColor = texture2D(colorMap, gl_TexCoord[0].xy);
             }
         >>
-    shader_set colorMap := 0
+    shader_set colorMap        := 0
     shader_set displacementMap := 1
-    shader_set ratio := DISPLACEMENT_RATIO
+    shader_set ratio           := DISPLACEMENT_RATIO
 
 // -------------------------------------------------------------------------------------------------------------------
 //   NORMAL MAPPING
@@ -219,7 +219,7 @@ normal_shader ->
             }
         >>
 
-    shader_set colorMap := 0
+    shader_set colorMap  := 0
     shader_set normalMap := 1
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -255,7 +255,7 @@ noise_shader ->
             varying vec3 v;
             void main()
             {
-                gl_Position = ftransform();
+                gl_Position    = ftransform();
                 gl_TexCoord[0] = gl_TextureMatrix[0] * gl_MultiTexCoord0;
                 gl_TexCoord[1] = gl_TextureMatrix[1] * gl_MultiTexCoord1;
             }
@@ -280,7 +280,7 @@ noise_shader ->
         >>
     shader_set colorMap := 0
     shader_set noiseMap := 1
-    shader_set ratio := NOISE_RATIO
+    shader_set ratio    := NOISE_RATIO
 
 generate_noise ->
     /**
@@ -292,20 +292,22 @@ generate_noise ->
             void main()
             {
                gl_TexCoord[0] = gl_Vertex;
-               gl_Position = ftransform();
+               gl_Position    = ftransform();
             }
         >>
         fragment_shader <<
             // Pseudo random number base generator use to make noise
             float noise(vec2 v)
             {
-                int n = v.x * 40 + v.y * 6400;
+                int n;
+                n = v.x * 40 + v.y * 6400;
                 n = (n << 13) ^ n;
+
                 return 1.0 - float( (n * (n * n * 15731 + 789221) + 1376312589) & 0x7fffffff) / 1073741824.0;
             }
             void main()
             {
                  float noiseColor = (noise(gl_TexCoord[0].st) + 1.0) * 0.5;
-                 gl_FragColor = vec4(noiseColor, noiseColor, noiseColor, 1);
+                 gl_FragColor     = vec4(noiseColor, noiseColor, noiseColor, 1);
             }
         >>
