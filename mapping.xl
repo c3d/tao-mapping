@@ -1,4 +1,4 @@
-// Mapping module definition
+﻿// Mapping module definition
 //
 // This module defines commands to generate the Lorem ipsum sequence.
 //
@@ -8,8 +8,14 @@ module_description
     id "a2cdbc99-ce81-42b2-a218-f51938ef2414"
     name "Mapping"
     import_name "Mapping"
-    description ""
-    version 1.0
+    description "Allow to add details in a scene thanks to a surface texture"
+    author "Taodyne SAS"
+    website "http://www.taodyne.com"
+    version "1.0"
+
+module_description "fr",
+    name "Mappage"
+    description "Permet d'ajouter des détails visuels dans une scène à partir d'images."
 
 // -------------------------------------------------------------------------------------------------------------------
 //   ALPHA MAPPING
