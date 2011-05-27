@@ -27,7 +27,7 @@
 
 XL_DEFINE_TRACES
 
-Tree_p plane(Tree_p tree, Real_p x, Real_p y, Real_p w,
+Tree_p plane(Tree_p, Real_p x, Real_p y, Real_p w,
              Real_p h, Integer_p lines_nb, Integer_p columns_nb)
 // ----------------------------------------------------------------------------
 //    Define the lens flare target
