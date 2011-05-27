@@ -23,7 +23,7 @@
 
 #include "texture_mapping.h"
 
-struct Plane : public TextureMapping
+struct Plane : public QObject
 // ----------------------------------------------------------------------------
 //   Define a subdivided plane
 // ----------------------------------------------------------------------------

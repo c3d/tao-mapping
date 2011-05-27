@@ -1,6 +1,6 @@
-// Mapping module definition
+﻿// Mapping module definition
 //
-// This module defines mapping techniques.
+// This module defines commands to generate the Lorem ipsum sequence.
 //
 // Copyright 20010-2011 Taodyne
 
@@ -15,7 +15,7 @@ module_description
 
 module_description "fr",
     name "Mappage"
-    description "Permet d'ajouter des détails visuels dans une scène �  partir d'images."
+    description "Permet d'ajouter des détails visuels dans une scène à partir d'images."
 
 // -------------------------------------------------------------------------------------------------------------------
 //   ALPHA MAPPING

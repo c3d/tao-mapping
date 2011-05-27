@@ -30,7 +30,7 @@ XL_DEFINE_TRACES
 Tree_p plane(Tree_p, Real_p x, Real_p y, Real_p w,
              Real_p h, Integer_p lines_nb, Integer_p columns_nb)
 // ----------------------------------------------------------------------------
-//    Define a subdivded plane
+//    Define the lens flare target
 // ----------------------------------------------------------------------------
 {
     Plane* plane = new Plane(x, y, w, h, lines_nb, columns_nb);

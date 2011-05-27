@@ -5,7 +5,7 @@
 //   File Description:
 // 
 //     Definition of the interface between XLR and native code
-//     for the "Mapping" module.
+//     for the "mapping" module.
 // 
 // 
 // 
@@ -37,5 +37,7 @@ PREFIX(Plane,  tree, "plane",
        PARM(columns_nb, integer, ),
        return plane(self, x, y, width, height, lines_nb, columns_nb),
        GROUP(module.Mapping)
-       SYNOPSIS("Generate a subdivided plane")
-       DESCRIPTION("Generate a subdivided plane."))
+       SYNOPSIS("Produce a sequence of words in pseudo-latin")
+       DESCRIPTION("Produce a sequence of words in pseudo-latin. "
+                   "The text contains an arbitrary number of words, "
+                   "specified by @a words."))

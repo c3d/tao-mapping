@@ -27,7 +27,7 @@
 
 // ============================================================================
 //
-//    Plane
+//    Lens Flare
 //
 // ============================================================================
 
@@ -49,7 +49,7 @@ Plane::~Plane()
 
 void Plane::initialize()
 // ----------------------------------------------------------------------------
-//   Initialize plane parameters
+//   Initialize plan parameters
 // ----------------------------------------------------------------------------
 {
     // Subdivision steps
@@ -105,7 +105,8 @@ void Plane::delete_callback(void *arg)
 
 void Plane::Draw()
 // ----------------------------------------------------------------------------
-//   Draw a subdivided plane
+//   Draw a lens flare centred at the source position
+//   and heading toward the defined target.
 // ----------------------------------------------------------------------------
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
