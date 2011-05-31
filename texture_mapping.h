@@ -15,7 +15,7 @@ struct TextureMapping : public QObject
     TextureMapping();
     ~TextureMapping();
 
-    // Draw lens flare
+    // Draw mapping
     void            Draw();
 
     static void     render_callback(void *arg);
