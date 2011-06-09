@@ -145,7 +145,7 @@ normal_shader ->
 
             void main()
             {
-                // Determine object parameterss
+                // Determine object parameters
                 gl_Position    = ftransform();
                 gl_TexCoord[0] = gl_TextureMatrix[0] * gl_MultiTexCoord0;
                 gl_TexCoord[1] = gl_TextureMatrix[1] * gl_MultiTexCoord1;
@@ -157,7 +157,6 @@ normal_shader ->
                 // Compute direction parameters
                 lightDir = normalize(gl_LightSource[0].position.xyz - eyePos);
                 viewDir  = normalize(-eyePos);
-
             }
         >>
         fragment_shader <<
@@ -322,9 +321,57 @@ generate_noise ->
 // -------------------------------------------------------------------------------------------------------------------
 //   SPHERE MAPPING
 // -------------------------------------------------------------------------------------------------------------------
-sphere_mapping ->
+
+SPHERE_RATIO -> 0.0
+SPHERE_RATIO := 0.0
+
+sphere_mapping r:real->
     /**
     * Apply sphere mapping.
     **/
+    SPHERE_RATIO := r
     sphere_shader
+
+sphere_shader ->
+    /**
+    * Define sphere mapping shader.
+    **/
+    shader_program
+        vertex_shader <<
+            void main()
+            {
+                    // Determine object parameters
+                    gl_Position = ftransform();
+                    gl_TexCoord[0] = gl_TextureMatrix[0] * gl_MultiTexCoord0;
+                    vec3 normal = normalize( gl_NormalMatrix * gl_Normal );
+
+                    // Compute camera parameters
+                    vec3 eyePos = normalize( vec3(gl_ModelViewMatrix * gl_Vertex) );
+
+                    // Compute camera parameters
+                    vec3 r = reflect( eyePos, normal );
+
+                    //Compute sphere coordinates
+                    float m = 2.0 * sqrt( r.x * r.x + r.y * r.y + (r.z + 1.0) * (r.z + 1.0) );
+                    gl_TexCoord[1].s = r.x/m + 0.5;
+                    gl_TexCoord[1].t = r.y/m + 0.5;
+          }
+        >>
+        fragment_shader <<
+            // Mapping parameters
+            uniform sampler2D colorMap;
+            uniform sampler2D sphereMap;
+            uniform float ratio;
+
+            void main()
+            {
+                vec4 color = texture2D( colorMap, gl_TexCoord[0].st);
+                vec4 sphere = texture2D( sphereMap, gl_TexCoord[1].st);
+
+                gl_FragColor = color + sphere * ratio;
+            }
+        >>
+    shader_set colorMap  := 0
+    shader_set sphereMap := 1
+    shader_set ratio     := SPHERE_RATIO
 
