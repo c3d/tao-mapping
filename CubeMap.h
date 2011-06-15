@@ -1,5 +1,5 @@
-#ifndef PLANE_H
-#define PLANE_H
+#ifndef CUBEMAP_H
+#define CUBEMAP_H
 // ****************************************************************************
 //  plane.h                                                  Tao project
 // ****************************************************************************
@@ -19,35 +19,32 @@
 //  (C) 2010 Jerome Forissier <jerome@taodyne.com>
 //  (C) 2010 Taodyne SAS
 // ****************************************************************************
-
+#include <stdio.h>
 
 #include "texture_mapping.h"
-#include <vector>
 
-struct Plane : public TextureMapping
+struct CubeMap : public TextureMapping
 // ----------------------------------------------------------------------------
 //   Define a subdivided plane
 // ----------------------------------------------------------------------------
 {
     // Constructor and destructor
-    Plane(float x, float y, float w, float h, int lines, int columns);
-    ~Plane();
-
-    void initialize();
+    CubeMap();
+    ~CubeMap();
 
     // Draw plane
     virtual void Draw();
 
-private:
-    // Plane parameters
-    Tao::Vector3 center;
-    float width, height;
-    int   lines, columns;
+    void texParameters();
+    bool setTexture(const char* filename, GLuint face);
+    bool loadCubeMap();
 
-    //Plane buffers
-    std::vector<Vector3> vertices;
-    std::vector<Vector>  textures;
-    std::vector<GLuint>  indices;
+private:
+    bool loadTexture(const char* filename, GLenum target);
+
+private:
+    GLuint  cubeMapId;
+    std::vector<const char*> textures;
 };
 
-#endif
+#endif // CUBEMAP_H

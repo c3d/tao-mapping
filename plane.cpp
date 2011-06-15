@@ -83,24 +83,7 @@ void Plane::initialize()
 
 
     // Set texture Coordinates to all units
-    TextureMapping::tao->SetTexCoords(0, &textures[0].x);
-    TextureMapping::tao->SetTexCoords(1, &textures[0].x);
-}
-
-void Plane::render_callback(void *arg)
-// ----------------------------------------------------------------------------
-//   Rendering callback: call the render function for the object
-// ----------------------------------------------------------------------------
-{
-    ((Plane *)arg)->Draw();
-}
-
-void Plane::delete_callback(void *arg)
-// ----------------------------------------------------------------------------
-//   Delete callback: destroy object
-// ----------------------------------------------------------------------------
-{
-    delete (Plane *)arg;
+    TextureMapping::tao->SetTexCoords(-1, &textures[0].x);
 }
 
 void Plane::Draw()
@@ -117,10 +100,12 @@ void Plane::Draw()
     glEnableClientState(GL_VERTEX_ARRAY);
 
     // Set fill color defined in Tao
-    TextureMapping::tao->SetFillColor();
+    if(TextureMapping::tao->SetFillColor());
+        glDrawElements(GL_QUADS, columns * lines * 4 , GL_UNSIGNED_INT, &indices[0]);
 
-    // Draw plane
-    glDrawElements(GL_QUADS, columns * lines * 4 , GL_UNSIGNED_INT, &indices[0]);
+    // Set fill color defined in Tao
+    if(TextureMapping::tao->SetLineColor());
+        glDrawElements(GL_LINES, columns * lines * 4 , GL_UNSIGNED_INT, &indices[0]);
 
     glDisableClientState(GL_VERTEX_ARRAY);
 }

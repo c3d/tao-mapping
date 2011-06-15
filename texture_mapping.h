@@ -5,7 +5,6 @@
 #include "tao/module_api.h"
 #include "tao/tao_gl.h"
 #include <QObject>
-#include <vector>
 
 using namespace std;
 using namespace Tao;
@@ -16,7 +15,7 @@ struct TextureMapping : public QObject
     ~TextureMapping();
 
     // Draw mapping
-    void            Draw();
+    virtual void    Draw();
 
     static void     render_callback(void *arg);
     static void     delete_callback(void *arg);

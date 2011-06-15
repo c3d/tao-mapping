@@ -19,10 +19,12 @@ INCLUDEPATH += $${TAOTOPSRC}/tao/include/tao/
 HEADERS      = \
                mapping.h \
     texture_mapping.h \
-    plane.h
+    plane.h \
+    CubeMap.h
 SOURCES      = mapping.cpp $${TAOTOPSRC}/tao/include/tao/GL/glew.c \
     texture_mapping.cpp \
-    plane.cpp
+    plane.cpp \
+    CubeMap.cpp
 TBL_SOURCES  = mapping.tbl
 OTHER_FILES  = mapping.xl mapping.tbl traces.tbl
 QT          += core \

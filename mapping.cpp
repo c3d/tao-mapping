@@ -18,14 +18,12 @@
 //  (C) 2010 Jerome Forissier <jerome@taodyne.com>
 //  (C) 2010 Taodyne SAS
 // ****************************************************************************
+
 #include "mapping.h"
-#include "main.h"
-#include "runtime.h"
-#include "base.h"
-#include "plane.h"
-#include "texture_mapping.h"
 
 XL_DEFINE_TRACES
+
+CubeMap* cube;
 
 Tree_p plane(Tree_p, Real_p x, Real_p y, Real_p w,
              Real_p h, Integer_p lines_nb, Integer_p columns_nb)
@@ -34,7 +32,42 @@ Tree_p plane(Tree_p, Real_p x, Real_p y, Real_p w,
 // ----------------------------------------------------------------------------
 {
     Plane* plane = new Plane(x, y, w, h, lines_nb, columns_nb);
-    TextureMapping::tao->addToLayout(Plane::render_callback, plane, Plane::delete_callback);
+    TextureMapping::tao->addToLayout(TextureMapping::render_callback, plane, TextureMapping::delete_callback);
+
+    return xl_true;
+}
+
+Tree_p cube_map(Context *context, Tree_p tree, Tree_p prog)
+// ----------------------------------------------------------------------------
+//    Apply a cube mapping
+// ----------------------------------------------------------------------------
+{
+    cube = new CubeMap();
+    context->Evaluate(prog);
+
+    cube->loadCubeMap();
+
+    TextureMapping::tao->addToLayout(TextureMapping::render_callback, cube, TextureMapping::delete_callback);
+
+    return xl_true;
+}
+
+Tree_p texture_cube(Tree_p tree, GLuint face, text filename)
+// ----------------------------------------------------------------------------
+//    Add texture to the current cube map
+// ----------------------------------------------------------------------------
+{
+    if(! cube)
+    {
+        Ooops("No mapping defined '$1' ", tree);
+        return xl_false;
+    }
+
+    if(! cube->setTexture( filename.c_str(), face))
+    {
+        Ooops("No correct face '$1' ", tree);
+        return xl_false;
+    }
 
     return xl_true;
 }
@@ -49,7 +82,6 @@ int module_init(const Tao::ModuleApi *api, const Tao::ModuleInfo *)
 
     return 0;
 }
-
 
 int module_exit()
 // ----------------------------------------------------------------------------
