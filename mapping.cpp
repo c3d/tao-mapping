@@ -63,7 +63,7 @@ Tree_p texture_cube(Tree_p tree, GLuint face, text filename)
         return xl_false;
     }
 
-    if(! cube->setTexture( filename.c_str(), face))
+    if(! cube->setTexture( filename, face))
     {
         Ooops("No correct face '$1' ", tree);
         return xl_false;
