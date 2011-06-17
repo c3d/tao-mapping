@@ -22,7 +22,7 @@
  *       - etc.
  *
  * @attention All these techniques use multitexturing to obtain good results.
- * @attention Thus, color and texture map must be bind respectively on first and second texture units before applying the effect.
+ * @attention Thus, color and texture map have to be bind respectively on first and second texture units before applying the effect.
  *
  * @note Multitexturing is a particular case of texture mapping.
  *
@@ -85,7 +85,7 @@ alpha_mapping(threshold:real);
  * Set the other map specified by @ref color_map as main texture.
  *
  * @attention As normal mapping uses a light and some materials, it is largely recommended to add it
- * to the current scene to increase effects.
+ * to the current scene to increase the effects.
  *
  * @note This effect support only light zero.
  * @note Contrary to displacement mapping, normal mapping doesn't modify geometric positions.
@@ -123,6 +123,84 @@ noise_map(w:integer, h:integer);
  * @see http://en.wikipedia.org/wiki/Image_noise
  */
 noise_mapping(ratio:integer);
+
+/**
+ * Creates a local cube map.
+ *
+ * Define and evaluate the cube map tree generate thanks to @ref cube_face.
+ * This texture can be used directly to create nice environment or
+ * during a cube mapping to generate reflections.
+ *
+ * @note This cube map does not support multi-texturing without shaders.
+ *
+ * @param contents defines code of the current cube map.
+ */
+cube_map(contents:tree);
+
+/**
+ * Adds a texture to the current cube map.
+ *
+ * Select a texture by its @p filename and bind it to a @p face
+ * of a cube map create by @ref cube_map.
+ *
+ * Faces of the cube map are defined in this way :
+ *      - Right  = 0
+ *      - Left   = 1
+ *      - Top    = 2
+ *      - Bottom = 3
+ *      - Front  = 4
+ *      - Back   = 5
+ *
+ * @attention Each texture must be a square (same width and height) and must have the same size for each face to generate correctly the cube map.
+ *
+@code
+cube_map
+    cube_face 0, "right.bmp"
+    cube_face 1, "face.bmp"
+    cube_face 2, "top.bmp"
+    cube_face 3, "bottom.bmp"
+    cube_face 4, "front.bmp"
+    cube_face 5, "back.bmp"
+cube 0, 0, 0, 30000, 30000, 30000
+@endcode
+ *
+ */
+cube_face(face:integer, filename:text);
+
+/**
+ * Makes cube mapping.
+ *
+ * Allow to simulate easily the reflection of an environment on an object thanks
+ * to a texture called cube map, which can be generated thanks to @ref cube_map.
+ *
+ * @param ratio ratio of the environment reflection.
+ *
+ * @note This method is more efficient than @ref sphere_mapping
+ * but needs six textures, which define the environment.
+ *
+ * @see http://en.wikipedia.org/wiki/Cube_mapping
+ */
+cube_mapping(ratio:integer);
+
+/**
+ * Makes sphere mapping.
+ *
+ * Allow to simulate easily the reflection of an environment on an object thanks
+ * to a texture called sphere map.
+ *
+ * @param ratio ratio of the environment reflection.
+ *
+ * @note This texture is a particular image, which defines environment reflection.
+ * @note There is an example of such an image below.
+ *
+ * @image html sphere.jpg "Example of sphere map"
+ *
+ * @see http://en.wikipedia.org/wiki/Sphere_mapping
+ */
+sphere_mapping();
+
+
+
 
 
 

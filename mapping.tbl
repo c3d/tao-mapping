@@ -41,16 +41,16 @@ PREFIX(Plane,  tree, "plane",
        DESCRIPTION("Generate a subdivided plane."))
 
 PREFIX(CubeMap,  tree, "texture_cube",
-       PARM(p, code, "The program that represent the content of the frame"),
+       PARM(p, code, "The program that represent a cube map"),
        return cube_map(context, self, p),
        GROUP(module.Mapping)
-       SYNOPSIS("Generate a cube mapping")
-       DESCRIPTION("Generate a cube mapping."))
+       SYNOPSIS("Generate a cube map")
+       DESCRIPTION("Generate a cube map."))
 
-PREFIX(TextureCube,  tree, "texture_cube_face",
+PREFIX(CubeFace,  tree, "cube_face",
        PARM(face, integer, )
        PARM(name, text, ),
        return texture_cube(self, face, name),
        GROUP(module.Mapping)
-       SYNOPSIS("Add a near texture to a cube map")
-       DESCRIPTION("Add a near texture to a cube map."))
+       SYNOPSIS("Add a texture to a face of the cube map")
+       DESCRIPTION("Add a texture to a face of the cube map."))

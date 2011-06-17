@@ -1,5 +1,24 @@
 #ifndef TEXTURE_MAPPING_H
 #define TEXTURE_MAPPING_H
+// ****************************************************************************
+//  cube_map.h                                                  Tao project
+// ****************************************************************************
+//
+//   File Description:
+//
+//      Define a cube map.
+//
+//
+//
+//
+//
+// ****************************************************************************
+// This software is property of Taodyne SAS - Confidential
+// Ce logiciel est la propriété de Taodyne SAS - Confidentiel
+//  (C) 1992-2010 Christophe de Dinechin <christophe@taodyne.com>
+//  (C) 2010 Jerome Forissier <jerome@taodyne.com>
+//  (C) 2010 Taodyne SAS
+// ****************************************************************************
 
 #include "tao/coords3d.h"
 #include "tao/module_api.h"

@@ -1,12 +1,12 @@
 #ifndef CUBEMAP_H
 #define CUBEMAP_H
 // ****************************************************************************
-//  cube_map.h                                                  Tao project
+//  cube_map.h                                                      Tao project
 // ****************************************************************************
 //
 //   File Description:
 //
-//      Define a cubeMap texture.
+//      Define a cube Map.
 //
 //
 //
@@ -14,11 +14,12 @@
 //
 // ****************************************************************************
 // This software is property of Taodyne SAS - Confidential
-// Ce logiciel est la propriÃ©tÃ© de Taodyne SAS - Confidentiel
+// Ce logiciel est la propriété de Taodyne SAS - Confidentiel
 //  (C) 1992-2010 Christophe de Dinechin <christophe@taodyne.com>
 //  (C) 2010 Jerome Forissier <jerome@taodyne.com>
 //  (C) 2010 Taodyne SAS
 // ****************************************************************************
+
 #include <stdio.h>
 
 #include "texture_mapping.h"

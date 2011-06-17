@@ -1,4 +1,4 @@
-#ifndef MAPPING_H
+﻿#ifndef MAPPING_H
 #define MAPPING_H
 // ****************************************************************************
 //  mapping.h                                                       Tao project
@@ -27,7 +27,7 @@
 #include "base.h"
 #include "tao/module_api.h"
 #include "plane.h"
-#include "CubeMap.h"
+#include "cube_map.h"
 #include "texture_mapping.h"
 
 

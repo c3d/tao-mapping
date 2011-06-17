@@ -14,7 +14,7 @@
 //
 // ****************************************************************************
 // This software is property of Taodyne SAS - Confidential
-// Ce logiciel est la propriÃ©tÃ© de Taodyne SAS - Confidentiel
+// Ce logiciel est la propriété de Taodyne SAS - Confidentiel
 //  (C) 1992-2010 Christophe de Dinechin <christophe@taodyne.com>
 //  (C) 2010 Jerome Forissier <jerome@taodyne.com>
 //  (C) 2010 Taodyne SAS
@@ -103,7 +103,7 @@ void Plane::Draw()
     if(TextureMapping::tao->SetFillColor());
         glDrawElements(GL_QUADS, columns * lines * 4 , GL_UNSIGNED_INT, &indices[0]);
 
-    // Set fill color defined in Tao
+    // Set line color defined in Tao
     if(TextureMapping::tao->SetLineColor());
         glDrawElements(GL_LINES, columns * lines * 4 , GL_UNSIGNED_INT, &indices[0]);
 
