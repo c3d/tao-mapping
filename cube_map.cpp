@@ -25,7 +25,7 @@
 
 CubeMap::texture_map CubeMap::textures;
 
-CubeMap::CubeMap()
+CubeMap::CubeMap() : cubeMapId(0)
 // ----------------------------------------------------------------------------
 //   Construction
 // ----------------------------------------------------------------------------
@@ -37,6 +37,7 @@ CubeMap::~CubeMap()
 //   Destruction
 // ----------------------------------------------------------------------------
 {
+   glDeleteTextures (1, &cubeMapId);
 }
 
 bool CubeMap::setTexture(text filename, uint face)
@@ -58,10 +59,18 @@ bool CubeMap::loadCubeMap()
 //   and set it to the textures list in Tao
 // ----------------------------------------------------------------------------
 {
-    GLuint cubeMapId = isInclude();
+    cubeMapId = isInclude();
 
     if(! cubeMapId)
     {
+        // Prune the map if it gets too big
+        while (textures.size() > MAX_TEXTURES)
+        {
+            texture_map::iterator first = textures.begin();
+            glDeleteTextures(1, &(*first).first);
+            textures.erase(first);
+        }
+
         // Load cubemap texture
         glGenTextures (1, &cubeMapId);
         glBindTexture (GL_TEXTURE_CUBE_MAP, cubeMapId);
@@ -88,8 +97,8 @@ bool CubeMap::loadCubeMap()
         textures[cubeMapId] = currentTexture;
     }
 
-   // Set to the textures list in Tao.
-   TextureMapping::tao->SetTexture(cubeMapId, GL_TEXTURE_CUBE_MAP);
+    // Set to the textures list in Tao.
+    TextureMapping::tao->SetTexture(cubeMapId, GL_TEXTURE_CUBE_MAP);
 
     return true;
 }
@@ -146,6 +155,7 @@ bool CubeMap::loadTexture (uint face)
         glTexImage2D (GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, 0, GL_RGBA,
                       texture.width(), texture.height(), 0, GL_RGBA,
                       GL_UNSIGNED_BYTE, texture.bits());
+
         return true;
     }
     return false;

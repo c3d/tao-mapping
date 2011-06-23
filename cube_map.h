@@ -74,6 +74,7 @@ struct CubeMap : public TextureMapping
 // ----------------------------------------------------------------------------
 {
     typedef std::map<uint, TextureCube> texture_map;
+    enum { MAX_TEXTURES = 20 };
 
     // Constructor and destructor
     CubeMap();
@@ -92,6 +93,7 @@ private:
     bool loadTexture(uint face);
 
 private:
+    GLuint             cubeMapId;
     TextureCube        currentTexture;
     static texture_map textures;
 };
