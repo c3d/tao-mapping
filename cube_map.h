@@ -93,7 +93,6 @@ private:
     bool loadTexture(uint face);
 
 private:
-    GLuint             cubeMapId;
     TextureCube        currentTexture;
     static texture_map textures;
 };

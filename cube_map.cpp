@@ -25,7 +25,7 @@
 
 CubeMap::texture_map CubeMap::textures;
 
-CubeMap::CubeMap() : cubeMapId(0)
+CubeMap::CubeMap()
 // ----------------------------------------------------------------------------
 //   Construction
 // ----------------------------------------------------------------------------
@@ -37,7 +37,6 @@ CubeMap::~CubeMap()
 //   Destruction
 // ----------------------------------------------------------------------------
 {
-   glDeleteTextures (1, &cubeMapId);
 }
 
 bool CubeMap::setTexture(text filename, uint face)
@@ -59,7 +58,7 @@ bool CubeMap::loadCubeMap()
 //   and set it to the textures list in Tao
 // ----------------------------------------------------------------------------
 {
-    cubeMapId = isInclude();
+    GLuint cubeMapId = isInclude();
 
     if(! cubeMapId)
     {
