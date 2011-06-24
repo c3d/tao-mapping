@@ -1,12 +1,12 @@
 #ifndef TEXTURE_MAPPING_H
 #define TEXTURE_MAPPING_H
 // ****************************************************************************
-//  cube_map.h                                                  Tao project
+//  texture_mapping.h                                               Tao project
 // ****************************************************************************
 //
 //   File Description:
 //
-//      Define a cube map.
+//      Define a texture mapping.
 //
 //
 //

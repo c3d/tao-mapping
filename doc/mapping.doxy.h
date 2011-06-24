@@ -176,7 +176,7 @@ cube_face(face:integer, filename:text);
  * @param ratio ratio of the environment reflection.
  *
  * @note This method is more efficient than @ref sphere_mapping
- * but needs six textures, which define the environment.
+ * but needs six textures to define the environment.
  *
  * @see http://en.wikipedia.org/wiki/Cube_mapping
  */
@@ -186,7 +186,7 @@ cube_mapping(ratio:integer);
  * Makes sphere mapping.
  *
  * Allow to simulate easily the reflection of an environment on an object thanks
- * to a texture called sphere map.
+ * to a texture called sphere map set by @ref texture.
  *
  * @param ratio ratio of the environment reflection.
  *
@@ -197,7 +197,18 @@ cube_mapping(ratio:integer);
  *
  * @see http://en.wikipedia.org/wiki/Sphere_mapping
  */
-sphere_mapping();
+sphere_mapping(ratio:integer);
+
+/**
+ * Makes reflection mapping.
+ *
+ * Allow to simulate easily the reflection of an environment on an object thanks
+ * to a common texture define set by @ref texture.
+ *
+ * @param ratio ratio of the environment reflection.
+ *
+ */
+reflection_mapping(ratio:integer);
 
 
 

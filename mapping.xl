@@ -487,3 +487,62 @@ sphere_shader ->
     shader_set sphereMap := 1
     shader_set ratio     := SPHERE_RATIO
 
+
+// -------------------------------------------------------------------------------------------------------------------
+//   REFLECTION MAPPING
+//   For further informations, see http://en.wikipedia.org/wiki/Reflection_mapping
+// -------------------------------------------------------------------------------------------------------------------
+
+// Define reflection mapping ratio
+REFLECTION_RATIO -> 0.0
+REFLECTION_RATIO := 0.0
+
+reflection_mapping r:real->
+    /**
+    * Apply reflection mapping.
+    **/
+    REFLECTION_RATIO := r
+    reflection_shader
+
+reflection_shader ->
+    /**
+    * Define reflection mapping shader.
+    **/
+    shader_program
+        vertex_shader <<
+            void main()
+            {
+                // Compute world position and normal
+                vec3 normal = normalize (gl_NormalMatrix * gl_Normal);
+                vec3 eyePos = normalize( vec3(gl_ModelViewMatrix * gl_Vertex) );
+
+                // Compute reflection vector
+                vec3 r = normalize(reflect (eyePos, normal));
+
+                // Compute texture coordinates
+                gl_TexCoord[0] = gl_TextureMatrix[0] * gl_MultiTexCoord0;
+                gl_TexCoord[1].x = (r.x / 2.0) + 0.5 ;
+                gl_TexCoord[1].y = (r.y / 2.0) + 0.5 ;
+
+                // Compute position
+                gl_Position = ftransform();
+            }
+        >>
+        fragment_shader <<
+            // Mapping parameters
+            uniform float       ratio;
+            uniform sampler2D   colorMap;
+            uniform sampler2D   cubeMap;
+
+            void main()
+            {
+                vec3 cube     = texture2D(cubeMap, gl_TexCoord[1].xy).rgb;
+                vec3 color    = texture2D(colorMap, gl_TexCoord[0].st).rgb;
+                gl_FragColor  = vec4(mix(color, cube, ratio), 1.0);
+            }
+        >>
+    shader_set colorMap := 0
+    shader_set cubeMap  := 1
+    shader_set ratio    := REFLECTION_RATIO
+
+
