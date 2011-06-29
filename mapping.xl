@@ -156,11 +156,11 @@ normal_shader ->
                 gl_TexCoord[1] = gl_TextureMatrix[1] * gl_MultiTexCoord1;
 
                 // Compute world position and normal
-                normal      = normalize(gl_NormalMatrix * gl_Normal);
+                normal      = gl_NormalMatrix * gl_Normal;
                 vec3 eyePos = vec3(gl_ModelViewMatrix * gl_Vertex);
 
                 // Compute direction parameters
-                lightDir = normalize(gl_LightSource[0].position.xyz - eyePos);
+                lightDir = gl_LightSource[0].position.xyz - eyePos;
                 viewDir  = normalize(-eyePos);
             }
         >>
@@ -195,7 +195,6 @@ normal_shader ->
             void main()
             {
                 // Normalize vectors
-                vec3 v = normalize(viewDir);
                 vec3 l = normalize(lightDir);
                 vec3 n = normalize(normal);
 
@@ -302,7 +301,6 @@ generate_noise ->
     **/
     shader_program
         vertex_shader <<
-            varying vec3 v;
             void main()
             {
                gl_TexCoord[0] = gl_Vertex;
@@ -514,7 +512,7 @@ reflection_shader ->
             {
                 // Compute world position and normal
                 vec3 normal = normalize (gl_NormalMatrix * gl_Normal);
-                vec3 eyePos = normalize( vec3(gl_ModelViewMatrix * gl_Vertex) );
+                vec3 eyePos = normalize(vec3(gl_ModelViewMatrix * gl_Vertex));
 
                 // Compute reflection vector
                 vec3 r = normalize(reflect (eyePos, normal));
