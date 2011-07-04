@@ -308,6 +308,7 @@ generate_noise ->
             }
         >>
         fragment_shader <<
+
             // Pseudo random number base generator use to make noise
             float noise(vec2 v)
             {
