@@ -131,9 +131,21 @@ noise_mapping(ratio:integer);
  * This texture can be used directly to create nice environment or
  * during a cube mapping to generate reflections.
  *
- * @note This cube map does not support multi-texturing without shaders.
- *
  * @param contents defines code of the current cube map.
+ *
+ * An example of use of this effect is described below :
+ @code
+ cube_map
+    cube_face 0, "right.png"
+    cube_face 1, "face.png"
+    cube_face 2, "top.png"
+    cube_face 3, "bottom.png"
+    cube_face 4, "front.png"
+    cube_face 5, "back.png"
+ cube 0, 0, 0, 30000, 30000, 30000
+ @endcode
+ *
+ * @note This cube map does not support multi-texturing without shaders.
  */
 cube_map(contents:tree);
 
@@ -151,18 +163,7 @@ cube_map(contents:tree);
  *      - Front  = 4
  *      - Back   = 5
  *
- * @attention Each texture must be a square (same width and height) and must have the same size for each face to generate correctly the cube map.
- *
-@code
-cube_map
-    cube_face 0, "right.bmp"
-    cube_face 1, "face.bmp"
-    cube_face 2, "top.bmp"
-    cube_face 3, "bottom.bmp"
-    cube_face 4, "front.bmp"
-    cube_face 5, "back.bmp"
-cube 0, 0, 0, 30000, 30000, 30000
-@endcode
+ * @attention Each texture has to be a square (same width and height) and has to have the same size for each face to generate correctly the cube map.
  *
  */
 cube_face(face:integer, filename:text);
@@ -175,8 +176,32 @@ cube_face(face:integer, filename:text);
  *
  * @param ratio ratio of the environment reflection.
  *
- * @note This method is more efficient than @ref sphere_mapping
- * but needs six textures to define the environment.
+ * @attention A @ref cube_map has to be define previously in order to generate reflection/refraction effects.
+ * @attention This effect has to be apply just before the choosen object in order to be subject correctly to all its transformations.
+
+ *
+ * An example of use of this effect is described below :
+ @code
+ // Define color map
+ texture_unit 0
+ texture "color_map.png"
+ // Define cube map for reflection
+ texture_unit 1
+ cube_map
+    cube_face 0, "right.png"
+    cube_face 1, "face.png"
+    cube_face 2, "top.png"
+    cube_face 3, "bottom.png"
+    cube_face 4, "front.png"
+    cube_face 5, "back.png"
+ rotatex time * 20
+ rotatey 90
+ // Apply effect juste before drawing object
+ cube_mapping 0.5
+ cube 0, 0, 0, 5000, 5000, 5000
+ @endcode
+ *
+ * @note This method is more efficient than @ref sphere_mapping but needs six textures to define the environment.
  *
  * @see http://en.wikipedia.org/wiki/Cube_mapping
  */
@@ -190,12 +215,29 @@ cube_mapping(ratio:integer);
  *
  * @param ratio ratio of the environment reflection.
  *
- * @note This texture is a particular image, which defines environment reflection.
+ * @attention This effect has to be apply just before the choosen object in order to be subject correctly to all its transformations.
+ *
+ * An example of use of this effect is described below :
+ @code
+ // Define color map
+ texture_unit 0
+ texture "color_map.png"
+ // Define sphere map for reflection
+ texture "sphere_map.png"
+ rotatex time * 20
+ rotatey 90
+ // Apply effect juste before drawing object
+ sphere_mapping 0.5
+ sphere 0, 0, 0, 500, 500, 500, 50, 50
+ @endcode
+ *
+ * @note The sphere map is a particular image, which defines environment reflection.
  * @note There is an example of such an image below.
  *
  * @image html sphere.jpg "Example of sphere map"
  *
  * @see http://en.wikipedia.org/wiki/Sphere_mapping
+ *
  */
 sphere_mapping(ratio:integer);
 
@@ -207,6 +249,21 @@ sphere_mapping(ratio:integer);
  *
  * @param ratio ratio of the environment reflection.
  *
+ * @attention This effect has to be apply just before the choosen object in order to be subject correctly to all its transformations.
+ *
+ * An example of use of this effect is described below :
+ @code
+ // Define color map
+ texture_unit 0
+ texture "color_map.png"
+ // Define reflection map
+ texture "reflection_map.png"
+ rotatex time * 20
+ rotatey 90
+ // Apply effect juste before drawing object
+ reflection_mapping 0.5
+ sphere 0, 0, 0, 500, 500, 500, 50, 50
+ @endcode
  */
 reflection_mapping(ratio:integer);
 
