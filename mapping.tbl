@@ -42,15 +42,23 @@ PREFIX(Plane,  tree, "plane",
 
 PREFIX(CubeMap,  tree, "texture_cube",
        PARM(p, code, "The program that represent a cube map"),
-       return cube_map(context, self, p),
+       return texture_cube(context, self, p),
        GROUP(module.Mapping)
        SYNOPSIS("Generate a cube map")
        DESCRIPTION("Generate a cube map."))
 
-PREFIX(CubeFace,  tree, "cube_face",
+PREFIX(CubeFace,  tree, "cube_map_face",
        PARM(face, integer, )
        PARM(name, text, ),
-       return texture_cube(self, face, name),
+       return cube_map_face(self, face, name),
        GROUP(module.Mapping)
        SYNOPSIS("Add a texture to a face of the cube map")
        DESCRIPTION("Add a texture to a face of the cube map."))
+
+PREFIX(CubeFaceFlip,  tree, "cube_map_flip",
+       PARM(u, boolean, )
+       PARM(v, boolean, ),
+       return cube_map_flip(self, u, v),
+       GROUP(module.Mapping)
+       SYNOPSIS("Flip u and v coordinates of following faces")
+       DESCRIPTION("Flip u and v coordinates of following faces."))

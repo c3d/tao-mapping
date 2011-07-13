@@ -25,7 +25,7 @@
 
 CubeMap::texture_map CubeMap::textures;
 
-CubeMap::CubeMap()
+CubeMap::CubeMap() : flip_u(false), flip_v(true)
 // ----------------------------------------------------------------------------
 //   Construction
 // ----------------------------------------------------------------------------
@@ -39,6 +39,15 @@ CubeMap::~CubeMap()
 {
 }
 
+void CubeMap::flip(bool u, bool v)
+// ----------------------------------------------------------------------------
+//   Flip faces of the cube map
+// ----------------------------------------------------------------------------
+{
+    flip_u = u;
+    flip_v = v;
+}
+
 bool CubeMap::setTexture(text filename, uint face)
 // ----------------------------------------------------------------------------
 //   Set a texture to a given face of the cube
@@ -46,7 +55,11 @@ bool CubeMap::setTexture(text filename, uint face)
 {
     if(face < 6)
     {
-        (*whichFace(face)) = filename;
+        TextureFace* currentFace = whichFace(face);
+        currentFace->name = filename;
+        currentFace->flip_u = flip_u;
+        currentFace->flip_v = flip_v;
+
         return true;
     }
     return false;
@@ -104,7 +117,7 @@ bool CubeMap::loadCubeMap()
 
 void CubeMap::Draw()
 // ----------------------------------------------------------------------------
-//   Draw cubemap texture
+//   Draw cube map texture
 // ----------------------------------------------------------------------------
 {
 }
@@ -125,7 +138,7 @@ uint CubeMap::isInclude()
    return 0;
 }
 
-text* CubeMap::whichFace(uint face)
+TextureFace* CubeMap::whichFace(uint face)
 // ----------------------------------------------------------------------------
 //  Get adress of the texture name according to a given face
 // ----------------------------------------------------------------------------
@@ -147,10 +160,12 @@ bool CubeMap::loadTexture (uint face)
 //   bind it to the face of the cubemap texture
 // ----------------------------------------------------------------------------
 {
-    QImage image((*whichFace(face)).c_str());
+    TextureFace* currentFace = whichFace(face);
+    QImage image(currentFace->name.c_str());
     if (!image.isNull())
     {
         QImage texture = QGLWidget::convertToGLFormat(image);
+        texture = texture.mirrored(currentFace->flip_u, currentFace->flip_v);
         glTexImage2D (GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, 0, GL_RGBA,
                       texture.width(), texture.height(), 0, GL_RGBA,
                       GL_UNSIGNED_BYTE, texture.bits());

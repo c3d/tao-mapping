@@ -136,12 +136,12 @@ noise_mapping(ratio:integer);
  * An example of use of this effect is described below :
  @code
  cube_map
-    cube_face 0, "right.png"
-    cube_face 1, "face.png"
-    cube_face 2, "top.png"
-    cube_face 3, "bottom.png"
-    cube_face 4, "front.png"
-    cube_face 5, "back.png"
+    cube_map_face 0, "right.png"
+    cube_map_face 1, "face.png"
+    cube_map_face 2, "top.png"
+    cube_map_face 3, "bottom.png"
+    cube_map_face 4, "front.png"
+    cube_map_face 5, "back.png"
  cube 0, 0, 0, 30000, 30000, 30000
  @endcode
  *
@@ -166,7 +166,17 @@ cube_map(contents:tree);
  * @attention Each texture has to be a square (same width and height) and has to have the same size for each face to generate correctly the cube map.
  *
  */
-cube_face(face:integer, filename:text);
+cube_map_face(face:integer, filename:text);
+
+/**
+ * Flips following faces of the current cube map.
+ *
+ * Mirror following faces of the current cube map according to uv-coordinates.
+ *
+ * @param u enable or disable flipping of u-coordinate.
+ * @param v enable or disable flipping of v-coordinate.
+ */
+cube_map_flip(u:boolean, v:boolean);
 
 /**
  * Makes cube mapping.
@@ -188,12 +198,12 @@ cube_face(face:integer, filename:text);
  // Define cube map for reflection
  texture_unit 1
  cube_map
-    cube_face 0, "right.png"
-    cube_face 1, "face.png"
-    cube_face 2, "top.png"
-    cube_face 3, "bottom.png"
-    cube_face 4, "front.png"
-    cube_face 5, "back.png"
+    cube_map_face 0, "right.png"
+    cube_map_face 1, "face.png"
+    cube_map_face 2, "top.png"
+    cube_map_face 3, "bottom.png"
+    cube_map_face 4, "front.png"
+    cube_map_face 5, "back.png"
  rotatex time * 20
  rotatey 90
  // Apply effect juste before drawing object

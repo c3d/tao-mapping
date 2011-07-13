@@ -28,7 +28,7 @@ CubeMap* cube;
 Tree_p plane(Tree_p, Real_p x, Real_p y, Real_p w,
              Real_p h, Integer_p lines_nb, Integer_p columns_nb)
 // ----------------------------------------------------------------------------
-//    Define a subdivded plane
+//   Define a subdivded plane
 // ----------------------------------------------------------------------------
 {
     Plane* plane = new Plane(x, y, w, h, lines_nb, columns_nb);
@@ -37,9 +37,9 @@ Tree_p plane(Tree_p, Real_p x, Real_p y, Real_p w,
     return xl_true;
 }
 
-Tree_p cube_map(Context *context, Tree_p tree, Tree_p prog)
+Tree_p texture_cube(Context *context, Tree_p tree, Tree_p prog)
 // ----------------------------------------------------------------------------
-//    Apply a cube mapping
+//   Create a cube map texture
 // ----------------------------------------------------------------------------
 {
     cube = new CubeMap();
@@ -52,9 +52,9 @@ Tree_p cube_map(Context *context, Tree_p tree, Tree_p prog)
     return xl_true;
 }
 
-Tree_p texture_cube(Tree_p tree, GLuint face, text filename)
+Tree_p cube_map_face(Tree_p tree, GLuint face, text filename)
 // ----------------------------------------------------------------------------
-//    Add texture to the current cube map
+//   Add texture to the current cube map
 // ----------------------------------------------------------------------------
 {
     if(! cube)
@@ -68,6 +68,22 @@ Tree_p texture_cube(Tree_p tree, GLuint face, text filename)
         Ooops("No correct face '$1' ", tree);
         return xl_false;
     }
+
+    return xl_true;
+}
+
+Tree_p cube_map_flip(Tree_p tree, bool u, bool v)
+// ----------------------------------------------------------------------------
+//   Allow to flip faces of the current cube map
+// ----------------------------------------------------------------------------
+{
+    if(! cube)
+    {
+        Ooops("No mapping defined '$1' ", tree);
+        return xl_false;
+    }
+
+    cube->flip( u, v);
 
     return xl_true;
 }

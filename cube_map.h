@@ -24,13 +24,52 @@
 
 #include "texture_mapping.h"
 
+struct  TextureFace
+// ----------------------------------------------------------------------------
+//   Define a face of a cube map
+// ----------------------------------------------------------------------------
+{
+    bool flip_u; // flip u-coordinates of our face
+    bool flip_v; // flip v-coordinates of our face
+    text name;   // name of our face
+
+    TextureFace() : flip_u(false), flip_v(true) {}
+
+    TextureFace & operator = (const TextureFace &o)
+    {
+        name   = o.name;
+        flip_u = o.flip_u;
+        flip_v = o.flip_v;
+
+        return *this;
+    }
+
+    bool operator == (const TextureFace&o) const
+    {
+        if(o.name.compare(name))
+           return false;
+        if(o.flip_u != flip_u)
+            return false;
+        if(o.flip_v != flip_v)
+            return false;
+        return true;
+    }
+
+    bool operator != (const TextureFace&o) const
+    {
+        return ! operator ==(o);
+    }
+};
+
+
+
 struct  TextureCube
 // ----------------------------------------------------------------------------
 //   Define a cubemap texture
 // ----------------------------------------------------------------------------
 {
     //name of cube faces
-    text left, right, bottom, top, front, back;
+    TextureFace left, right, bottom, top, front, back;
 
     TextureCube & operator = (const TextureCube &o)
     {
@@ -46,17 +85,17 @@ struct  TextureCube
 
     bool operator == (const TextureCube&o) const
     {
-        if(o.left.compare(left))
+        if(o.left != left)
            return false;
-        if(o.right.compare(right))
+        if(o.right != right)
            return false;
-        if(o.bottom.compare(bottom))
+        if(o.bottom != bottom)
            return false;
-        if(o.top.compare(top))
+        if(o.top != top)
            return false;
-        if(o.front.compare(front))
+        if(o.front != front )
            return false;
-        if(o.back.compare(back))
+        if(o.back != back)
            return false;
 
         return true;
@@ -83,18 +122,21 @@ struct CubeMap : public TextureMapping
     // Draw cubemap
     virtual void Draw();
 
-    void texParameters();
+    void flip(bool u, bool v);
     bool setTexture(text filename, uint face);
     bool loadCubeMap();
 
 private:
-    uint isInclude();
-    text* whichFace(uint face);
-    bool loadTexture(uint face);
+    uint         isInclude();
+    TextureFace* whichFace(uint face);
+    bool         loadTexture(uint face);
 
 private:
     TextureCube        currentTexture;
     static texture_map textures;
+    bool               flip_u : 1;
+    bool               flip_v : 1;
+
 };
 
 #endif // CUBEMAP_H
