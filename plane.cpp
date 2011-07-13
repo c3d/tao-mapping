@@ -100,11 +100,11 @@ void Plane::Draw()
     glEnableClientState(GL_VERTEX_ARRAY);
 
     // Set fill color defined in Tao
-    if(TextureMapping::tao->SetFillColor());
+    if(TextureMapping::tao->SetFillColor())
         glDrawElements(GL_QUADS, columns * lines * 4 , GL_UNSIGNED_INT, &indices[0]);
 
     // Set line color defined in Tao
-    if(TextureMapping::tao->SetLineColor());
+    if(TextureMapping::tao->SetLineColor())
         glDrawElements(GL_LINES, columns * lines * 4 , GL_UNSIGNED_INT, &indices[0]);
 
     glDisableClientState(GL_VERTEX_ARRAY);
