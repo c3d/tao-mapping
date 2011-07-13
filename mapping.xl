@@ -342,10 +342,11 @@ cube_map t:tree->
     /**
     * Create a cube map.
     **/
-    texture_cube_shader
+    cube_map_shader
     texture_cube t
+    texture 0 //Force desactivation of cube map
 
-texture_cube_shader ->
+cube_map_shader ->
     /**
     * Define shader to apply correctly cube map.
     **/
