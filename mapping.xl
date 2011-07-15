@@ -279,7 +279,9 @@ noise_shader ->
                 gl_TexCoord[1] = gl_TextureMatrix[1] * gl_MultiTexCoord1;
             }
         >>
-        fragment_shader <<
+        fragment_shader <<#version 130
+            #extension GL_EXT_gpu_shader4 : enable
+
             // Mapping parameters
             uniform float     ratio;
             uniform sampler2D colorMap;
@@ -314,8 +316,9 @@ generate_noise ->
                gl_Position    = ftransform();
             }
         >>
-        fragment_shader <<#extension GL_EXT_gpu_shader4 : require
+        fragment_shader <<#version 130
             #extension GL_EXT_gpu_shader4 : enable
+
             // Pseudo random number base generator use to make noise
             float noise(vec2 v)
             {
