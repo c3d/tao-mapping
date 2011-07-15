@@ -25,7 +25,7 @@
 
 CubeMap::texture_map CubeMap::textures;
 
-CubeMap::CubeMap() : flip_u(false), flip_v(true)
+CubeMap::CubeMap() : flip_u(false), flip_v(false)
 // ----------------------------------------------------------------------------
 //   Construction
 // ----------------------------------------------------------------------------
