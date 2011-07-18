@@ -32,6 +32,8 @@ struct  TextureFace
     bool flip_u; // flip u-coordinates of our face
     bool flip_v; // flip v-coordinates of our face
     text name;   // name of our face
+    uint width;  // texture width
+    uint height; // texture height
 
     TextureFace() : flip_u(false), flip_v(true) {}
 
@@ -47,6 +49,10 @@ struct  TextureFace
     bool operator == (const TextureFace&o) const
     {
         if(o.name.compare(name))
+           return false;
+        if(o.width != width)
+           return false;
+        if(o.height != height)
            return false;
         if(o.flip_u != flip_u)
             return false;
@@ -132,10 +138,12 @@ private:
     bool         loadTexture(uint face);
 
 private:
-    TextureCube        currentTexture;
-    static texture_map textures;
     bool               flip_u : 1;
     bool               flip_v : 1;
+    TextureCube        currentTexture;
+
+    // Textures cache
+    static texture_map textures;
 
 };
 
