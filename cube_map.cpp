@@ -166,6 +166,10 @@ bool CubeMap::loadTexture (uint face)
     {
         QImage texture = QGLWidget::convertToGLFormat(image);
         texture = texture.mirrored(currentFace->flip_u, currentFace->flip_v);
+
+        currentFace->width = texture.width();
+        currentFace->height = texture.height();
+
         glTexImage2D (GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, 0, GL_RGBA,
                       texture.width(), texture.height(), 0, GL_RGBA,
                       GL_UNSIGNED_BYTE, texture.bits());
