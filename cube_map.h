@@ -32,8 +32,6 @@ struct  TextureFace
     bool flip_u; // flip u-coordinates of our face
     bool flip_v; // flip v-coordinates of our face
     text name;   // name of our face
-    uint width;  // texture width
-    uint height; // texture height
 
     TextureFace() : flip_u(false), flip_v(true) {}
 
@@ -49,10 +47,6 @@ struct  TextureFace
     bool operator == (const TextureFace&o) const
     {
         if(o.name.compare(name))
-           return false;
-        if(o.width != width)
-           return false;
-        if(o.height != height)
            return false;
         if(o.flip_u != flip_u)
             return false;
@@ -119,6 +113,7 @@ struct CubeMap : public TextureMapping
 // ----------------------------------------------------------------------------
 {
     typedef std::map<uint, TextureCube> texture_map;
+    typedef std::map<const QGLContext *, texture_map> context_to_textures;
     enum { MAX_TEXTURES = 20 };
 
     // Constructor and destructor
@@ -136,6 +131,7 @@ private:
     uint         isInclude();
     TextureFace* whichFace(uint face);
     bool         loadTexture(uint face);
+    void         checkGLContext();
 
 private:
     bool               flip_u : 1;
@@ -143,7 +139,8 @@ private:
     TextureCube        currentTexture;
 
     // Textures cache
-    static texture_map textures;
+    static context_to_textures texture_maps;
+#   define textures texture_maps[QGLContext::currentContext()]
 
 };
 
