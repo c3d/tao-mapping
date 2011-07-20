@@ -23,14 +23,13 @@
 #include <math.h>
 #include "cube_map.h"
 
-CubeMap::context_to_textures CubeMap::texture_maps;
+CubeMap::texture_map CubeMap::textures;
 
-CubeMap::CubeMap(int size) : size(size), flip_u(false), flip_v(false)
+CubeMap::CubeMap() : flip_u(false), flip_v(true)
 // ----------------------------------------------------------------------------
 //   Construction
 // ----------------------------------------------------------------------------
-{    
-    currentTexture.size = size;
+{
 }
 
 CubeMap::~CubeMap()
@@ -72,7 +71,6 @@ bool CubeMap::loadCubeMap()
 //   and set it to the textures list in Tao
 // ----------------------------------------------------------------------------
 {
-    checkGLContext();
     GLuint cubeMapId = isInclude();
 
     if(! cubeMapId)
@@ -89,7 +87,7 @@ bool CubeMap::loadCubeMap()
         glGenTextures (1, &cubeMapId);
         glBindTexture (GL_TEXTURE_CUBE_MAP, cubeMapId);
 
-        // Setup some parameters for texture filters and mapping
+        // Setup some parameters for texture filters and mipmapping
         glTexParameteri (GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri (GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
@@ -112,7 +110,7 @@ bool CubeMap::loadCubeMap()
     }
 
     // Set to the textures list in Tao.
-    TextureMapping::tao->BindTexture(cubeMapId, GL_TEXTURE_CUBE_MAP);
+    TextureMapping::tao->SetTexture(cubeMapId, GL_TEXTURE_CUBE_MAP);
 
     return true;
 }
@@ -164,21 +162,10 @@ bool CubeMap::loadTexture (uint face)
 {
     TextureFace* currentFace = whichFace(face);
     QImage image(currentFace->name.c_str());
-    if (image.isNull())
-    {
-        text qualified = "texture:" + currentFace->name;
-        image.load(qualified.c_str());
-    }
     if (!image.isNull())
     {
-        if (size <= 0)
-            size = image.width();
-        if (size != image.width() || size != image.height())
-            image = image.scaled(size, size, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
-
         QImage texture = QGLWidget::convertToGLFormat(image);
         texture = texture.mirrored(currentFace->flip_u, currentFace->flip_v);
-
         glTexImage2D (GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, 0, GL_RGBA,
                       texture.width(), texture.height(), 0, GL_RGBA,
                       GL_UNSIGNED_BYTE, texture.bits());
@@ -186,16 +173,4 @@ bool CubeMap::loadTexture (uint face)
         return true;
     }
     return false;
-}
-
-void CubeMap::checkGLContext()
-// ----------------------------------------------------------------------------
-//   Make sure a texture_map has been allocated for the current GL context
-// ----------------------------------------------------------------------------
-{
-    if (!texture_maps.count(QGLContext::currentContext()))
-    {
-        texture_map m;
-        texture_maps[QGLContext::currentContext()] = m;
-    }
 }

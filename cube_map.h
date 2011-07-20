@@ -6,7 +6,7 @@
 //
 //   File Description:
 //
-//      Define a cube map.
+//      Define a cube Map.
 //
 //
 //
@@ -21,6 +21,7 @@
 // ****************************************************************************
 
 #include <stdio.h>
+
 #include "texture_mapping.h"
 
 struct  TextureFace
@@ -67,13 +68,11 @@ struct  TextureCube
 //   Define a cubemap texture
 // ----------------------------------------------------------------------------
 {
-    int size; //size of texture cube
     //name of cube faces
     TextureFace left, right, bottom, top, front, back;
 
     TextureCube & operator = (const TextureCube &o)
     {
-        size   = o.size;
         left   = o.left;
         right  = o.right;
         bottom = o.bottom;
@@ -86,8 +85,6 @@ struct  TextureCube
 
     bool operator == (const TextureCube&o) const
     {
-        if(o.size != size)
-            return false;
         if(o.left != left)
            return false;
         if(o.right != right)
@@ -116,11 +113,10 @@ struct CubeMap : public TextureMapping
 // ----------------------------------------------------------------------------
 {
     typedef std::map<uint, TextureCube> texture_map;
-    typedef std::map<const QGLContext *, texture_map> context_to_textures;
     enum { MAX_TEXTURES = 20 };
 
     // Constructor and destructor
-    CubeMap(int size = 0);
+    CubeMap();
     ~CubeMap();
 
     // Draw cubemap
@@ -134,17 +130,12 @@ private:
     uint         isInclude();
     TextureFace* whichFace(uint face);
     bool         loadTexture(uint face);
-    void         checkGLContext();
 
 private:
-    int                size;
+    TextureCube        currentTexture;
+    static texture_map textures;
     bool               flip_u : 1;
     bool               flip_v : 1;
-    TextureCube        currentTexture;
-
-    // Textures cache
-    static context_to_textures texture_maps;
-#   define textures texture_maps[QGLContext::currentContext()]
 
 };
 
