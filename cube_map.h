@@ -113,7 +113,6 @@ struct CubeMap : public TextureMapping
 // ----------------------------------------------------------------------------
 {
     typedef std::map<uint, TextureCube> texture_map;
-    typedef std::map<const QGLContext *, texture_map> context_to_textures;
     enum { MAX_TEXTURES = 20 };
 
     // Constructor and destructor
@@ -131,16 +130,12 @@ private:
     uint         isInclude();
     TextureFace* whichFace(uint face);
     bool         loadTexture(uint face);
-    void         checkGLContext();
 
 private:
+    TextureCube        currentTexture;
+    static texture_map textures;
     bool               flip_u : 1;
     bool               flip_v : 1;
-    TextureCube        currentTexture;
-
-    // Textures cache
-    static context_to_textures texture_maps;
-#   define textures texture_maps[QGLContext::currentContext()]
 
 };
 

@@ -23,9 +23,9 @@
 #include <math.h>
 #include "cube_map.h"
 
-CubeMap::context_to_textures CubeMap::texture_maps;
+CubeMap::texture_map CubeMap::textures;
 
-CubeMap::CubeMap() : flip_u(false), flip_v(false)
+CubeMap::CubeMap() : flip_u(false), flip_v(true)
 // ----------------------------------------------------------------------------
 //   Construction
 // ----------------------------------------------------------------------------
@@ -71,7 +71,6 @@ bool CubeMap::loadCubeMap()
 //   and set it to the textures list in Tao
 // ----------------------------------------------------------------------------
 {
-    checkGLContext();
     GLuint cubeMapId = isInclude();
 
     if(! cubeMapId)
@@ -167,7 +166,6 @@ bool CubeMap::loadTexture (uint face)
     {
         QImage texture = QGLWidget::convertToGLFormat(image);
         texture = texture.mirrored(currentFace->flip_u, currentFace->flip_v);
-
         glTexImage2D (GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, 0, GL_RGBA,
                       texture.width(), texture.height(), 0, GL_RGBA,
                       GL_UNSIGNED_BYTE, texture.bits());
@@ -175,16 +173,4 @@ bool CubeMap::loadTexture (uint face)
         return true;
     }
     return false;
-}
-
-void CubeMap::checkGLContext()
-// ----------------------------------------------------------------------------
-//   Make sure a texture_map has been allocated for the current GL context
-// ----------------------------------------------------------------------------
-{
-    if (!texture_maps.count(QGLContext::currentContext()))
-    {
-        texture_map m;
-        texture_maps[QGLContext::currentContext()] = m;
-    }
 }
