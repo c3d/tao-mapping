@@ -134,16 +134,16 @@ noise_mapping(ratio:integer);
  * @param contents defines code of the current cube map.
  *
  * An example of use of this effect is described below :
- @code
- cube_map
-    cube_map_face 0, "right.png"
-    cube_map_face 1, "face.png"
-    cube_map_face 2, "top.png"
-    cube_map_face 3, "bottom.png"
-    cube_map_face 4, "front.png"
-    cube_map_face 5, "back.png"
- cube 0, 0, 0, 30000, 30000, 30000
- @endcode
+@
+cube_map
+   cube_map_face 0, "right.png"
+   cube_map_face 1, "face.png"
+   cube_map_face 2, "top.png"
+   cube_map_face 3, "bottom.png"
+   cube_map_face 4, "front.png"
+   cube_map_face 5, "back.png"
+cube 0, 0, 0, 30000, 30000, 30000
+@endcode
  *
  * @note This cube map does not support multi-texturing without shaders.
  */
@@ -173,8 +173,8 @@ cube_map_face(face:integer, filename:text);
  *
  * Mirror following faces of the current cube map according to uv-coordinates.
  *
- * @param u enable or disable flipping of u-coordinate.
- * @param v enable or disable flipping of v-coordinate.
+ * @param u enable or disable flipping of u-coordinate. Its default value is false.
+ * @param v enable or disable flipping of v-coordinate. Its default value is false.
  */
 cube_map_flip(u:boolean, v:boolean);
 
@@ -191,25 +191,25 @@ cube_map_flip(u:boolean, v:boolean);
 
  *
  * An example of use of this effect is described below :
- @code
- // Define color map
- texture_unit 0
- texture "color_map.png"
- // Define cube map for reflection
- texture_unit 1
- cube_map
-    cube_map_face 0, "right.png"
-    cube_map_face 1, "face.png"
-    cube_map_face 2, "top.png"
-    cube_map_face 3, "bottom.png"
-    cube_map_face 4, "front.png"
-    cube_map_face 5, "back.png"
- rotatex time * 20
- rotatey 90
- // Apply effect juste before drawing object
- cube_mapping 0.5
- cube 0, 0, 0, 5000, 5000, 5000
- @endcode
+@code
+// Define color map
+texture_unit 0
+texture "color_map.png"
+// Define cube map for reflection
+texture_unit 1
+cube_map
+   cube_map_face 0, "right.png"
+   cube_map_face 1, "face.png"
+   cube_map_face 2, "top.png"
+   cube_map_face 3, "bottom.png"
+   cube_map_face 4, "front.png"
+   cube_map_face 5, "back.png"
+rotatex time * 20
+rotatey 90
+// Apply effect juste before drawing object
+cube_mapping 0.5
+cube 0, 0, 0, 5000, 5000, 5000
+@endcode
  *
  * @note This method is more efficient than @ref sphere_mapping but needs six textures to define the environment.
  *
@@ -228,18 +228,18 @@ cube_mapping(ratio:integer);
  * @attention This effect has to be apply just before the choosen object in order to be subject correctly to all its transformations.
  *
  * An example of use of this effect is described below :
- @code
- // Define color map
- texture_unit 0
- texture "color_map.png"
- // Define sphere map for reflection
- texture "sphere_map.png"
- rotatex time * 20
- rotatey 90
- // Apply effect juste before drawing object
- sphere_mapping 0.5
- sphere 0, 0, 0, 500, 500, 500, 50, 50
- @endcode
+@code
+// Define color map
+texture_unit 0
+texture "color_map.png"
+// Define sphere map for reflection
+texture "sphere_map.png"
+rotatex time * 20
+rotatey 90
+// Apply effect juste before drawing object
+sphere_mapping 0.5
+sphere 0, 0, 0, 500, 500, 500, 50, 50
+@endcode
  *
  * @note The sphere map is a particular image, which defines environment reflection.
  * @note There is an example of such an image below.
@@ -262,18 +262,19 @@ sphere_mapping(ratio:integer);
  * @attention This effect has to be apply just before the choosen object in order to be subject correctly to all its transformations.
  *
  * An example of use of this effect is described below :
- @code
- // Define color map
- texture_unit 0
- texture "color_map.png"
- // Define reflection map
- texture "reflection_map.png"
- rotatex time * 20
- rotatey 90
- // Apply effect juste before drawing object
- reflection_mapping 0.5
- sphere 0, 0, 0, 500, 500, 500, 50, 50
- @endcode
+@code
+// Define color map
+texture_unit 0
+texture "color_map.png"
+// Define reflection map
+texture_unit 1
+texture "reflection_map.png"
+rotatex time * 20
+rotatey 90
+// Apply effect juste before drawing object
+reflection_mapping 0.5
+sphere 0, 0, 0, 500, 500, 500, 50, 50
+@endcode
  */
 reflection_mapping(ratio:integer);
 

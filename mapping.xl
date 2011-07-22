@@ -291,7 +291,7 @@ noise_shader ->
                 vec4 noise = texture2D(noiseMap, gl_TexCoord[1].st );
 
                 // Compute noise coordinates
-                vec2 noiseCoord = gl_TexCoord[0].st + vec2( noise.r * 0.065, -noise.g * 0.025 ) *  ratio / 10;
+                vec2 noiseCoord = gl_TexCoord[0].st + vec2( noise.r * 0.065, -noise.g * 0.025 ) *  ratio / 10.0;
 
                 // Apply noise coordinates to color map
                 gl_FragColor = texture2D(colorMap, noiseCoord );
@@ -314,13 +314,13 @@ generate_noise ->
                gl_Position    = ftransform();
             }
         >>
-        fragment_shader <<
-
+        fragment_shader <<#extension GL_EXT_gpu_shader4 : require
+            #extension GL_EXT_gpu_shader4 : enable
             // Pseudo random number base generator use to make noise
             float noise(vec2 v)
             {
                 int n;
-                n = v.x * 40 + v.y * 6400;
+                n = int(v.x * 40.0 + v.y * 6400.0);
                 n = (n << 13) ^ n;
 
                 return 1.0 - float( (n * (n * n * 15731 + 789221) + 1376312589) & 0x7fffffff) / 1073741824.0;
@@ -351,17 +351,18 @@ cube_map_shader ->
     * Define shader to apply correctly cube map.
     **/
     shader_program
+        shader_log
         vertex_shader <<
             void main()
             {
                 // Generate texture coordinates (equivalent to glTexGen)
-                vec4 xPlane = vec4( 1.0f, 0.0f, 0.0f, 0.0f );
-                vec4 yPlane = vec4( 0.0f, 1.0f, 0.0f, 0.0f );
-                vec4 zPlane = vec4( 0.0f, 0.0f, 1.0f, 0.0f );
+                vec4 xPlane = vec4( 1.0, 0.0, 0.0, 0.0 );
+                vec4 yPlane = vec4( 0.0, 1.0, 0.0, 0.0 );
+                vec4 zPlane = vec4( 0.0, 0.0, 1.0, 0.0 );
 
-                gl_TexCoord[0].x = gl_TextureMatrix[0] * dot(vec4(gl_Vertex.xyz, 1.0), xPlane);
-                gl_TexCoord[0].y = gl_TextureMatrix[0] * dot(vec4(gl_Vertex.xyz, 1.0), yPlane);
-                gl_TexCoord[0].z = gl_TextureMatrix[0] * dot(vec4(gl_Vertex.xyz, 1.0), zPlane);
+                gl_TexCoord[0].x = dot(gl_TextureMatrix[0] * vec4(gl_Vertex.xyz, 1.0), xPlane);
+                gl_TexCoord[0].y = dot(gl_TextureMatrix[0] * vec4(gl_Vertex.xyz, 1.0), yPlane);
+                gl_TexCoord[0].z = dot(gl_TextureMatrix[0] * vec4(gl_Vertex.xyz, 1.0), zPlane);
 
                 // Compute position
                 gl_Position = ftransform();
