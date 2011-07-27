@@ -40,6 +40,7 @@ alpha_shader ->
     shader_program
         shader_log
         vertex_shader <<
+            varying vec4 color;
             void main()
             {
                 // Compute position
@@ -48,6 +49,8 @@ alpha_shader ->
                 // Compute texture coordinates
                 gl_TexCoord[0] = gl_TextureMatrix[0] * gl_MultiTexCoord0;
                 gl_TexCoord[1] = gl_TextureMatrix[1] * gl_MultiTexCoord1;
+
+                color = gl_Color;
             }
         >>
         fragment_shader <<
@@ -56,6 +59,7 @@ alpha_shader ->
             uniform sampler2D alphaMap;
             uniform sampler2D colorMap;
 
+            varying vec4 color;
             void main()
             {
                 vec4 alpha_color = texture2D(alphaMap, gl_TexCoord[1].st);
@@ -64,7 +68,7 @@ alpha_shader ->
                 if(alpha_color.r < threshold && alpha_color.g < threshold && alpha_color.b < threshold)
                     discard;
 
-                gl_FragColor  = texture2D(colorMap, gl_TexCoord[0].st);
+                gl_FragColor  = texture2D(colorMap, gl_TexCoord[0].st) * color;
             }
         >>
     shader_set colorMap  := 0
@@ -99,6 +103,7 @@ displacement_shader ->
             uniform float     ratio;
             uniform sampler2D displacementMap;
 
+            varying vec4 color;
             void main()
             {
                vec4 newPos, dv;
@@ -115,13 +120,17 @@ displacement_shader ->
 
                // Compute position
                gl_Position = gl_ModelViewProjectionMatrix * newPos;
+
+               color = gl_Color;
             }
         >>
         fragment_shader <<
             uniform sampler2D colorMap;
+
+            varying vec4 color;
             void main()
             {
-               gl_FragColor = texture2D(colorMap, gl_TexCoord[0].xy);
+               gl_FragColor = texture2D(colorMap, gl_TexCoord[0].xy) * color;
             }
         >>
     shader_set colorMap        := 0
@@ -149,7 +158,7 @@ normal_shader ->
             varying vec3 lightDir;
             varying vec3 viewDir;
             varying vec3 normal;
-
+            varying vec4 color;
             void main()
             {
                 // Determine object parameters
@@ -166,6 +175,8 @@ normal_shader ->
                 // Compute direction parameters
                 lightDir = gl_LightSource[0].position.xyz - eyePos;
                 viewDir  = -eyePos;
+
+                color = gl_Color;
             }
         >>
         fragment_shader <<
@@ -176,7 +187,7 @@ normal_shader ->
             varying vec3 lightDir;
             varying vec3 viewDir;
             varying vec3 normal;
-
+            varying vec4 color;
             /**
             /* Calculate tangent space matrix from normal, vector in plane
             *  and texture coordinates
@@ -228,8 +239,8 @@ normal_shader ->
                 }
 
                 // Define new render color
-                vec3 color   = (gl_FrontLightModelProduct.sceneColor + ambient + diffuse).rgb * texture2D(colorMap, gl_TexCoord[0].st).rgb  + specular.rgb;
-                gl_FragColor = vec4(color, 1.0);
+                vec3 finalColor   = (gl_FrontLightModelProduct.sceneColor + ambient + diffuse).rgb * texture2D(colorMap, gl_TexCoord[0].st).rgb  + specular.rgb;
+                gl_FragColor = vec4(finalColor, 1.0) * color;
             }
         >>
 
@@ -268,7 +279,7 @@ noise_shader ->
     shader_program
         shader_log
         vertex_shader <<
-            varying vec3 v;
+            varying vec4 color;
             void main()
             {
                 // Compute position
@@ -277,6 +288,8 @@ noise_shader ->
                 // Compute texture coordinates
                 gl_TexCoord[0] = gl_TextureMatrix[0] * gl_MultiTexCoord0;
                 gl_TexCoord[1] = gl_TextureMatrix[1] * gl_MultiTexCoord1;
+
+                color = gl_Color;
             }
         >>
         fragment_shader <<
@@ -285,6 +298,7 @@ noise_shader ->
             uniform sampler2D colorMap;
             uniform sampler2D noiseMap;
 
+            varying vec4 color;
             void main()
             {
                 // Get noise value from noise map.
@@ -294,7 +308,7 @@ noise_shader ->
                 vec2 noiseCoord = gl_TexCoord[0].st + vec2( noise.r * 0.065, -noise.g * 0.025 ) *  ratio / 10.0;
 
                 // Apply noise coordinates to color map
-                gl_FragColor = texture2D(colorMap, noiseCoord );
+                gl_FragColor = texture2D(colorMap, noiseCoord ) * color;
             }
         >>
     shader_set colorMap := 0
@@ -308,15 +322,20 @@ generate_noise ->
     shader_program
         shader_log
         vertex_shader <<
+            varying vec4 color;
             void main()
             {
                gl_TexCoord[0] = gl_Vertex;
                gl_Position    = ftransform();
+
+               color = gl_Color;
             }
         >>
         fragment_shader <<#extension GL_EXT_gpu_shader4 : require
             #extension GL_EXT_gpu_shader4 : enable
             // Pseudo random number base generator use to make noise
+
+            varying vec4 color;
             float noise(vec2 v)
             {
                 int n;
@@ -329,7 +348,7 @@ generate_noise ->
             void main()
             {
                 float noiseColor = (noise(gl_TexCoord[0].st) + 1.0) * 0.5;
-                gl_FragColor     = vec4(noiseColor, noiseColor, noiseColor, 1.0);
+                gl_FragColor     = vec4(noiseColor, noiseColor, noiseColor, 1.0) * color;
             }
         >>
 
@@ -371,7 +390,6 @@ cube_map_shader ->
         fragment_shader <<
             // Mapping parameters
             uniform samplerCube cubeMap;
-
             void main()
             {
                 vec3 cube     = textureCube(cubeMap, gl_TexCoord[0].xyz).rgb;
@@ -379,7 +397,6 @@ cube_map_shader ->
             }
         >>
     shader_set cubeMap := texture_unit
-
 
 // -------------------------------------------------------------------------------------------------------------------
 //   CUBE MAPPING
