@@ -240,7 +240,7 @@ normal_shader ->
 
                 // Define new render color
                 vec3 finalColor   = (gl_FrontLightModelProduct.sceneColor + ambient + diffuse).rgb * texture2D(colorMap, gl_TexCoord[0].st).rgb  + specular.rgb;
-                gl_FragColor = vec4(finalColor * color, 1.0);
+                gl_FragColor = vec4(finalColor, 1.0) * color;
             }
         >>
 
