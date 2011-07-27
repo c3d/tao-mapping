@@ -91,8 +91,6 @@ void Plane::Draw()
 //   Draw a subdivided plane
 // ----------------------------------------------------------------------------
 {
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
     glNormal3f(0., 0., 1.);
 
     // Set vertex coordinates
