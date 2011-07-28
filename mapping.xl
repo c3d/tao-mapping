@@ -421,13 +421,29 @@ cube_shader ->
     shader_program
         shader_log
         vertex_shader <<#version 120
+
             uniform mat4 model;
             uniform vec3 camera;
             void main()
             {
+                mat3 normalMatrix;
+
+                // Get linear part of model matrix
+                normalMatrix[0][0] = model[0][0];
+                normalMatrix[0][1] = model[0][1];
+                normalMatrix[0][2] = model[0][2];
+
+                normalMatrix[1][0] = model[1][0];
+                normalMatrix[1][1] = model[1][1];
+                normalMatrix[1][2] = model[1][2];
+
+                normalMatrix[2][0] = model[2][0];
+                normalMatrix[2][1] = model[2][1];
+                normalMatrix[2][2] = model[2][2];
+
                 // Compute world position and normal
                 vec4 worldPos = model * gl_Vertex;
-                vec3 normal   = normalize(mat3(model) * gl_Normal);
+                vec3 normal   = normalize(normalMatrix * gl_Normal);
                 vec3 eyePos   = normalize(worldPos.xyz - camera);
 
                 // Compute reflection vector
@@ -491,13 +507,28 @@ sphere_shader ->
         uniform vec3 camera;
         void main()
         {
+            mat3 normalMatrix;
+
+            // Get linear part of model matrix
+            normalMatrix[0][0] = model[0][0];
+            normalMatrix[0][1] = model[0][1];
+            normalMatrix[0][2] = model[0][2];
+
+            normalMatrix[1][0] = model[1][0];
+            normalMatrix[1][1] = model[1][1];
+            normalMatrix[1][2] = model[1][2];
+
+            normalMatrix[2][0] = model[2][0];
+            normalMatrix[2][1] = model[2][1];
+            normalMatrix[2][2] = model[2][2];
+
             // Determine object parameters
             gl_Position    = ftransform();
             gl_TexCoord[0] = gl_TextureMatrix[0] * gl_MultiTexCoord0;
 
             // Compute world position and normal
             vec4 worldPos = model * gl_Vertex;
-            vec3 normal   = normalize(mat3(model) * gl_Normal);
+            vec3 normal   = normalize(normalMatrix * gl_Normal);
             vec3 eyePos   = normalize(worldPos.xyz - camera);
 
             // Compute camera parameters
@@ -560,9 +591,24 @@ reflection_shader ->
             uniform vec3 camera;
             void main()
             {
+                mat3 normalMatrix;
+
+                // Get linear part of model matrix
+                normalMatrix[0][0] = model[0][0];
+                normalMatrix[0][1] = model[0][1];
+                normalMatrix[0][2] = model[0][2];
+
+                normalMatrix[1][0] = model[1][0];
+                normalMatrix[1][1] = model[1][1];
+                normalMatrix[1][2] = model[1][2];
+
+                normalMatrix[2][0] = model[2][0];
+                normalMatrix[2][1] = model[2][1];
+                normalMatrix[2][2] = model[2][2];
+
                 // Compute world position and normal
                 vec4 worldPos = model * gl_Vertex;
-                vec3 normal   = normalize(mat3(model) * gl_Normal);
+                vec3 normal   = normalize(normalMatrix * gl_Normal);
                 vec3 eyePos   = normalize(worldPos.xyz - camera);
 
                 // Compute reflection vector
