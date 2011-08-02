@@ -58,6 +58,8 @@ plane(x:real, y:real, w:real, h:real, l:integer, c:integer);
  * @param ratio displacement ratio
  *
  * @attention In order to obtain a good displacement, the used shapes must have important geometrical subdivision.
+ * @attention In case where lights have been placed in the current scene, a normal map have to be bind on texture unit 2 to
+ * adjust correct normals of the model. It is possible to create a normal map with @ref normal_map
  *
  * @note For that reason, this module includes a new 2D shape, @ref plane , which can be easily subdivided.
  */
@@ -78,6 +80,15 @@ displacement_mapping(ratio:real);
 alpha_mapping(threshold:real);
 
 /**
+ * Convert current texture into a basic normal map.
+ * Make a basic normal map thanks to the current texture.
+ * This one can be use to make a normal mapping or a displacement mapping.
+ *
+ * @note A better result can be obtain if the current texture is a black and white one (for instance: a displacement map)
+ */
+normal_map();
+
+/**
  * Makes normal mapping.
  *
  * Simulate 3D on an object thanks to the association of normal map defined by @ref normal_map
@@ -87,7 +98,7 @@ alpha_mapping(threshold:real);
  * @attention As normal mapping uses a light and some materials, it is largely recommended to add it
  * to the current scene to increase the effects.
  *
- * @note This effect support only light zero.
+ * @note This effect can support a maximum of 8 differents lights.
  * @note Contrary to displacement mapping, normal mapping doesn't modify geometric positions.
  * @note This mapping use a particular texture, which allows to define normals used during mapping.
  * @note There is an example of such an image below.
@@ -277,10 +288,3 @@ sphere 0, 0, 0, 500, 500, 500, 50, 50
 @endcode
  */
 reflection_mapping(ratio:integer);
-
-
-
-
-
-
-
