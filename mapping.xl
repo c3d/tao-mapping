@@ -39,7 +39,8 @@ alpha_shader ->
     **/
     shader_program
         shader_log
-        vertex_shader <<#extension GL_EXT_gpu_shader4 : require
+        vertex_shader <<
+            #extension GL_EXT_gpu_shader4 : require
             #extension GL_EXT_gpu_shader4 : enable
 
             uniform int lights;
@@ -70,7 +71,8 @@ alpha_shader ->
                 color = gl_Color;
             }
         >>
-        fragment_shader <<#extension GL_EXT_gpu_shader4 : require
+        fragment_shader <<
+            #extension GL_EXT_gpu_shader4 : require
             #extension GL_EXT_gpu_shader4 : enable
 
             // Mapping paramaters
@@ -211,6 +213,7 @@ displacement_shader ->
         fragment_shader <<
             uniform sampler2D colorMap;
             varying vec4 color;
+
             void main()
             {
                gl_FragColor = texture2D(colorMap, gl_TexCoord[0].xy) * color;
@@ -237,7 +240,8 @@ normal_shader ->
     **/
     shader_program
         shader_log
-        vertex_shader <<#extension GL_EXT_gpu_shader4 : require
+        vertex_shader <<
+            #extension GL_EXT_gpu_shader4 : require
             #extension GL_EXT_gpu_shader4 : enable
 
             uniform int lights;
@@ -268,7 +272,8 @@ normal_shader ->
                 color = gl_Color;
             }
         >>
-        fragment_shader <<#extension GL_EXT_gpu_shader4 : require
+        fragment_shader <<
+             #extension GL_EXT_gpu_shader4 : require
              #extension GL_EXT_gpu_shader4 : enable
 
             // Mapping paramaters
@@ -436,7 +441,8 @@ noise_shader ->
     **/
     shader_program
         shader_log
-        vertex_shader <<#extension GL_EXT_gpu_shader4 : require
+        vertex_shader <<
+            #extension GL_EXT_gpu_shader4 : require
             #extension GL_EXT_gpu_shader4 : enable
             uniform int lights;
 
@@ -466,8 +472,10 @@ noise_shader ->
                 color = gl_Color;
             }
         >>
-        fragment_shader <<#extension GL_EXT_gpu_shader4 : require
+        fragment_shader <<
+            #extension GL_EXT_gpu_shader4 : require
             #extension GL_EXT_gpu_shader4 : enable
+
             // Mapping parameters
             uniform float     ratio;
             uniform sampler2D colorMap;
@@ -569,7 +577,8 @@ generate_noise ->
                color = gl_Color;
             }
         >>
-        fragment_shader <<#extension GL_EXT_gpu_shader4 : require
+        fragment_shader <<
+            #extension GL_EXT_gpu_shader4 : require
             #extension GL_EXT_gpu_shader4 : enable
             // Pseudo random number base generator use to make noise
 
@@ -610,6 +619,9 @@ cube_map_shader ->
     shader_program
         shader_log
         vertex_shader <<
+            #extension GL_EXT_gpu_shader4 : require
+            #extension GL_EXT_gpu_shader4 : enable
+
             uniform int lights;
 
             varying vec3 lightDir[8];
@@ -644,6 +656,9 @@ cube_map_shader ->
             }
         >>
         fragment_shader <<
+            #extension GL_EXT_gpu_shader4 : require
+            #extension GL_EXT_gpu_shader4 : enable
+
             // Mapping parameters
             uniform samplerCube cubeMap;
 
@@ -741,9 +756,18 @@ cube_shader ->
     shader_program
         shader_log
         vertex_shader <<#version 120
+            #extension GL_EXT_gpu_shader4 : require
+            #extension GL_EXT_gpu_shader4 : enable
 
             uniform mat4 model;
             uniform vec3 camera;
+
+            uniform int lights;
+
+            varying vec3 lightDir[8];
+            varying vec3 viewDir;
+            varying vec3 normal;
+            varying vec4 color;
             void main()
             {
                 mat3 normalMatrix;
@@ -763,11 +787,11 @@ cube_shader ->
 
                 // Compute world position and normal
                 vec4 worldPos = model * gl_Vertex;
-                vec3 normal   = normalize(normalMatrix * gl_Normal);
-                vec3 eyePos   = normalize(worldPos.xyz - camera);
+                viewDir  = normalize(worldPos.xyz - camera);
+                normal   = normalize(normalMatrix * gl_Normal);
 
                 // Compute reflection vector
-                vec3 r = reflect (eyePos, normal);
+                vec3 r = reflect (viewDir, normal);
 
                 // Compute texture coordinates
                 gl_TexCoord[1] = gl_TextureMatrix[1] * vec4 (r, 1.0);
@@ -775,24 +799,103 @@ cube_shader ->
 
                 // Compute position
                 gl_Position = ftransform();
+
+                // Compute new values for lighting
+                normal   =  normalize(gl_NormalMatrix * gl_Normal);
+                viewDir  = -normalize((gl_ModelViewMatrix * gl_Vertex).xyz);
+
+                // Compute light direction
+                if(lights > 0)
+                    for(int i = 0; i < lights; i++)
+                        if(bool(lights & (1 << i)))
+                            lightDir[i] = gl_LightSource[i].position.xyz;
+
+                color = gl_Color;
             }
         >>
         fragment_shader <<
+            #extension GL_EXT_gpu_shader4 : require
+            #extension GL_EXT_gpu_shader4 : enable
+
             // Mapping parameters
             uniform float       ratio;
             uniform sampler2D   colorMap;
             uniform samplerCube cubeMap;
 
+            uniform int lights;
+
+            varying vec3 lightDir[8];
+            varying vec3 viewDir;
+            varying vec3 normal;
+            varying vec4 color;
+            /**
+            * Compute render color according to materials, lights and colors parameters
+            * which are set in the current scene.
+            **/
+            vec4 computeRenderColor(vec4 renderColor)
+            {
+                vec4 lighting_color;
+                if(lights > 0)
+                {
+                    vec3 N = normalize(normal);
+                    vec3 V = normalize(viewDir);
+
+                    vec4 ambient  = vec4(0.0);
+                    vec4 diffuse  = vec4(0.0);
+                    vec4 specular = vec4(0.0);
+                    ambient  = gl_FrontLightModelProduct.sceneColor * gl_FrontMaterial.ambient;
+
+                    for(int i = 0; i < lights; i++)
+                    {
+                        if(bool(lights & (1 << i)))
+                        {
+                            vec3 L = normalize(lightDir[i]);
+
+                            // Compute ambient part
+                            ambient += gl_LightSource[i].ambient * gl_FrontMaterial.ambient;
+
+                            // Diffuse coefficient
+                            float nDotL = max(clamp(dot(L, N), 0.0, 1.0), 0.0);
+                            if (nDotL > 0.0)
+                            {
+                                // Compute diffuse part
+                                diffuse += gl_LightSource[i].diffuse * gl_FrontMaterial.diffuse * nDotL;
+
+                                // Compute specular coefficient
+                                float nDotV = clamp(dot(reflect(-L, N), V), 0.0, 1.0);
+                                if (nDotV > 0.0)
+                                {
+                                    // Compute specular part
+                                    specular += gl_LightSource[i].specular * gl_FrontMaterial.specular * pow(nDotV, gl_FrontMaterial.shininess);
+                                }
+                            }
+                        }
+                    }
+
+                     // Define new render color
+                    lighting_color  = (ambient + diffuse) * renderColor + specular;
+                }
+                else
+                {
+                    // Define new render color
+                    lighting_color  = color * renderColor;
+                }
+
+                return lighting_color;
+            }
+
             void main()
             {
-                vec3 cube     = textureCube(cubeMap, gl_TexCoord[1].xyz).rgb;
-                vec3 color    = texture2D(colorMap, gl_TexCoord[0].st).rgb;
-                gl_FragColor  = vec4(mix(color, cube, ratio), 1.0);
+                vec3 cubeColor    = textureCube(cubeMap, gl_TexCoord[1].xyz).rgb;
+                vec3 mainColor    = texture2D(colorMap, gl_TexCoord[0].st).rgb;
+                vec4 renderColor  = vec4(mix(mainColor, cubeColor, ratio), 1.0);
+                gl_FragColor  = computeRenderColor(renderColor);
             }
         >>
     shader_set colorMap := 0
     shader_set cubeMap  := 1
     shader_set ratio    := CUBE_RATIO
+    shader_set lights   := light_id
 
     //FOLLOWING PARAMETERS ARE NEEDED BUT NOT OPTIMIZED BECAUSE LISTS ARE RELOAD FULLY TO EACH XL FUNCTIONS CALL
     shader_set camera   := (camera_position at 1; camera_position at 2; camera_position at 3)
@@ -823,8 +926,18 @@ sphere_shader ->
     **/
     shader_program
         vertex_shader <<#version 120
+        #extension GL_EXT_gpu_shader4 : require
+        #extension GL_EXT_gpu_shader4 : enable
+
         uniform mat4 model;
         uniform vec3 camera;
+
+        uniform int lights;
+
+        varying vec3 lightDir[8];
+        varying vec3 viewDir;
+        varying vec3 normal;
+        varying vec4 color;
         void main()
         {
             mat3 normalMatrix;
@@ -848,34 +961,113 @@ sphere_shader ->
 
             // Compute world position and normal
             vec4 worldPos = model * gl_Vertex;
-            vec3 normal   = normalize(normalMatrix * gl_Normal);
-            vec3 eyePos   = normalize(worldPos.xyz - camera);
+            viewDir  = normalize(worldPos.xyz - camera);
+            normal   = normalize(normalMatrix * gl_Normal);
 
             // Compute camera parameters
-            vec3  r  = reflect( eyePos, normal );
+            vec3  r  = reflect( viewDir, normal );
             float m  = 2.0 * sqrt( r.x * r.x + r.y * r.y + (r.z + 1.0) * (r.z + 1.0) );
 
             // Compute sphere coordinates
             gl_TexCoord[1].s = r.x/m + 0.5;
             gl_TexCoord[1].t = r.y/m + 0.5;
+
+            // Compute new values for lighting
+            normal   =  normalize(gl_NormalMatrix * gl_Normal);
+            viewDir  = -normalize((gl_ModelViewMatrix * gl_Vertex).xyz);
+
+            // Compute light direction
+            if(lights > 0)
+                for(int i = 0; i < lights; i++)
+                    if(bool(lights & (1 << i)))
+                        lightDir[i] = gl_LightSource[i].position.xyz;
+
+            color = gl_Color;
         }
         >>
         fragment_shader <<
+            #extension GL_EXT_gpu_shader4 : require
+            #extension GL_EXT_gpu_shader4 : enable
+
             // Mapping parameters
             uniform float     ratio;
             uniform sampler2D colorMap;
             uniform sampler2D sphereMap;
 
+            uniform int lights;
+
+            varying vec3 lightDir[8];
+            varying vec3 viewDir;
+            varying vec3 normal;
+            varying vec4 color;
+            /**
+            * Compute render color according to materials, lights and colors parameters
+            * which are set in the current scene.
+            **/
+            vec4 computeRenderColor(vec4 renderColor)
+            {
+                vec4 lighting_color;
+                if(lights > 0)
+                {
+                    vec3 N = normalize(normal);
+                    vec3 V = normalize(viewDir);
+
+                    vec4 ambient  = vec4(0.0);
+                    vec4 diffuse  = vec4(0.0);
+                    vec4 specular = vec4(0.0);
+                    ambient  = gl_FrontLightModelProduct.sceneColor * gl_FrontMaterial.ambient;
+
+                    for(int i = 0; i < lights; i++)
+                    {
+                        if(bool(lights & (1 << i)))
+                        {
+                            vec3 L = normalize(lightDir[i]);
+
+                            // Compute ambient part
+                            ambient += gl_LightSource[i].ambient * gl_FrontMaterial.ambient;
+
+                            // Diffuse coefficient
+                            float nDotL = max(clamp(dot(L, N), 0.0, 1.0), 0.0);
+                            if (nDotL > 0.0)
+                            {
+                                // Compute diffuse part
+                                diffuse += gl_LightSource[i].diffuse * gl_FrontMaterial.diffuse * nDotL;
+
+                                // Compute specular coefficient
+                                float nDotV = clamp(dot(reflect(-L, N), V), 0.0, 1.0);
+                                if (nDotV > 0.0)
+                                {
+                                    // Compute specular part
+                                    specular += gl_LightSource[i].specular * gl_FrontMaterial.specular * pow(nDotV, gl_FrontMaterial.shininess);
+                                }
+                            }
+                        }
+                    }
+
+                     // Define new render color
+                    lighting_color  = (ambient + diffuse) * renderColor + specular;
+                }
+                else
+                {
+                    // Define new render color
+                    lighting_color  = color * renderColor;
+                }
+
+                return lighting_color;
+            }
+
             void main()
             {
-                vec3 color   = texture2D( colorMap, gl_TexCoord[0].st).rgb;
-                vec3 sphere  = texture2D( sphereMap, gl_TexCoord[1].st).rgb;
-                gl_FragColor = vec4(mix(color, sphere, ratio), 1.0);
+                vec3 sphereColor    = texture2D( sphereMap, gl_TexCoord[1].st).rgb;
+                vec3 mainColor    = texture2D( colorMap, gl_TexCoord[0].st).rgb;
+                vec4 renderColor  = vec4(mix(mainColor, sphereColor, ratio), 1.0);
+                gl_FragColor  = computeRenderColor(renderColor);
             }
         >>
     shader_set colorMap  := 0
     shader_set sphereMap := 1
     shader_set ratio     := SPHERE_RATIO
+    shader_set lights    := light_id
 
     //FOLLOWING PARAMETERS ARE NEEDED BUT NOT OPTIMIZED BECAUSE LISTS ARE RELOAD FULLY TO EACH XL FUNCTIONS CALL
     shader_set camera   := (camera_position at 1; camera_position at 2; camera_position at 3)
