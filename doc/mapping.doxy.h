@@ -254,6 +254,7 @@ sphere 0, 0, 0, 500, 500, 500, 50, 50
  *
  * @note The sphere map is a particular image, which defines environment reflection.
  * @note There is an example of such an image below.
+ * @note It is also possible to use a regular image as sphere map with a suitable scaling to generate static reflection.
  *
  * @image html sphere.jpg "Example of sphere map"
  *
@@ -261,30 +262,3 @@ sphere 0, 0, 0, 500, 500, 500, 50, 50
  *
  */
 sphere_mapping(ratio:integer);
-
-/**
- * Makes reflection mapping.
- *
- * Allow to simulate easily the reflection of an environment on an object thanks
- * to a common texture define set by @ref texture.
- *
- * @param ratio ratio of the environment reflection.
- *
- * @attention This effect has to be apply just before the choosen object in order to be subject correctly to all its transformations.
- *
- * An example of use of this effect is described below :
-@code
-// Define color map
-texture_unit 0
-texture "color_map.png"
-// Define reflection map
-texture_unit 1
-texture "reflection_map.png"
-rotatex time * 20
-rotatey 90
-// Apply effect juste before drawing object
-reflection_mapping 0.5
-sphere 0, 0, 0, 500, 500, 500, 50, 50
-@endcode
- */
-reflection_mapping(ratio:integer);
