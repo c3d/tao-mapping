@@ -940,7 +940,7 @@ cube_shader ->
             #extension GL_EXT_gpu_shader4 : require
             #extension GL_EXT_gpu_shader4 : enable
 
-            uniform mat4 model;
+            uniform mat3 normalMatrix;
             uniform vec3 camera;
 
             uniform int lights;
@@ -951,23 +951,8 @@ cube_shader ->
             varying vec4 color;
             void main()
             {
-                mat3 normalMatrix;
-
-                // Get linear part of model matrix
-                normalMatrix[0][0] = model[0][0];
-                normalMatrix[0][1] = model[0][1];
-                normalMatrix[0][2] = model[0][2];
-
-                normalMatrix[1][0] = model[1][0];
-                normalMatrix[1][1] = model[1][1];
-                normalMatrix[1][2] = model[1][2];
-
-                normalMatrix[2][0] = model[2][0];
-                normalMatrix[2][1] = model[2][1];
-                normalMatrix[2][2] = model[2][2];
-
                 // Compute world position and normal
-                vec4 worldPos = model * gl_Vertex;
+                vec4 worldPos = gl_Vertex;
                 viewDir  = normalize(worldPos.xyz - camera);
                 normal   = normalize(normalMatrix * gl_Normal);
 
@@ -1079,11 +1064,10 @@ cube_shader ->
     shader_set lights   := light_id
 
     //FOLLOWING PARAMETERS ARE NEEDED BUT NOT OPTIMIZED BECAUSE LISTS ARE RELOAD FULLY TO EACH XL FUNCTIONS CALL
-    shader_set camera   := (camera_position at 1; camera_position at 2; camera_position at 3)
-    shader_set model    := (model_matrix at 1;  model_matrix at 2;  model_matrix at 3;  model_matrix at 4;
-                            model_matrix at 5;  model_matrix at 6;  model_matrix at 7;  model_matrix at 8;
-                            model_matrix at 9;  model_matrix at 10; model_matrix at 11; model_matrix at 12;
-                            model_matrix at 13; model_matrix at 14; model_matrix at 15; model_matrix at 16)
+    shader_set camera       := (camera_position at 1; camera_position at 2; camera_position at 3)
+    shader_set normalMatrix := (model_matrix at 1;  model_matrix at 2;  model_matrix at 3;
+                                model_matrix at 5;  model_matrix at 6;  model_matrix at 7;
+                                model_matrix at 9;  model_matrix at 10; model_matrix at 11)
 
 // -------------------------------------------------------------------------------------------------------------------
 //   SPHERE MAPPING
