@@ -785,12 +785,12 @@ noise_shader ->
 //   For further informations, see http://wiki.polycount.com/CubeMap
 // -------------------------------------------------------------------------------------------------------------------
 
-cube_map t:tree->
+cube_map s:integer, t:tree->
     /**
     * Create a cube map.
     **/
     cube_map_shader
-    texture_cube t
+    texture_cube s, t
     texture 0 //Force desactivation of cube map
 
 cube_map_shader ->

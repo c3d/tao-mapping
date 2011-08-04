@@ -138,15 +138,16 @@ noise_mapping(ratio:integer);
 /**
  * Creates a local cube map.
  *
- * Define and evaluate the cube map tree generate thanks to @ref cube_face.
+ * Define and evaluate the cube map tree generate thanks to @ref cube_face according to the defined size.
  * This texture can be used directly to create nice environment or
  * during a cube mapping to generate reflections.
  *
+ * @param size     allows to rescale directly the images as squares. If 0 then there is no rescaling.
  * @param contents defines code of the current cube map.
  *
  * An example of use of this effect is described below :
 @
-cube_map
+cube_map 1024,
    cube_map_face 0, "right.png"
    cube_map_face 1, "face.png"
    cube_map_face 2, "top.png"
@@ -158,7 +159,7 @@ cube 0, 0, 0, 30000, 30000, 30000
  *
  * @note This cube map does not support multi-texturing without shaders.
  */
-cube_map(contents:tree);
+cube_map(integer:size, contents:tree);
 
 /**
  * Adds a texture to the current cube map.
@@ -208,7 +209,7 @@ texture_unit 0
 texture "color_map.png"
 // Define cube map for reflection
 texture_unit 1
-cube_map
+cube_map 1024,
    cube_map_face 0, "right.png"
    cube_map_face 1, "face.png"
    cube_map_face 2, "top.png"

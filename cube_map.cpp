@@ -25,11 +25,12 @@
 
 CubeMap::context_to_textures CubeMap::texture_maps;
 
-CubeMap::CubeMap() : flip_u(false), flip_v(false)
+CubeMap::CubeMap(int size) : size(size), flip_u(false), flip_v(false)
 // ----------------------------------------------------------------------------
 //   Construction
 // ----------------------------------------------------------------------------
-{
+{    
+    currentTexture.size = size;
 }
 
 CubeMap::~CubeMap()
@@ -170,8 +171,14 @@ bool CubeMap::loadTexture (uint face)
     }
     if (!image.isNull())
     {
+        if (size <= 0)
+            size = image.width();
+        if (size != image.width() || size != image.height())
+            image = image.scaled(size, size, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+
         QImage texture = QGLWidget::convertToGLFormat(image);
         texture = texture.mirrored(currentFace->flip_u, currentFace->flip_v);
+
         glTexImage2D (GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, 0, GL_RGBA,
                       texture.width(), texture.height(), 0, GL_RGBA,
                       GL_UNSIGNED_BYTE, texture.bits());
