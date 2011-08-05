@@ -112,7 +112,7 @@ bool CubeMap::loadCubeMap()
     }
 
     // Set to the textures list in Tao.
-    TextureMapping::tao->SetTexture(cubeMapId, GL_TEXTURE_CUBE_MAP);
+    TextureMapping::tao->BindTexture(cubeMapId, GL_TEXTURE_CUBE_MAP);
 
     return true;
 }
@@ -122,6 +122,7 @@ void CubeMap::Draw()
 //   Draw cube map texture
 // ----------------------------------------------------------------------------
 {
+    TextureMapping::tao->SetTextures();
 }
 
 uint CubeMap::isInclude()
