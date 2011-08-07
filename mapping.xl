@@ -791,7 +791,6 @@ cube_map s:integer, t:tree->
     **/
     cube_map_shader
     texture_cube s, t
-    texture 0 //Force desactivation of cube map
 
 cube_map_shader ->
     /**
@@ -819,6 +818,8 @@ cube_map_shader ->
                 gl_TexCoord[0].x = dot(gl_TextureMatrix[0] * vec4(gl_Vertex.xyz, 1.0), xPlane);
                 gl_TexCoord[0].y = dot(gl_TextureMatrix[0] * vec4(gl_Vertex.xyz, 1.0), yPlane);
                 gl_TexCoord[0].z = dot(gl_TextureMatrix[0] * vec4(gl_Vertex.xyz, 1.0), zPlane);
+
+                gl_TexCoord[1] = gl_TextureMatrix[0] * gl_MultiTexCoord0;
 
                 // Compute position
                 gl_Position = ftransform();

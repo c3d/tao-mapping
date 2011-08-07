@@ -157,7 +157,8 @@ cube_map 1024,
 cube 0, 0, 0, 30000, 30000, 30000
 @endcode
  *
- * @note This cube map does not support multi-texturing without shaders.
+ * @note This texture have a higher priority than a common texture.
+ * @note The cube map does not support multi-texturing without shaders.
  */
 cube_map(integer:size, contents:tree);
 

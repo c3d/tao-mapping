@@ -122,7 +122,6 @@ void CubeMap::Draw()
 //   Draw cube map texture
 // ----------------------------------------------------------------------------
 {
-    TextureMapping::tao->SetTextures();
 }
 
 uint CubeMap::isInclude()
