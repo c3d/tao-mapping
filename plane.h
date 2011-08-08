@@ -23,18 +23,6 @@
 #include "texture_mapping.h"
 #include <vector>
 
-struct PlaneMesh
-// ----------------------------------------------------------------------------
-//   Common drawing code for mesh-based shapes
-// ----------------------------------------------------------------------------
-{
-    PlaneMesh(int lines, int columns);
-
-    std::vector<Point3> vertices;
-    std::vector<GLuint> indices;
-    std::vector<Point>  textures;
-};
-
 struct Plane : public TextureMapping
 // ----------------------------------------------------------------------------
 //   Define a subdivided plane
@@ -44,21 +32,21 @@ struct Plane : public TextureMapping
     Plane(float x, float y, float w, float h, int lines, int columns);
     ~Plane();
 
+    void initialize();
+
     // Draw plane
     virtual void Draw();
-    void Draw(PlaneMesh* plane);
 
 private:
     // Plane parameters
     Tao::Vector3 center;
     float width, height;
-    int   slices, stacks;
+    int   lines, columns;
 
-    enum { MAX_PLANES = 10 };
-    typedef std::pair<uint, uint> Key;
-    typedef std::map<Key, PlaneMesh *> PlaneCache;
-
-    static PlaneCache cache;
+    //Plane buffers
+    std::vector<Vector3> vertices;
+    std::vector<Vector>  textures;
+    std::vector<GLuint>  indices;
 };
 
 #endif

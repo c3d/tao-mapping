@@ -40,12 +40,9 @@ PREFIX(Plane,  tree, "plane",
        SYNOPSIS("Generate a subdivided plane")
        DESCRIPTION("Generate a subdivided plane."))
 
-
-
-PREFIX(CubeMap,  tree, "cube_map",
-       PARM(size, integer, )
+PREFIX(CubeMap,  tree, "texture_cube",
        PARM(p, code, "The program that represent a cube map"),
-       return cube_map(context, size, self, p),
+       return texture_cube(context, self, p),
        GROUP(module.Mapping)
        SYNOPSIS("Generate a cube map")
        DESCRIPTION("Generate a cube map."))
@@ -65,29 +62,3 @@ PREFIX(CubeFaceFlip,  tree, "cube_map_flip",
        GROUP(module.Mapping)
        SYNOPSIS("Flip u and v coordinates of following faces")
        DESCRIPTION("Flip u and v coordinates of following faces."))
-
-
-PREFIX(CubeMapping,  tree, "cube_mapping",
-       PARM(r, real, ),
-       return cube_mapping(self, r),
-       GROUP(module.Mapping)
-       SYNOPSIS("Apply cube mapping")
-       DESCRIPTION("Apply cube mapping."))
-
-
-PREFIX(SphereMapping,  tree, "sphere_mapping",
-       PARM(r, real, ),
-       return sphere_mapping(self, r),
-       GROUP(module.Mapping)
-       SYNOPSIS("Apply sphere mapping")
-       DESCRIPTION("Apply sphere mapping."))
-
-
-PREFIX(NoiseMap3D,  tree, "noise_map_3D",
-       PARM(w, integer, )
-       PARM(h, integer, )
-       PARM(seed, integer, ),
-       return noise_map_3D(self, w, h, seed),
-       GROUP(module.Mapping)
-       SYNOPSIS("Generate a 3D noise map")
-       DESCRIPTION("Generate a 3D noise map"))
