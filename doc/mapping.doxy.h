@@ -58,6 +58,8 @@ plane(x:real, y:real, w:real, h:real, l:integer, c:integer);
  * @param ratio displacement ratio
  *
  * @attention In order to obtain a good displacement, the used shapes must have important geometrical subdivision.
+ * @attention In case where lights have been placed in the current scene, a normal map have to be bind on texture unit 2 to
+ * adjust correct normals of the model. It is possible to create a normal map with @ref normal_map
  *
  * @note For that reason, this module includes a new 2D shape, @ref plane , which can be easily subdivided.
  */
@@ -78,6 +80,15 @@ displacement_mapping(ratio:real);
 alpha_mapping(threshold:real);
 
 /**
+ * Convert current texture into a basic normal map.
+ * Make a basic normal map thanks to the current texture.
+ * This one can be use to make a normal mapping or a displacement mapping.
+ *
+ * @note A better result can be obtain if the current texture is a black and white one (for instance: a displacement map)
+ */
+normal_map();
+
+/**
  * Makes normal mapping.
  *
  * Simulate 3D on an object thanks to the association of normal map defined by @ref normal_map
@@ -87,7 +98,7 @@ alpha_mapping(threshold:real);
  * @attention As normal mapping uses a light and some materials, it is largely recommended to add it
  * to the current scene to increase the effects.
  *
- * @note This effect support only light zero.
+ * @note This effect can support a maximum of 8 differents lights.
  * @note Contrary to displacement mapping, normal mapping doesn't modify geometric positions.
  * @note This mapping use a particular texture, which allows to define normals used during mapping.
  * @note There is an example of such an image below.
@@ -134,16 +145,16 @@ noise_mapping(ratio:integer);
  * @param contents defines code of the current cube map.
  *
  * An example of use of this effect is described below :
- @code
- cube_map
-    cube_map_face 0, "right.png"
-    cube_map_face 1, "face.png"
-    cube_map_face 2, "top.png"
-    cube_map_face 3, "bottom.png"
-    cube_map_face 4, "front.png"
-    cube_map_face 5, "back.png"
- cube 0, 0, 0, 30000, 30000, 30000
- @endcode
+@
+cube_map
+   cube_map_face 0, "right.png"
+   cube_map_face 1, "face.png"
+   cube_map_face 2, "top.png"
+   cube_map_face 3, "bottom.png"
+   cube_map_face 4, "front.png"
+   cube_map_face 5, "back.png"
+cube 0, 0, 0, 30000, 30000, 30000
+@endcode
  *
  * @note This cube map does not support multi-texturing without shaders.
  */
@@ -173,8 +184,8 @@ cube_map_face(face:integer, filename:text);
  *
  * Mirror following faces of the current cube map according to uv-coordinates.
  *
- * @param u enable or disable flipping of u-coordinate.
- * @param v enable or disable flipping of v-coordinate.
+ * @param u enable or disable flipping of u-coordinate. Its default value is false.
+ * @param v enable or disable flipping of v-coordinate. Its default value is false.
  */
 cube_map_flip(u:boolean, v:boolean);
 
@@ -191,25 +202,25 @@ cube_map_flip(u:boolean, v:boolean);
 
  *
  * An example of use of this effect is described below :
- @code
- // Define color map
- texture_unit 0
- texture "color_map.png"
- // Define cube map for reflection
- texture_unit 1
- cube_map
-    cube_map_face 0, "right.png"
-    cube_map_face 1, "face.png"
-    cube_map_face 2, "top.png"
-    cube_map_face 3, "bottom.png"
-    cube_map_face 4, "front.png"
-    cube_map_face 5, "back.png"
- rotatex time * 20
- rotatey 90
- // Apply effect juste before drawing object
- cube_mapping 0.5
- cube 0, 0, 0, 5000, 5000, 5000
- @endcode
+@code
+// Define color map
+texture_unit 0
+texture "color_map.png"
+// Define cube map for reflection
+texture_unit 1
+cube_map
+   cube_map_face 0, "right.png"
+   cube_map_face 1, "face.png"
+   cube_map_face 2, "top.png"
+   cube_map_face 3, "bottom.png"
+   cube_map_face 4, "front.png"
+   cube_map_face 5, "back.png"
+rotatex time * 20
+rotatey 90
+// Apply effect juste before drawing object
+cube_mapping 0.5
+cube 0, 0, 0, 5000, 5000, 5000
+@endcode
  *
  * @note This method is more efficient than @ref sphere_mapping but needs six textures to define the environment.
  *
@@ -228,18 +239,18 @@ cube_mapping(ratio:integer);
  * @attention This effect has to be apply just before the choosen object in order to be subject correctly to all its transformations.
  *
  * An example of use of this effect is described below :
- @code
- // Define color map
- texture_unit 0
- texture "color_map.png"
- // Define sphere map for reflection
- texture "sphere_map.png"
- rotatex time * 20
- rotatey 90
- // Apply effect juste before drawing object
- sphere_mapping 0.5
- sphere 0, 0, 0, 500, 500, 500, 50, 50
- @endcode
+@code
+// Define color map
+texture_unit 0
+texture "color_map.png"
+// Define sphere map for reflection
+texture "sphere_map.png"
+rotatex time * 20
+rotatey 90
+// Apply effect juste before drawing object
+sphere_mapping 0.5
+sphere 0, 0, 0, 500, 500, 500, 50, 50
+@endcode
  *
  * @note The sphere map is a particular image, which defines environment reflection.
  * @note There is an example of such an image below.
@@ -262,24 +273,18 @@ sphere_mapping(ratio:integer);
  * @attention This effect has to be apply just before the choosen object in order to be subject correctly to all its transformations.
  *
  * An example of use of this effect is described below :
- @code
- // Define color map
- texture_unit 0
- texture "color_map.png"
- // Define reflection map
- texture "reflection_map.png"
- rotatex time * 20
- rotatey 90
- // Apply effect juste before drawing object
- reflection_mapping 0.5
- sphere 0, 0, 0, 500, 500, 500, 50, 50
- @endcode
+@code
+// Define color map
+texture_unit 0
+texture "color_map.png"
+// Define reflection map
+texture_unit 1
+texture "reflection_map.png"
+rotatex time * 20
+rotatey 90
+// Apply effect juste before drawing object
+reflection_mapping 0.5
+sphere 0, 0, 0, 500, 500, 500, 50, 50
+@endcode
  */
 reflection_mapping(ratio:integer);
-
-
-
-
-
-
-
