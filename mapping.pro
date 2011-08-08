@@ -20,17 +20,11 @@ HEADERS      = \
                mapping.h \
     texture_mapping.h \
     plane.h \
-    cube_map.h \
-    noise_map.h \
-    3rdparty/fbm.h \
-
+    cube_map.h
 SOURCES      = mapping.cpp $${TAOTOPSRC}/tao/include/tao/GL/glew.c \
     texture_mapping.cpp \
     plane.cpp \
-    cube_map.cpp \
-    noise_map.cpp \
-    3rdparty/fbm.c \
-
+    cube_map.cpp
 TBL_SOURCES  = mapping.tbl
 OTHER_FILES  = mapping.xl mapping.tbl traces.tbl
 QT          += core \
@@ -38,5 +32,3 @@ QT          += core \
                opengl
 
 INSTALLS    += thismod_icon
-
-
