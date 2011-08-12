@@ -509,7 +509,7 @@ normal_mapping ->
     if SHADER4_AVAILABLE_MAPPING = true then
         normal_shader_lights
     else
-        normal_shader_no_ligths
+        normal_shader_no_lights
 
 normal_shader_lights ->
     /**
@@ -684,6 +684,122 @@ normal_shader_lights ->
             }
         >>
     shader_set lights    := light_id
+    shader_set colorMap  := 0
+    shader_set normalMap := 1
+
+normal_shader_no_lights ->
+    /**
+    * Define normal shader with no support of lights.
+    **/
+    shader_program
+        shader_log
+        vertex_shader <<
+            varying vec3 viewDir;
+            varying vec3 normal;
+            varying vec4 color;
+            void main()
+            {
+                // Determine object parameters
+                gl_Position    = ftransform();
+
+                // Compute texture coordinates
+                gl_TexCoord[0] = gl_TextureMatrix[0] * gl_MultiTexCoord0;
+                gl_TexCoord[1] = gl_TextureMatrix[1] * gl_MultiTexCoord1;
+
+                // Compute world position and normal
+                normal  = gl_NormalMatrix * gl_Normal;
+                viewDir = -vec3(gl_ModelViewMatrix * gl_Vertex);
+
+                color = gl_Color;
+            }
+        >>
+        fragment_shader <<
+            // Mapping paramaters
+            uniform sampler2D colorMap;
+            uniform sampler2D normalMap;
+
+            varying vec3 viewDir;
+            varying vec3 normal;
+            varying vec4 color;
+            /**
+            * Calculate tangent space matrix from normal, vector in plane
+            * and texture coordinates.
+            **/
+            mat3 computeTangentFrame(vec3 normal, vec3 position, vec2 texCoord)
+            {
+                // Compute derivatives
+                vec3 dpx = dFdx(position);
+                vec3 dpy = dFdy(position);
+                vec2 dtx = dFdx(texCoord);
+                vec2 dty = dFdy(texCoord);
+
+                // Compute tangent and binormal
+                vec3 tangent  = normalize(dpy * dtx.t - dpx * dty.t);
+                vec3 binormal = cross(tangent, normal);
+
+                return mat3(tangent, binormal, normal);
+            }
+
+            /**
+            * Compute render color according to materials, lights and colors parameters
+            * which are set in the current scene.
+            **/
+            vec4 computeRenderColor(vec3 N, vec3 V, vec4 renderColor)
+            {
+                vec4 lighting_color;
+
+                // In case where there is no light, we define a unique light
+                // with a simple material to increse the render of this mapping
+                vec4 ambient  = vec4(0.0);
+                vec4 diffuse  = vec4(0.0);
+                vec4 specular = vec4(0.0);
+
+                vec3 L = normalize(vec3(0.0, 0.0, 50));
+
+                // Compute ambient part
+                ambient = vec4(0.0, 0.0, 0.0, 1.0);
+
+                // Diffuse coefficient
+                float nDotL = max(clamp(dot(L, N), 0.0, 1.0), 0.0);
+                if (nDotL > 0.0)
+                {
+                    // Compute diffuse part
+                    diffuse = vec4(1.0, 1.0, 1.0, 1.0) * nDotL;
+
+                    // Compute specular coefficient
+                    float nDotV = clamp(dot(reflect(-L, N), V), 0.0, 1.0);
+                    if (nDotV > 0.0)
+                    {
+                        // Compute specular part
+                        specular += vec4(0.3, 0.3, 0.3, 1.0) * pow(nDotV, 70.0);
+                    }
+                }
+
+                 // Define new render color
+                lighting_color  = (ambient + diffuse) * renderColor * color + specular;
+                return lighting_color;
+            }
+
+            void main()
+            {
+                // Normalize vectors
+                vec3 n = normalize(normal);
+                vec3 v = normalize(viewDir);
+
+                // Compute bump coefficient according to normal map
+                vec3 bump = normalize(texture2D(normalMap, gl_TexCoord[1].st).xyz * 2.0 - 1.0);
+
+                // Calculate tangent space matrix
+                mat3 TBN = computeTangentFrame(n, v, gl_TexCoord[1].st);
+
+                // Define new normal
+                n = TBN * bump;
+
+                // Diffuse coefficient
+                vec4 renderColor = texture2D(colorMap, gl_TexCoord[0].st);
+                gl_FragColor = computeRenderColor(n, v, renderColor);
+            }
+        >>
     shader_set colorMap  := 0
     shader_set normalMap := 1
 
@@ -1056,7 +1172,7 @@ cube_map_shader_lights ->
             void main()
             {
                 vec4 renderColor = textureCube(cubeMap, gl_TexCoord[0].xyz);
-                gl_FragColor  = computeRenderColor(renderColor);
+                gl_FragColor     = computeRenderColor(renderColor);
             }
         >>
     shader_set cubeMap := texture_unit
@@ -1070,6 +1186,8 @@ cube_map_shader_no_ligths ->
     shader_program
         shader_log
         vertex_shader <<
+            varying vec4 color;
+
             void main()
             {
                 // Generate texture coordinates (equivalent to glTexGen)
@@ -1083,15 +1201,19 @@ cube_map_shader_no_ligths ->
 
                 // Compute position
                 gl_Position = ftransform();
+
+                color = gl_Color;
             }
         >>
         fragment_shader <<
+            varying vec4 color;
+
             // Mapping parameters
             uniform samplerCube cubeMap;
             void main()
             {
-                vec3 cube     = textureCube(cubeMap, gl_TexCoord[0].xyz).rgb;
-                gl_FragColor  = vec4(cube, 1.0);
+                vec3 cubeColor = textureCube(cubeMap, gl_TexCoord[0].xyz).rgb;
+                gl_FragColor   = vec4(cubeColor, 1.0) * color;
             }
         >>
     shader_set cubeMap := texture_unit
@@ -1240,7 +1362,7 @@ cube_shader_lights ->
                 vec3 cubeColor    = textureCube(cubeMap, gl_TexCoord[1].xyz).rgb;
                 vec3 mainColor    = texture2D(colorMap, gl_TexCoord[0].st).rgb;
                 vec4 renderColor  = vec4(mix(mainColor, cubeColor, ratio), 1.0);
-                gl_FragColor  = computeRenderColor(renderColor);
+                gl_FragColor      = computeRenderColor(renderColor);
             }
         >>
     shader_set colorMap := 0
@@ -1264,6 +1386,8 @@ cube_shader_no_lights ->
         vertex_shader <<
             uniform mat4 normalMatrix;
             uniform vec3 camera;
+
+            varying vec4 color;
             void main()
             {
                 // Compute world position and normal
@@ -1280,6 +1404,8 @@ cube_shader_no_lights ->
 
                 // Compute position
                 gl_Position = ftransform();
+
+                color = gl_Color;
             }
         >>
         fragment_shader <<
@@ -1288,11 +1414,12 @@ cube_shader_no_lights ->
             uniform sampler2D   colorMap;
             uniform samplerCube cubeMap;
 
+            varying vec4 color;
             void main()
             {
-                vec3 cube     = textureCube(cubeMap, gl_TexCoord[1].xyz).rgb;
-                vec3 color    = texture2D(colorMap, gl_TexCoord[0].st).rgb;
-                gl_FragColor  = vec4(mix(color, cube, ratio), 1.0);
+                vec3 cubeColor    = textureCube(cubeMap, gl_TexCoord[1].xyz).rgb;
+                vec3 mainColor    = texture2D(colorMap, gl_TexCoord[0].st).rgb;
+                gl_FragColor      = vec4(mix(cubeColor, mainColor, ratio), 1.0) * color;
             }
         >>
     shader_set colorMap := 0
@@ -1462,10 +1589,10 @@ sphere_shader_lights ->
 
             void main()
             {
-                vec3 sphereColor    = texture2D( sphereMap, gl_TexCoord[1].st).rgb;
+                vec3 sphereColor  = texture2D( sphereMap, gl_TexCoord[1].st).rgb;
                 vec3 mainColor    = texture2D( colorMap, gl_TexCoord[0].st).rgb;
                 vec4 renderColor  = vec4(mix(mainColor, sphereColor, ratio), 1.0);
-                gl_FragColor  = computeRenderColor(renderColor);
+                gl_FragColor      = computeRenderColor(renderColor);
             }
         >>
     shader_set colorMap  := 0
@@ -1488,6 +1615,8 @@ sphere_shader_no_lights ->
         vertex_shader <<
         uniform mat4 model;
         uniform vec3 camera;
+
+        varying vec4 color;
         void main()
         {
             mat3 normalMatrix;
@@ -1521,6 +1650,8 @@ sphere_shader_no_lights ->
             // Compute sphere coordinates
             gl_TexCoord[1].s = r.x/m + 0.5;
             gl_TexCoord[1].t = r.y/m + 0.5;
+
+            color = gl_Color;
         }
         >>
         fragment_shader <<
@@ -1529,11 +1660,12 @@ sphere_shader_no_lights ->
             uniform sampler2D colorMap;
             uniform sampler2D sphereMap;
 
+            varying vec4 color;
             void main()
             {
-                vec3 color   = texture2D( colorMap, gl_TexCoord[0].st).rgb;
-                vec3 sphere  = texture2D( sphereMap, gl_TexCoord[1].st).rgb;
-                gl_FragColor = vec4(mix(color, sphere, ratio), 1.0);
+                vec3 mainColor    = texture2D( colorMap, gl_TexCoord[0].st).rgb;
+                vec3 sphereColor  = texture2D( sphereMap, gl_TexCoord[1].st).rgb;
+                gl_FragColor      = vec4(mix(mainColor, sphereColor, ratio), 1.0) * color;
             }
         >>
     shader_set colorMap  := 0
