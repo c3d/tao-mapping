@@ -238,6 +238,7 @@ displacement_shader ->
             varying vec3 viewDir;
             varying vec3 normal;
             varying vec4 color;
+
             /**
             * Calculate tangent space matrix from normal, vector in plane
             * and texture coordinates.
