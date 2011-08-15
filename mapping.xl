@@ -49,12 +49,6 @@ alpha_shader_lights ->
     shader_program
         shader_log
         vertex_shader <<
-            #extension GL_EXT_gpu_shader4 : require
-            #extension GL_EXT_gpu_shader4 : enable
-
-            uniform int lights;
-
-            varying vec3 lightDir[8];
             varying vec3 viewDir;
             varying vec3 normal;
             varying vec4 color;
@@ -71,18 +65,11 @@ alpha_shader_lights ->
                 normal  = gl_NormalMatrix * gl_Normal;
                 viewDir = -vec3(gl_ModelViewMatrix * gl_Vertex);
 
-                // Compute light direction
-                if(lights > 0)
-                    for(int i = 0; i < lights; i++)
-                        if(bool(lights & (1 << i)))
-                            lightDir[i] = gl_LightSource[i].position.xyz;
-
                 color = gl_Color;
             }
         >>
         fragment_shader <<
             #extension GL_EXT_gpu_shader4 : require
-            #extension GL_EXT_gpu_shader4 : enable
 
             // Mapping paramaters
             uniform float     threshold;
@@ -91,7 +78,6 @@ alpha_shader_lights ->
 
             uniform int lights;
 
-            varying vec3 lightDir[8];
             varying vec3 viewDir;
             varying vec3 normal;
             varying vec4 color;
@@ -104,6 +90,9 @@ alpha_shader_lights ->
                 vec4 lighting_color;
                 if(lights > 0)
                 {
+                    // Define a maximum of lights supported
+                    int MAX_LIGHTS = 8;
+
                     vec3 N = normalize(normal);
                     vec3 V = normalize(viewDir);
 
@@ -113,11 +102,11 @@ alpha_shader_lights ->
                     ambient  = gl_FrontLightModelProduct.sceneColor * gl_FrontMaterial.ambient;
 
                     // Compute render for each enabled lights
-                    for(int i = 0; i < lights; i++)
+                    for(int i = 0; i < MAX_LIGHTS; i++)
                     {
                         if(bool(lights & (1 << i)))
                         {
-                            vec3 L = normalize(lightDir[i]);
+                            vec3 L = normalize(gl_LightSource[i].position.xyz);
 
                             // Compute ambient part
                             ambient += gl_LightSource[i].ambient * gl_FrontMaterial.ambient;
@@ -244,9 +233,6 @@ displacement_shader_lights ->
             uniform float     ratio;
             uniform sampler2D displacementMap;
 
-            uniform int lights;
-
-            varying vec3 lightDir[8];
             varying vec3 viewDir;
             varying vec3 normal;
             varying vec4 color;
@@ -268,25 +254,20 @@ displacement_shader_lights ->
                // Compute position
                gl_Position = gl_ModelViewProjectionMatrix * newPos;
 
-                // Compute world position and normal
-                normal  = gl_NormalMatrix * gl_Normal;
-                viewDir = -vec3(gl_ModelViewMatrix * gl_Vertex);
-
-                // Compute light direction
-                if(lights > 0)
-                    for(int i = 0; i < lights; i++)
-                        if(bool(lights & (1 << i)))
-                            lightDir[i] = gl_LightSource[i].position.xyz;
+               // Compute world position and normal
+               normal  = gl_NormalMatrix * gl_Normal;
+               viewDir = -vec3(gl_ModelViewMatrix * gl_Vertex);
 
                color = gl_Color;
             }
         >>
         fragment_shader <<
+            #extension GL_EXT_gpu_shader4 : require
+
             uniform sampler2D colorMap;
             uniform sampler2D normalMap;
             uniform int lights;
 
-            varying vec3 lightDir[8];
             varying vec3 viewDir;
             varying vec3 normal;
             varying vec4 color;
@@ -319,6 +300,9 @@ displacement_shader_lights ->
                 vec4 lighting_color;
                 if(lights > 0)
                 {
+                    // Define a maximum of lights supported
+                    int MAX_LIGHTS = 8;
+
                     // Normalize vectors
                     vec3 N = normalize(normal);
                     vec3 V = normalize(viewDir);
@@ -338,11 +322,11 @@ displacement_shader_lights ->
                     ambient  = gl_FrontLightModelProduct.sceneColor * gl_FrontMaterial.ambient;
 
                     // Compute render for each enabled lights
-                    for(int i = 0; i < lights; i++)
+                    for(int i = 0; i < MAX_LIGHTS; i++)
                     {
                         if(bool(lights & (1 << i)))
                         {
-                            vec3 L = normalize(lightDir[i]);
+                            vec3 L = normalize(gl_LightSource[i].position.xyz);
 
                             // Compute ambient part
                             ambient += gl_LightSource[i].ambient * gl_FrontMaterial.ambient;
@@ -519,12 +503,6 @@ normal_shader_lights ->
     shader_program
         shader_log
         vertex_shader <<
-            #extension GL_EXT_gpu_shader4 : require
-            #extension GL_EXT_gpu_shader4 : enable
-
-            uniform int lights;
-
-            varying vec3 lightDir[8];
             varying vec3 viewDir;
             varying vec3 normal;
             varying vec4 color;
@@ -541,26 +519,17 @@ normal_shader_lights ->
                 normal  = gl_NormalMatrix * gl_Normal;
                 viewDir = -vec3(gl_ModelViewMatrix * gl_Vertex);
 
-                // Compute light direction
-                if(lights > 0)
-                    for(int i = 0; i < lights; i++)
-                        if(bool(lights & (1 << i)))
-                            lightDir[i] = gl_LightSource[i].position.xyz;
-
                 color = gl_Color;
             }
         >>
         fragment_shader <<
              #extension GL_EXT_gpu_shader4 : require
-             #extension GL_EXT_gpu_shader4 : enable
 
             // Mapping paramaters
             uniform sampler2D colorMap;
             uniform sampler2D normalMap;
-
             uniform int lights;
 
-            varying vec3 lightDir[8];
             varying vec3 viewDir;
             varying vec3 normal;
             varying vec4 color;
@@ -592,17 +561,20 @@ normal_shader_lights ->
                 vec4 lighting_color;
                 if(lights > 0)
                 {
+                    // Define a maximum of lights supported
+                    int MAX_LIGHTS = 8;
+
                     vec4 ambient  = vec4(0.0);
                     vec4 diffuse  = vec4(0.0);
                     vec4 specular = vec4(0.0);
                     ambient  = gl_FrontLightModelProduct.sceneColor * gl_FrontMaterial.ambient;
 
                     // Compute render for each enabled lights
-                    for(int i = 0; i < lights; i++)
+                    for(int i = 0; i < MAX_LIGHTS; i++)
                     {
                         if(bool(lights & (1 << i)))
                         {
-                            vec3 L = normalize(lightDir[i]);
+                            vec3 L = normalize(gl_LightSource[i].position.xyz);
 
                             // Compute ambient part
                             ambient += gl_LightSource[i].ambient * gl_FrontMaterial.ambient;
@@ -881,11 +853,6 @@ noise_shader_lights ->
     shader_program
         shader_log
         vertex_shader <<
-            #extension GL_EXT_gpu_shader4 : require
-            #extension GL_EXT_gpu_shader4 : enable
-            uniform int lights;
-
-            varying vec3 lightDir[8];
             varying vec3 viewDir;
             varying vec3 normal;
             varying vec4 color;
@@ -902,27 +869,18 @@ noise_shader_lights ->
                 normal  = gl_NormalMatrix * gl_Normal;
                 viewDir = -vec3(gl_ModelViewMatrix * gl_Vertex);
 
-                // Compute light direction
-                if(lights > 0)
-                    for(int i = 0; i < lights; i++)
-                        if(bool(lights & (1 << i)))
-                            lightDir[i] = gl_LightSource[i].position.xyz;
-
                 color = gl_Color;
             }
         >>
         fragment_shader <<
             #extension GL_EXT_gpu_shader4 : require
-            #extension GL_EXT_gpu_shader4 : enable
 
             // Mapping parameters
             uniform float     ratio;
             uniform sampler2D colorMap;
             uniform sampler2D noiseMap;
-
             uniform int lights;
 
-            varying vec3 lightDir[8];
             varying vec3 viewDir;
             varying vec3 normal;
             varying vec4 color;
@@ -935,6 +893,9 @@ noise_shader_lights ->
                 vec4 lighting_color;
                 if(lights > 0)
                 {
+                    // Define a maximum of lights supported
+                    int MAX_LIGHTS = 8;
+
                     vec3 N = normalize(normal);
                     vec3 V = normalize(viewDir);
 
@@ -943,11 +904,11 @@ noise_shader_lights ->
                     vec4 specular = vec4(0.0);
                     ambient  = gl_FrontLightModelProduct.sceneColor * gl_FrontMaterial.ambient;
 
-                    for(int i = 0; i < lights; i++)
+                    for(int i = 0; i < MAX_LIGHTS; i++)
                     {
                         if(bool(lights & (1 << i)))
                         {
-                            vec3 L = normalize(lightDir[i]);
+                            vec3 L = normalize(gl_LightSource[i].position.xyz);
 
                             // Compute ambient part
                             ambient += gl_LightSource[i].ambient * gl_FrontMaterial.ambient;
@@ -1065,12 +1026,6 @@ cube_map_shader_lights ->
     shader_program
         shader_log
         vertex_shader <<
-            #extension GL_EXT_gpu_shader4 : require
-            #extension GL_EXT_gpu_shader4 : enable
-
-            uniform int lights;
-
-            varying vec3 lightDir[8];
             varying vec3 viewDir;
             varying vec3 normal;
             varying vec4 color;
@@ -1092,25 +1047,16 @@ cube_map_shader_lights ->
                 normal  = gl_NormalMatrix * gl_Normal;
                 viewDir = -vec3(gl_ModelViewMatrix * gl_Vertex);
 
-                // Compute light direction
-                if(lights > 0)
-                    for(int i = 0; i < lights; i++)
-                        if(bool(lights & (1 << i)))
-                            lightDir[i] = gl_LightSource[i].position.xyz;
-
                 color = gl_Color;
             }
         >>
         fragment_shader <<
             #extension GL_EXT_gpu_shader4 : require
-            #extension GL_EXT_gpu_shader4 : enable
 
             // Mapping parameters
             uniform samplerCube cubeMap;
-
             uniform int lights;
 
-            varying vec3 lightDir[8];
             varying vec3 viewDir;
             varying vec3 normal;
             varying vec4 color;
@@ -1123,6 +1069,9 @@ cube_map_shader_lights ->
                 vec4 lighting_color;
                 if(lights > 0)
                 {
+                    // Define a maximum of lights supported
+                    int MAX_LIGHTS = 8;
+
                     vec3 N = normalize(normal);
                     vec3 V = normalize(viewDir);
 
@@ -1131,11 +1080,11 @@ cube_map_shader_lights ->
                     vec4 specular = vec4(0.0);
                     ambient  = gl_FrontLightModelProduct.sceneColor * gl_FrontMaterial.ambient;
 
-                    for(int i = 0; i < lights; i++)
+                    for(int i = 0; i < MAX_LIGHTS; i++)
                     {
                         if(bool(lights & (1 << i)))
                         {
-                            vec3 L = normalize(lightDir[i]);
+                            vec3 L = normalize(gl_LightSource[i].position.xyz);
 
                             // Compute ambient part
                             ambient += gl_LightSource[i].ambient * gl_FrontMaterial.ambient;
@@ -1244,16 +1193,10 @@ cube_shader_lights ->
     **/
     shader_program
         shader_log
-        vertex_shader <<#version 120
-            #extension GL_EXT_gpu_shader4 : require
-            #extension GL_EXT_gpu_shader4 : enable
-
+        vertex_shader <<
             uniform mat3 normalMatrix;
             uniform vec3 camera;
 
-            uniform int lights;
-
-            varying vec3 lightDir[8];
             varying vec3 viewDir;
             varying vec3 normal;
             varying vec4 color;
@@ -1278,27 +1221,18 @@ cube_shader_lights ->
                 normal   =  normalize(gl_NormalMatrix * gl_Normal);
                 viewDir  = -normalize((gl_ModelViewMatrix * gl_Vertex).xyz);
 
-                // Compute light direction
-                if(lights > 0)
-                    for(int i = 0; i < lights; i++)
-                        if(bool(lights & (1 << i)))
-                            lightDir[i] = gl_LightSource[i].position.xyz;
-
                 color = gl_Color;
             }
         >>
         fragment_shader <<
             #extension GL_EXT_gpu_shader4 : require
-            #extension GL_EXT_gpu_shader4 : enable
 
             // Mapping parameters
             uniform float       ratio;
             uniform sampler2D   colorMap;
             uniform samplerCube cubeMap;
-
             uniform int lights;
 
-            varying vec3 lightDir[8];
             varying vec3 viewDir;
             varying vec3 normal;
             varying vec4 color;
@@ -1311,6 +1245,9 @@ cube_shader_lights ->
                 vec4 lighting_color;
                 if(lights > 0)
                 {
+                    // Define a maximum of lights supported
+                    int MAX_LIGHTS = 8;
+
                     vec3 N = normalize(normal);
                     vec3 V = normalize(viewDir);
 
@@ -1319,11 +1256,11 @@ cube_shader_lights ->
                     vec4 specular = vec4(0.0);
                     ambient  = gl_FrontLightModelProduct.sceneColor * gl_FrontMaterial.ambient;
 
-                    for(int i = 0; i < lights; i++)
+                    for(int i = 0; i < MAX_LIGHTS; i++)
                     {
                         if(bool(lights & (1 << i)))
                         {
-                            vec3 L = normalize(lightDir[i]);
+                            vec3 L = normalize(gl_LightSource[i].position.xyz);
 
                             // Compute ambient part
                             ambient += gl_LightSource[i].ambient * gl_FrontMaterial.ambient;
@@ -1457,16 +1394,10 @@ sphere_shader_lights ->
     * Define sphere mapping shader with a full support of lights.
     **/
     shader_program
-        vertex_shader <<#version 120
-        #extension GL_EXT_gpu_shader4 : require
-        #extension GL_EXT_gpu_shader4 : enable
-
+        vertex_shader <<
         uniform mat4 model;
         uniform vec3 camera;
 
-        uniform int lights;
-
-        varying vec3 lightDir[8];
         varying vec3 viewDir;
         varying vec3 normal;
         varying vec4 color;
@@ -1508,27 +1439,18 @@ sphere_shader_lights ->
             normal   =  normalize(gl_NormalMatrix * gl_Normal);
             viewDir  = -normalize((gl_ModelViewMatrix * gl_Vertex).xyz);
 
-            // Compute light direction
-            if(lights > 0)
-                for(int i = 0; i < lights; i++)
-                    if(bool(lights & (1 << i)))
-                        lightDir[i] = gl_LightSource[i].position.xyz;
-
             color = gl_Color;
         }
         >>
         fragment_shader <<
             #extension GL_EXT_gpu_shader4 : require
-            #extension GL_EXT_gpu_shader4 : enable
 
             // Mapping parameters
             uniform float     ratio;
             uniform sampler2D colorMap;
             uniform sampler2D sphereMap;
-
             uniform int lights;
 
-            varying vec3 lightDir[8];
             varying vec3 viewDir;
             varying vec3 normal;
             varying vec4 color;
@@ -1541,6 +1463,9 @@ sphere_shader_lights ->
                 vec4 lighting_color;
                 if(lights > 0)
                 {
+                    // Define a maximum of lights supported
+                    int MAX_LIGHTS = 8;
+
                     vec3 N = normalize(normal);
                     vec3 V = normalize(viewDir);
 
@@ -1549,11 +1474,11 @@ sphere_shader_lights ->
                     vec4 specular = vec4(0.0);
                     ambient  = gl_FrontLightModelProduct.sceneColor * gl_FrontMaterial.ambient;
 
-                    for(int i = 0; i < lights; i++)
+                    for(int i = 0; i < MAX_LIGHTS; i++)
                     {
                         if(bool(lights & (1 << i)))
                         {
-                            vec3 L = normalize(lightDir[i]);
+                            vec3 L = normalize(gl_LightSource[i].position.xyz);
 
                             // Compute ambient part
                             ambient += gl_LightSource[i].ambient * gl_FrontMaterial.ambient;
