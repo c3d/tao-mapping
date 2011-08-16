@@ -238,6 +238,7 @@ displacement_shader ->
             varying vec3 viewDir;
             varying vec3 normal;
             varying vec4 color;
+
             /**
             * Calculate tangent space matrix from normal, vector in plane
             * and texture coordinates.
@@ -785,13 +786,12 @@ noise_shader ->
 //   For further informations, see http://wiki.polycount.com/CubeMap
 // -------------------------------------------------------------------------------------------------------------------
 
-cube_map t:tree->
+cube_map s:integer, t:tree->
     /**
     * Create a cube map.
     **/
     cube_map_shader
-    texture_cube t
-    texture 0 //Force desactivation of cube map
+    texture_cube s, t
 
 cube_map_shader ->
     /**
@@ -819,6 +819,8 @@ cube_map_shader ->
                 gl_TexCoord[0].x = dot(gl_TextureMatrix[0] * vec4(gl_Vertex.xyz, 1.0), xPlane);
                 gl_TexCoord[0].y = dot(gl_TextureMatrix[0] * vec4(gl_Vertex.xyz, 1.0), yPlane);
                 gl_TexCoord[0].z = dot(gl_TextureMatrix[0] * vec4(gl_Vertex.xyz, 1.0), zPlane);
+
+                gl_TexCoord[1] = gl_TextureMatrix[0] * gl_MultiTexCoord0;
 
                 // Compute position
                 gl_Position = ftransform();
@@ -940,7 +942,7 @@ cube_shader ->
             #extension GL_EXT_gpu_shader4 : require
             #extension GL_EXT_gpu_shader4 : enable
 
-            uniform mat4 model;
+            uniform mat3 normalMatrix;
             uniform vec3 camera;
 
             uniform int lights;
@@ -951,23 +953,8 @@ cube_shader ->
             varying vec4 color;
             void main()
             {
-                mat3 normalMatrix;
-
-                // Get linear part of model matrix
-                normalMatrix[0][0] = model[0][0];
-                normalMatrix[0][1] = model[0][1];
-                normalMatrix[0][2] = model[0][2];
-
-                normalMatrix[1][0] = model[1][0];
-                normalMatrix[1][1] = model[1][1];
-                normalMatrix[1][2] = model[1][2];
-
-                normalMatrix[2][0] = model[2][0];
-                normalMatrix[2][1] = model[2][1];
-                normalMatrix[2][2] = model[2][2];
-
                 // Compute world position and normal
-                vec4 worldPos = model * gl_Vertex;
+                vec4 worldPos = gl_Vertex;
                 viewDir  = normalize(worldPos.xyz - camera);
                 normal   = normalize(normalMatrix * gl_Normal);
 
@@ -1079,11 +1066,10 @@ cube_shader ->
     shader_set lights   := light_id
 
     //FOLLOWING PARAMETERS ARE NEEDED BUT NOT OPTIMIZED BECAUSE LISTS ARE RELOAD FULLY TO EACH XL FUNCTIONS CALL
-    shader_set camera   := (camera_position at 1; camera_position at 2; camera_position at 3)
-    shader_set model    := (model_matrix at 1;  model_matrix at 2;  model_matrix at 3;  model_matrix at 4;
-                            model_matrix at 5;  model_matrix at 6;  model_matrix at 7;  model_matrix at 8;
-                            model_matrix at 9;  model_matrix at 10; model_matrix at 11; model_matrix at 12;
-                            model_matrix at 13; model_matrix at 14; model_matrix at 15; model_matrix at 16)
+    shader_set camera       := (camera_position at 1; camera_position at 2; camera_position at 3)
+    shader_set normalMatrix := (model_matrix at 1;  model_matrix at 2;  model_matrix at 3;
+                                model_matrix at 5;  model_matrix at 6;  model_matrix at 7;
+                                model_matrix at 9;  model_matrix at 10; model_matrix at 11)
 
 // -------------------------------------------------------------------------------------------------------------------
 //   SPHERE MAPPING
@@ -1256,89 +1242,3 @@ sphere_shader ->
                             model_matrix at 5;  model_matrix at 6;  model_matrix at 7;  model_matrix at 8;
                             model_matrix at 9;  model_matrix at 10; model_matrix at 11; model_matrix at 12;
                             model_matrix at 13; model_matrix at 14; model_matrix at 15; model_matrix at 16)
-
-
-// -------------------------------------------------------------------------------------------------------------------
-//   REFLECTION MAPPING
-//   For further informations, see http://en.wikipedia.org/wiki/Reflection_mapping
-// -------------------------------------------------------------------------------------------------------------------
-
-// Define reflection mapping ratio
-REFLECTION_RATIO -> 0.0
-REFLECTION_RATIO := 0.0
-
-reflection_mapping r:real->
-    /**
-    * Apply reflection mapping.
-    **/
-    REFLECTION_RATIO := r
-    reflection_shader
-
-reflection_shader ->
-    /**
-    * Define reflection mapping shader.
-    **/
-    shader_program
-        vertex_shader <<#version 120
-            uniform mat4 model;
-            uniform vec3 camera;
-            void main()
-            {
-                mat3 normalMatrix;
-
-                // Get linear part of model matrix
-                normalMatrix[0][0] = model[0][0];
-                normalMatrix[0][1] = model[0][1];
-                normalMatrix[0][2] = model[0][2];
-
-                normalMatrix[1][0] = model[1][0];
-                normalMatrix[1][1] = model[1][1];
-                normalMatrix[1][2] = model[1][2];
-
-                normalMatrix[2][0] = model[2][0];
-                normalMatrix[2][1] = model[2][1];
-                normalMatrix[2][2] = model[2][2];
-
-                // Compute world position and normal
-                vec4 worldPos = model * gl_Vertex;
-                vec3 normal   = normalize(normalMatrix * gl_Normal);
-                vec3 eyePos   = normalize(worldPos.xyz - camera);
-
-                // Compute reflection vector
-                vec3 r = normalize(reflect (eyePos, normal));
-
-                // Compute texture coordinates
-                gl_TexCoord[0] = gl_TextureMatrix[0] * gl_MultiTexCoord0;
-                gl_TexCoord[1].x = (r.x / 2.0) + 0.5 ;
-                gl_TexCoord[1].y = (r.y / 2.0) + 0.5 ;
-
-                // Compute position
-                gl_Position = ftransform();
-            }
-        >>
-        fragment_shader <<
-            // Mapping parameters
-            uniform float       ratio;
-            uniform sampler2D   colorMap;
-            uniform sampler2D   reflectionMap;
-
-            void main()
-            {
-                vec3 reflection = texture2D(reflectionMap, gl_TexCoord[1].xy).rgb;
-                vec3 color      = texture2D(colorMap, gl_TexCoord[0].st).rgb;
-                gl_FragColor    = vec4(mix(color, reflection, ratio), 1.0);
-            }
-        >>
-    shader_set ratio          := REFLECTION_RATIO
-    shader_set colorMap       := 0
-    shader_set reflectionMap  := 1
-
-    //FOLLOWING PARAMETERS ARE NEEDED BUT NOT OPTIMIZED BECAUSE LISTS ARE RELOAD FULLY TO EACH XL FUNCTIONS CALL
-    shader_set camera   := (camera_position at 1; camera_position at 2; camera_position at 3)
-    shader_set model    := (model_matrix at 1;  model_matrix at 2;  model_matrix at 3;  model_matrix at 4;
-                            model_matrix at 5;  model_matrix at 6;  model_matrix at 7;  model_matrix at 8;
-                            model_matrix at 9;  model_matrix at 10; model_matrix at 11; model_matrix at 12;
-                            model_matrix at 13; model_matrix at 14; model_matrix at 15; model_matrix at 16)
-
-
-

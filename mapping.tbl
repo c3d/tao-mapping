@@ -41,8 +41,9 @@ PREFIX(Plane,  tree, "plane",
        DESCRIPTION("Generate a subdivided plane."))
 
 PREFIX(CubeMap,  tree, "texture_cube",
+       PARM(size, integer, )
        PARM(p, code, "The program that represent a cube map"),
-       return texture_cube(context, self, p),
+       return texture_cube(context, size, self, p),
        GROUP(module.Mapping)
        SYNOPSIS("Generate a cube map")
        DESCRIPTION("Generate a cube map."))

@@ -138,15 +138,16 @@ noise_mapping(ratio:integer);
 /**
  * Creates a local cube map.
  *
- * Define and evaluate the cube map tree generate thanks to @ref cube_face.
+ * Define and evaluate the cube map tree generate thanks to @ref cube_face according to the defined size.
  * This texture can be used directly to create nice environment or
  * during a cube mapping to generate reflections.
  *
+ * @param size     allows to rescale directly the images as squares. If 0 then there is no rescaling.
  * @param contents defines code of the current cube map.
  *
  * An example of use of this effect is described below :
 @
-cube_map
+cube_map 1024,
    cube_map_face 0, "right.png"
    cube_map_face 1, "face.png"
    cube_map_face 2, "top.png"
@@ -156,9 +157,10 @@ cube_map
 cube 0, 0, 0, 30000, 30000, 30000
 @endcode
  *
- * @note This cube map does not support multi-texturing without shaders.
+ * @note This texture have a higher priority than a common texture.
+ * @note The cube map does not support multi-texturing without shaders.
  */
-cube_map(contents:tree);
+cube_map(integer:size, contents:tree);
 
 /**
  * Adds a texture to the current cube map.
@@ -208,7 +210,7 @@ texture_unit 0
 texture "color_map.png"
 // Define cube map for reflection
 texture_unit 1
-cube_map
+cube_map 1024,
    cube_map_face 0, "right.png"
    cube_map_face 1, "face.png"
    cube_map_face 2, "top.png"
@@ -254,6 +256,7 @@ sphere 0, 0, 0, 500, 500, 500, 50, 50
  *
  * @note The sphere map is a particular image, which defines environment reflection.
  * @note There is an example of such an image below.
+ * @note It is also possible to use a regular image as sphere map with a suitable scaling to generate static reflection.
  *
  * @image html sphere.jpg "Example of sphere map"
  *
@@ -261,30 +264,3 @@ sphere 0, 0, 0, 500, 500, 500, 50, 50
  *
  */
 sphere_mapping(ratio:integer);
-
-/**
- * Makes reflection mapping.
- *
- * Allow to simulate easily the reflection of an environment on an object thanks
- * to a common texture define set by @ref texture.
- *
- * @param ratio ratio of the environment reflection.
- *
- * @attention This effect has to be apply just before the choosen object in order to be subject correctly to all its transformations.
- *
- * An example of use of this effect is described below :
-@code
-// Define color map
-texture_unit 0
-texture "color_map.png"
-// Define reflection map
-texture_unit 1
-texture "reflection_map.png"
-rotatex time * 20
-rotatey 90
-// Apply effect juste before drawing object
-reflection_mapping 0.5
-sphere 0, 0, 0, 500, 500, 500, 50, 50
-@endcode
- */
-reflection_mapping(ratio:integer);
