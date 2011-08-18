@@ -23,6 +23,18 @@ import RenderToTexture 1.0
 SHADER4_AVAILABLE_MAPPING -> true
 SHADER4_AVAILABLE_MAPPING := is_ext_available "GL_EXT_gpu_shader4"
 
+HAS_COLOR_MAP -> 0
+HAS_COLOR_MAP := 0
+
+has_color_map ->
+    /**
+    * Check if there is really a color map bound on texture unit 0
+    **/
+    if (has_texture 0) then
+        HAS_COLOR_MAP := 1
+    else
+        HAS_COLOR_MAP := 0
+
 // -------------------------------------------------------------------------------------------------------------------
 //   ALPHA MAPPING
 //   For further informations, see http://en.wikipedia.org/wiki/Alpha_mapping
@@ -36,6 +48,7 @@ alpha_mapping n:real ->
     /**
     * Apply alpha mapping with a full support of lights.
     **/
+    has_color_map
     ALPHA_THRESHOLD := n
     if SHADER4_AVAILABLE_MAPPING = true then
         alpha_shader_lights
@@ -72,11 +85,11 @@ alpha_shader_lights ->
             #extension GL_EXT_gpu_shader4 : require
 
             // Mapping paramaters
+            uniform int       lights;
+            uniform bool      hasColorMap;
             uniform float     threshold;
             uniform sampler2D alphaMap;
             uniform sampler2D colorMap;
-
-            uniform int lights;
 
             varying vec3 viewDir;
             varying vec3 normal;
@@ -87,7 +100,7 @@ alpha_shader_lights ->
             **/
             vec4 computeRenderColor(vec4 renderColor)
             {
-                vec4 lighting_color;
+                vec4 lighting_color = renderColor;
                 if(lights > 0)
                 {
                     // Define a maximum of lights supported
@@ -132,11 +145,6 @@ alpha_shader_lights ->
                      // Define new render color
                     lighting_color  = (ambient + diffuse) * renderColor + specular;
                 }
-                else
-                {
-                    // Define new render color
-                    lighting_color  = color * renderColor;
-                }
 
                 return lighting_color;
             }
@@ -149,20 +157,29 @@ alpha_shader_lights ->
                 if(alpha_color.r < threshold && alpha_color.g < threshold && alpha_color.b < threshold)
                     discard;
 
-                vec4 renderColor = texture2D(colorMap, gl_TexCoord[0].st);
+                // Get color map
+                vec4 mainColor = texture2D(colorMap, gl_TexCoord[0].xy);
 
-                gl_FragColor  = computeRenderColor(renderColor);
+                // Check if there is really a color map
+                if(hasColorMap)
+                    mainColor *= color;
+                else
+                    mainColor  = color;
+
+                gl_FragColor  = computeRenderColor(mainColor);
             }
         >>
-    shader_set colorMap  := 0
-    shader_set alphaMap  := 1
-    shader_set threshold := ALPHA_THRESHOLD
-    shader_set lights    := lights_mask
+    shader_set colorMap    := 0               // Unit of the color map
+    shader_set alphaMap    := 1               // Unit of the alpha map
+    shader_set threshold   := ALPHA_THRESHOLD // Threshold of the mapping
+    shader_set lights      := lights_mask     // Bitmask of all enabled lights
+    shader_set hasColorMap := HAS_COLOR_MAP   // Check if there is a color map
 
 
 alpha_shader_no_lights ->
     /**
     * Define alpha shader with no lights supported.
+    * This is needed in case where GL_EXT_gpu_shader4 is not available.
     **/
     shader_program
         shader_log
@@ -182,6 +199,7 @@ alpha_shader_no_lights ->
         >>
         fragment_shader <<
             // Mapping paramaters
+            uniform bool      hasColorMap;
             uniform float     threshold;
             uniform sampler2D alphaMap;
             uniform sampler2D colorMap;
@@ -195,12 +213,22 @@ alpha_shader_no_lights ->
                 if(alpha_color.r < threshold && alpha_color.g < threshold && alpha_color.b < threshold)
                     discard;
 
-                gl_FragColor  = texture2D(colorMap, gl_TexCoord[0].st) * color;
+                // Get color map
+                vec4 mainColor = texture2D(colorMap, gl_TexCoord[0].xy);
+
+                // Check if there is really a color map
+                if(hasColorMap)
+                    mainColor *= color;
+                else
+                    mainColor  = color;
+
+                gl_FragColor = mainColor;
             }
         >>
-    shader_set colorMap  := 0
-    shader_set alphaMap  := 1
-    shader_set threshold := ALPHA_THRESHOLD
+    shader_set colorMap    := 0                // Unit of the color map
+    shader_set alphaMap    := 1                // Unit of the alpha map
+    shader_set threshold   := ALPHA_THRESHOLD  // Threshold of the mapping
+    shader_set hasColorMap := HAS_COLOR_MAP    // Check if there is a color map
 
 // -------------------------------------------------------------------------------------------------------------------
 //   DISPLACEMENT MAPPING
@@ -216,6 +244,7 @@ displacement_mapping ratio:real ->
     /**
     * Apply displacement mapping.
     **/
+    has_color_map
     DISPLACEMENT_RATIO := ratio
     if SHADER4_AVAILABLE_MAPPING = true then
         displacement_shader_lights
@@ -264,9 +293,10 @@ displacement_shader_lights ->
         fragment_shader <<
             #extension GL_EXT_gpu_shader4 : require
 
+            uniform int       lights;
+            uniform bool      hasColorMap;
             uniform sampler2D colorMap;
             uniform sampler2D normalMap;
-            uniform int lights;
 
             varying vec3 viewDir;
             varying vec3 normal;
@@ -297,7 +327,7 @@ displacement_shader_lights ->
             **/
             vec4 computeRenderColor(vec4 renderColor)
             {
-                vec4 lighting_color;
+                vec4 lighting_color = renderColor;
                 if(lights > 0)
                 {
                     // Define a maximum of lights supported
@@ -352,31 +382,35 @@ displacement_shader_lights ->
                      // Define new render color
                     lighting_color  = (ambient + diffuse) * renderColor + specular;
                 }
-                else
-                {
-                    // Define new render color
-                    lighting_color  = color * renderColor;
-                }
 
                 return lighting_color;
             }
 
             void main()
             {
-                // Diffuse coefficient
-                vec4 renderColor = texture2D(colorMap, gl_TexCoord[0].st);
-                gl_FragColor = computeRenderColor(renderColor);
+                // Get color map
+                vec4 mainColor = texture2D(colorMap, gl_TexCoord[0].xy);
+
+                // Check if there is really a color map
+                if(hasColorMap)
+                    mainColor *= color;
+                else
+                    mainColor  = color;
+
+                gl_FragColor = computeRenderColor(mainColor);
             }
         >>
-    shader_set colorMap        := 0
-    shader_set displacementMap := 1
-    shader_set normalMap       := 2
-    shader_set ratio           := DISPLACEMENT_RATIO
-    shader_set lights          := lights_mask
+    shader_set colorMap        := 0                    // Unit of the color map
+    shader_set displacementMap := 1                    // Unit of the displacement map
+    shader_set normalMap       := 2                    // Unit of the normal map
+    shader_set ratio           := DISPLACEMENT_RATIO   // Ratio of the displacement
+    shader_set lights          := lights_mask          // Bitmask of all enabled lights
+    shader_set hasColorMap     := HAS_COLOR_MAP        // Check if there is a color map
 
 displacement_shader_no_lights ->
     /**
     * Define displacement shader with no lights supported.
+    * This is needed in case where GL_EXT_gpu_shader4 is not available.
     **/
     shader_program
         shader_log
@@ -407,17 +441,28 @@ displacement_shader_no_lights ->
             }
         >>
         fragment_shader <<
+            uniform bool      hasColorMap;
             uniform sampler2D colorMap;
 
             varying vec4 color;
             void main()
             {
-               gl_FragColor = texture2D(colorMap, gl_TexCoord[0].xy) * color;
+               // Get color map
+               vec4 mainColor = texture2D(colorMap, gl_TexCoord[0].xy);
+
+               // Check if there is really a color map
+               if(hasColorMap)
+                   mainColor *= color;
+               else
+                   mainColor  = color;
+
+               gl_FragColor = mainColor;
             }
         >>
-    shader_set colorMap        := 0
-    shader_set displacementMap := 1
-    shader_set ratio           := DISPLACEMENT_RATIO
+    shader_set colorMap        := 0                   // Unit of the color map
+    shader_set displacementMap := 1                   // Unit of the displacement map
+    shader_set ratio           := DISPLACEMENT_RATIO  // Ratio of the displacement
+    shader_set hasColorMap     := HAS_COLOR_MAP       // Check if there is a color map
 
 // -------------------------------------------------------------------------------------------------------------------
 //   NORMAL MAP
@@ -491,6 +536,7 @@ normal_mapping ->
     /**
     * Apply normal mapping.
     **/
+    has_color_map
     if SHADER4_AVAILABLE_MAPPING = true then
         normal_shader_lights
     else
@@ -528,7 +574,8 @@ normal_shader_lights ->
             // Mapping paramaters
             uniform sampler2D colorMap;
             uniform sampler2D normalMap;
-            uniform int lights;
+            uniform int       lights;
+            uniform bool      hasColorMap;
 
             varying vec3 viewDir;
             varying vec3 normal;
@@ -630,7 +677,7 @@ normal_shader_lights ->
                     }
 
                      // Define new render color
-                    lighting_color  = (ambient + diffuse) * renderColor * color + specular;
+                    lighting_color  = (ambient + diffuse) * renderColor + specular;
                 }
 
                 return lighting_color;
@@ -651,18 +698,27 @@ normal_shader_lights ->
                 // Define new normal
                 n = TBN * bump;
 
-                // Diffuse coefficient
+                // Get color map
                 vec4 renderColor = texture2D(colorMap, gl_TexCoord[0].st);
+
+                // Check if there is really a color map
+                if(hasColorMap)
+                    renderColor *= color;
+                else
+                    renderColor  = color;
+
                 gl_FragColor = computeRenderColor(n, v, renderColor);
             }
         >>
-    shader_set lights    := lights_mask
-    shader_set colorMap  := 0
-    shader_set normalMap := 1
+    shader_set colorMap    := 0             // Unit of the color map
+    shader_set normalMap   := 1             // Unit of the normal map
+    shader_set lights      := lights_mask   // Bitmask with enabled lights
+    shader_set hasColorMap := HAS_COLOR_MAP // Check if a color map is bound
 
 normal_shader_no_lights ->
     /**
     * Define normal shader with no support of lights.
+    * This is needed in case where GL_EXT_gpu_shader4 is not available.
     **/
     shader_program
         shader_log
@@ -688,6 +744,7 @@ normal_shader_no_lights ->
         >>
         fragment_shader <<
             // Mapping paramaters
+            uniform bool      hasColorMap;
             uniform sampler2D colorMap;
             uniform sampler2D normalMap;
 
@@ -749,7 +806,7 @@ normal_shader_no_lights ->
                 }
 
                  // Define new render color
-                lighting_color  = (ambient + diffuse) * renderColor * color + specular;
+                lighting_color  = (ambient + diffuse) * renderColor + specular;
                 return lighting_color;
             }
 
@@ -768,13 +825,20 @@ normal_shader_no_lights ->
                 // Define new normal
                 n = TBN * bump;
 
-                // Diffuse coefficient
+                // Get color map
                 vec4 renderColor = texture2D(colorMap, gl_TexCoord[0].st);
+
+                // Check if there is really a color map
+                if(hasColorMap)
+                    renderColor *= color;
+                else
+                    renderColor  = color;
                 gl_FragColor = computeRenderColor(n, v, renderColor);
             }
         >>
-    shader_set colorMap  := 0
-    shader_set normalMap := 1
+    shader_set colorMap    := 0             // Unit of the color map
+    shader_set normalMap   := 1             // Unit of the normal map
+    shader_set hasColorMap := HAS_COLOR_MAP // Check if a color map is bound
 
 // -------------------------------------------------------------------------------------------------------------------
 //   NOISE MAP
@@ -890,7 +954,7 @@ noise_shader_lights ->
             **/
             vec4 computeRenderColor(vec4 renderColor)
             {
-                vec4 lighting_color;
+                vec4 lighting_color = renderColor;
                 if(lights > 0)
                 {
                     // Define a maximum of lights supported
@@ -934,11 +998,6 @@ noise_shader_lights ->
                      // Define new render color
                     lighting_color  = (ambient + diffuse) * renderColor + specular;
                 }
-                else
-                {
-                    // Define new render color
-                    lighting_color  = color * renderColor;
-                }
 
                 return lighting_color;
             }
@@ -951,19 +1010,20 @@ noise_shader_lights ->
                 // Compute noise coordinates
                 vec2 noiseCoord = gl_TexCoord[0].st + vec2( noise.r * 0.065, -noise.g * 0.025 ) *  ratio / 10.0;
 
-                vec4 renderColor = texture2D(colorMap, noiseCoord);
+                vec4 renderColor = texture2D(colorMap, noiseCoord) * color;
 
                 gl_FragColor = computeRenderColor(renderColor);
             }
         >>
-    shader_set colorMap := 0
-    shader_set noiseMap := 1
-    shader_set ratio    := NOISE_RATIO
-    shader_set lights   := lights_mask
+    shader_set colorMap := 0           // Unit of the color map
+    shader_set noiseMap := 1           // Unit of the noise map
+    shader_set ratio    := NOISE_RATIO // Ratio of noise
+    shader_set lights   := lights_mask // Bitmask of all enabled lights
 
 noise_shader_no_lights ->
     /**
     * Define noise shader with no lights supported.
+    * This is needed in case where GL_EXT_gpu_shader4 is not available.
     **/
     shader_program
         shader_log
@@ -1000,9 +1060,9 @@ noise_shader_no_lights ->
                 gl_FragColor = texture2D(colorMap, noiseCoord ) * color;
             }
         >>
-    shader_set colorMap := 0
-    shader_set noiseMap := 1
-    shader_set ratio    := NOISE_RATIO
+    shader_set colorMap := 0            // Unit of the color map
+    shader_set noiseMap := 1            // Unit of the noise map
+    shader_set ratio    := NOISE_RATIO  // Ratio of noise
 
 // -------------------------------------------------------------------------------------------------------------------
 //   CUBE MAP
@@ -1066,7 +1126,7 @@ cube_map_shader_lights ->
             **/
             vec4 computeRenderColor(vec4 renderColor)
             {
-                vec4 lighting_color;
+                vec4 lighting_color = renderColor;
                 if(lights > 0)
                 {
                     // Define a maximum of lights supported
@@ -1110,28 +1170,24 @@ cube_map_shader_lights ->
                      // Define new render color
                     lighting_color  = (ambient + diffuse) * renderColor + specular;
                 }
-                else
-                {
-                    // Define new render color
-                    lighting_color  = color * renderColor;
-                }
 
                 return lighting_color;
             }
 
             void main()
             {
-                vec4 renderColor = textureCube(cubeMap, gl_TexCoord[0].xyz);
+                vec4 renderColor = textureCube(cubeMap, gl_TexCoord[0].xyz) * color;
                 gl_FragColor     = computeRenderColor(renderColor);
             }
         >>
-    shader_set cubeMap := texture_unit
-    shader_set lights  := lights_mask
+    shader_set cubeMap := texture_unit // Unit of the cube map
+    shader_set lights  := lights_mask  // Bitmask of all enabled lights
 
 
 cube_map_shader_no_ligths ->
     /**
     * Define shader to apply correctly cube map with no lights supported.
+    * This is needed in case where GL_EXT_gpu_shader4 is not available.
     **/
     shader_program
         shader_log
@@ -1162,11 +1218,11 @@ cube_map_shader_no_ligths ->
             uniform samplerCube cubeMap;
             void main()
             {
-                vec3 cubeColor = textureCube(cubeMap, gl_TexCoord[0].xyz).rgb;
-                gl_FragColor   = vec4(cubeColor, 1.0) * color;
+                vec4 cubeColor = textureCube(cubeMap, gl_TexCoord[0].xyz);
+                gl_FragColor   = cubeColor * color;
             }
         >>
-    shader_set cubeMap := texture_unit
+    shader_set cubeMap := texture_unit  // Unit of the cube map
 
 // -------------------------------------------------------------------------------------------------------------------
 //   CUBE MAPPING
@@ -1181,6 +1237,7 @@ cube_mapping r:real->
     /**
     * Apply cube mapping.
     **/
+    has_color_map
     CUBE_RATIO := r
     if SHADER4_AVAILABLE_MAPPING = true then
         cube_shader_lights
@@ -1231,7 +1288,8 @@ cube_shader_lights ->
             uniform float       ratio;
             uniform sampler2D   colorMap;
             uniform samplerCube cubeMap;
-            uniform int lights;
+            uniform int         lights;
+            uniform bool        hasColorMap;
 
             varying vec3 viewDir;
             varying vec3 normal;
@@ -1242,7 +1300,7 @@ cube_shader_lights ->
             **/
             vec4 computeRenderColor(vec4 renderColor)
             {
-                vec4 lighting_color;
+                vec4 lighting_color = renderColor;
                 if(lights > 0)
                 {
                     // Define a maximum of lights supported
@@ -1286,27 +1344,35 @@ cube_shader_lights ->
                      // Define new render color
                     lighting_color  = (ambient + diffuse) * renderColor + specular;
                 }
-                else
-                {
-                    // Define new render color
-                    lighting_color  = color * renderColor;
-                }
 
                 return lighting_color;
             }
 
             void main()
             {
-                vec3 cubeColor    = textureCube(cubeMap, gl_TexCoord[1].xyz).rgb;
-                vec3 mainColor    = texture2D(colorMap, gl_TexCoord[0].st).rgb;
-                vec4 renderColor  = vec4(mix(mainColor, cubeColor, ratio), 1.0);
-                gl_FragColor      = computeRenderColor(renderColor);
+                vec4 cubeColor, mainColor, renderColor;
+
+                // Get cube map
+                cubeColor = textureCube(cubeMap, gl_TexCoord[1].xyz);
+
+                // Get color map
+                mainColor = texture2D(colorMap, gl_TexCoord[0].st);
+
+                // Check if there is really a color map
+                if(hasColorMap)
+                   mainColor *= color;
+                else
+                   mainColor  = color;
+
+                renderColor  = mix(mainColor, cubeColor, ratio);
+                gl_FragColor = computeRenderColor(renderColor);
             }
         >>
-    shader_set colorMap := 0
-    shader_set cubeMap  := 1
-    shader_set ratio    := CUBE_RATIO
-    shader_set lights   := lights_mask
+    shader_set colorMap    := 0             // Unit of the color map
+    shader_set cubeMap     := 1             // Unit of the cube map
+    shader_set lights      := lights_mask   // Bitmask of enabled lights
+    shader_set ratio       := CUBE_RATIO    // Reflection ratio
+    shader_set hasColorMap := HAS_COLOR_MAP // Check if a color map is bound
 
     //FOLLOWING PARAMETERS ARE NEEDED BUT NOT OPTIMIZED BECAUSE LISTS ARE RELOAD FULLY TO EACH XL FUNCTIONS CALL
     shader_set camera       := (camera_position at 1; camera_position at 2; camera_position at 3)
@@ -1318,11 +1384,12 @@ cube_shader_lights ->
 cube_shader_no_lights ->
     /**
     * Define cube mapping shader with no lights supported.
+    * This is needed in case where GL_EXT_gpu_shader4 is not available.
     **/
     shader_program
         shader_log
         vertex_shader <<
-            uniform mat4 normalMatrix;
+            uniform mat3 normalMatrix;
             uniform vec3 camera;
 
             varying vec4 color;
@@ -1348,6 +1415,7 @@ cube_shader_no_lights ->
         >>
         fragment_shader <<
             // Mapping parameters
+            uniform bool        hasColorMap;
             uniform float       ratio;
             uniform sampler2D   colorMap;
             uniform samplerCube cubeMap;
@@ -1355,14 +1423,28 @@ cube_shader_no_lights ->
             varying vec4 color;
             void main()
             {
-                vec3 cubeColor    = textureCube(cubeMap, gl_TexCoord[1].xyz).rgb;
-                vec3 mainColor    = texture2D(colorMap, gl_TexCoord[0].st).rgb;
-                gl_FragColor      = vec4(mix(cubeColor, mainColor, ratio), 1.0) * color;
+                vec4 cubeColor, mainColor, renderColor;
+
+                // Get cube map
+                cubeColor = textureCube(cubeMap, gl_TexCoord[1].xyz);
+
+                // Get color map
+                mainColor = texture2D(colorMap, gl_TexCoord[0].st);
+
+                // Check if there is really a color map
+                if(hasColorMap)
+                   mainColor *= color;
+                else
+                   mainColor  = color;
+
+                renderColor  = mix(mainColor, cubeColor, ratio);
+                gl_FragColor = renderColor;
             }
         >>
-    shader_set colorMap := 0
-    shader_set cubeMap  := 1
-    shader_set ratio    := CUBE_RATIO
+    shader_set colorMap    := 0             // Unit of the color map
+    shader_set cubeMap     := 1             // Unit of the cube map
+    shader_set ratio       := CUBE_RATIO    // Reflection ratio
+    shader_set hasColorMap := HAS_COLOR_MAP // Check if a color map is bound
 
     //FOLLOWING PARAMETERS ARE NEEDED BUT NOT OPTIMIZED BECAUSE LISTS ARE RELOAD FULLY TO EACH XL FUNCTIONS CALL
     shader_set camera       := (camera_position at 1; camera_position at 2; camera_position at 3)
@@ -1383,6 +1465,7 @@ sphere_mapping r:real->
     /**
     * Apply sphere mapping.
     **/
+    has_color_map
     SPHERE_RATIO := r
     if SHADER4_AVAILABLE_MAPPING = true then
         sphere_shader_lights
@@ -1446,10 +1529,11 @@ sphere_shader_lights ->
             #extension GL_EXT_gpu_shader4 : require
 
             // Mapping parameters
+            uniform int      lights;
+            uniform bool      hasColorMap;
             uniform float     ratio;
             uniform sampler2D colorMap;
             uniform sampler2D sphereMap;
-            uniform int lights;
 
             varying vec3 viewDir;
             varying vec3 normal;
@@ -1460,7 +1544,7 @@ sphere_shader_lights ->
             **/
             vec4 computeRenderColor(vec4 renderColor)
             {
-                vec4 lighting_color;
+                vec4 lighting_color = renderColor;
                 if(lights > 0)
                 {
                     // Define a maximum of lights supported
@@ -1504,27 +1588,35 @@ sphere_shader_lights ->
                      // Define new render color
                     lighting_color  = (ambient + diffuse) * renderColor + specular;
                 }
-                else
-                {
-                    // Define new render color
-                    lighting_color  = color * renderColor;
-                }
 
                 return lighting_color;
             }
 
             void main()
             {
-                vec3 sphereColor  = texture2D( sphereMap, gl_TexCoord[1].st).rgb;
-                vec3 mainColor    = texture2D( colorMap, gl_TexCoord[0].st).rgb;
-                vec4 renderColor  = vec4(mix(mainColor, sphereColor, ratio), 1.0);
-                gl_FragColor      = computeRenderColor(renderColor);
+                vec4 sphereColor, mainColor, renderColor;
+
+                // Get sphere map
+                sphereColor = texture2D(sphereMap, gl_TexCoord[1].st);
+
+                // Get color map
+                mainColor = texture2D(colorMap, gl_TexCoord[0].st);
+
+                // Check if there is really a color map
+                if(hasColorMap)
+                   mainColor *= color;
+                else
+                   mainColor  = color;
+
+                renderColor  = mix(mainColor, sphereColor, ratio);
+                gl_FragColor = computeRenderColor(renderColor);
             }
         >>
-    shader_set colorMap  := 0
-    shader_set sphereMap := 1
-    shader_set ratio     := SPHERE_RATIO
-    shader_set lights    := lights_mask
+    shader_set colorMap    := 0              // Unit of the color map
+    shader_set sphereMap   := 1              // Unit of the cube map
+    shader_set ratio       := SPHERE_RATIO   // Reflection ratio
+    shader_set lights      := lights_mask    // Bitmask of all enabled lights
+    shader_set hasColorMap := HAS_COLOR_MAP  // Check if a color map is bound
 
     //FOLLOWING PARAMETERS ARE NEEDED BUT NOT OPTIMIZED BECAUSE LISTS ARE RELOAD FULLY TO EACH XL FUNCTIONS CALL
     shader_set camera   := (camera_position at 1; camera_position at 2; camera_position at 3)
@@ -1536,6 +1628,7 @@ sphere_shader_lights ->
 sphere_shader_no_lights ->
     /**
     * Define sphere mapping shader with no lights supported.
+    * This is needed in case where GL_EXT_gpu_shader4 is not available.
     **/
     shader_program
         vertex_shader <<
@@ -1582,6 +1675,7 @@ sphere_shader_no_lights ->
         >>
         fragment_shader <<
             // Mapping parameters
+            uniform bool      hasColorMap;
             uniform float     ratio;
             uniform sampler2D colorMap;
             uniform sampler2D sphereMap;
@@ -1589,14 +1683,28 @@ sphere_shader_no_lights ->
             varying vec4 color;
             void main()
             {
-                vec3 mainColor    = texture2D( colorMap, gl_TexCoord[0].st).rgb;
-                vec3 sphereColor  = texture2D( sphereMap, gl_TexCoord[1].st).rgb;
-                gl_FragColor      = vec4(mix(mainColor, sphereColor, ratio), 1.0) * color;
+                vec4 sphereColor, mainColor, renderColor;
+
+                // Get sphere map
+                sphereColor = texture2D(sphereMap, gl_TexCoord[1].st);
+
+                // Get color map
+                mainColor = texture2D(colorMap, gl_TexCoord[0].st);
+
+                // Check if there is really a color map
+                if(hasColorMap)
+                   mainColor *= color;
+                else
+                   mainColor  = color;
+
+                renderColor  = mix(mainColor, sphereColor, ratio);
+                gl_FragColor = renderColor;
             }
         >>
-    shader_set colorMap  := 0
-    shader_set sphereMap := 1
-    shader_set ratio     := SPHERE_RATIO
+    shader_set colorMap    := 0             // Unit of the color map
+    shader_set sphereMap   := 1             // Unit of the cube map
+    shader_set ratio       := SPHERE_RATIO  // Reflection ratio
+    shader_set hasColorMap := HAS_COLOR_MAP // Check if a color map is bound
 
     //FOLLOWING PARAMETERS ARE NEEDED BUT NOT OPTIMIZED BECAUSE LISTS ARE RELOAD FULLY TO EACH XL FUNCTIONS CALL
     shader_set camera   := (camera_position at 1; camera_position at 2; camera_position at 3)
