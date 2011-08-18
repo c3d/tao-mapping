@@ -157,7 +157,7 @@ alpha_shader_lights ->
     shader_set colorMap  := 0
     shader_set alphaMap  := 1
     shader_set threshold := ALPHA_THRESHOLD
-    shader_set lights    := light_id
+    shader_set lights    := lights_mask
 
 
 alpha_shader_no_lights ->
@@ -215,7 +215,7 @@ DISPLACEMENT_RATIO := 0.0
 displacement_mapping ratio:real ->
     /**
     * Apply displacement mapping.
-    **/    
+    **/
     DISPLACEMENT_RATIO := ratio
     if SHADER4_AVAILABLE_MAPPING = true then
         displacement_shader_lights
@@ -372,7 +372,7 @@ displacement_shader_lights ->
     shader_set displacementMap := 1
     shader_set normalMap       := 2
     shader_set ratio           := DISPLACEMENT_RATIO
-    shader_set lights          := light_id
+    shader_set lights          := lights_mask
 
 displacement_shader_no_lights ->
     /**
@@ -656,7 +656,7 @@ normal_shader_lights ->
                 gl_FragColor = computeRenderColor(n, v, renderColor);
             }
         >>
-    shader_set lights    := light_id
+    shader_set lights    := lights_mask
     shader_set colorMap  := 0
     shader_set normalMap := 1
 
@@ -959,7 +959,7 @@ noise_shader_lights ->
     shader_set colorMap := 0
     shader_set noiseMap := 1
     shader_set ratio    := NOISE_RATIO
-    shader_set lights   := light_id
+    shader_set lights   := lights_mask
 
 noise_shader_no_lights ->
     /**
@@ -1126,7 +1126,7 @@ cube_map_shader_lights ->
             }
         >>
     shader_set cubeMap := texture_unit
-    shader_set lights  := light_id
+    shader_set lights  := lights_mask
 
 
 cube_map_shader_no_ligths ->
@@ -1306,7 +1306,7 @@ cube_shader_lights ->
     shader_set colorMap := 0
     shader_set cubeMap  := 1
     shader_set ratio    := CUBE_RATIO
-    shader_set lights   := light_id
+    shader_set lights   := lights_mask
 
     //FOLLOWING PARAMETERS ARE NEEDED BUT NOT OPTIMIZED BECAUSE LISTS ARE RELOAD FULLY TO EACH XL FUNCTIONS CALL
     shader_set camera       := (camera_position at 1; camera_position at 2; camera_position at 3)
@@ -1524,7 +1524,7 @@ sphere_shader_lights ->
     shader_set colorMap  := 0
     shader_set sphereMap := 1
     shader_set ratio     := SPHERE_RATIO
-    shader_set lights    := light_id
+    shader_set lights    := lights_mask
 
     //FOLLOWING PARAMETERS ARE NEEDED BUT NOT OPTIMIZED BECAUSE LISTS ARE RELOAD FULLY TO EACH XL FUNCTIONS CALL
     shader_set camera   := (camera_position at 1; camera_position at 2; camera_position at 3)
