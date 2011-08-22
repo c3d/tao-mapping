@@ -109,12 +109,22 @@ normal_map();
 normal_mapping();
 
 /**
- * Generates a random noise image.
- * Make a random noise texture with width @p w and height @p h.
- * This one can be use to make a noise mapping.
+ * Generates an image 2D with some noise.
+ * Make a noise texture with width @p w and height @p h.
+ * @p seed define the distribution of the noise on the image.
+ * This type of texture can be use to make a noise mapping.
  *
  */
-noise_map(w:integer, h:integer);
+noise_map(w:integer, h:integer, seed:integer);
+
+/**
+ * Generates an image 3D with some noise.
+ * Make a noise texture with width @p w and height @p h.
+ * @p seed define the distribution of the noise on the image. In this case, there is limit of 200 seeds.
+ * This type of texture can be use to make a noise mapping and can be set in a shader thanks to sampler3D.
+ *
+ */
+noise_map_3D(w:integer, h:integer, seed:integer);
 
 /**
  * Makes noise mapping.
