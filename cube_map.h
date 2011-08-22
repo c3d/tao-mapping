@@ -6,7 +6,7 @@
 //
 //   File Description:
 //
-//      Define a cube map.
+//      Define a cube Map.
 //
 //
 //
@@ -21,6 +21,7 @@
 // ****************************************************************************
 
 #include <stdio.h>
+
 #include "texture_mapping.h"
 
 struct  TextureFace
