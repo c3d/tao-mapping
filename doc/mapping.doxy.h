@@ -21,6 +21,9 @@
  *       - sphere mapping
  *       - etc.
  *
+ * @attention All these techniques use multitexturing to obtain good results.
+ * @attention Thus, color and texture map have to be bind respectively on first and second texture units before applying the effect.
+ *
  * @note Multitexturing is a particular case of texture mapping.
  *
  * The example below presents a use case of displacement mapping.
@@ -47,18 +50,17 @@ plane(x:real, y:real, w:real, h:real, l:integer, c:integer);
  * Makes displacement mapping.
  *
  * Displace geometric position of points over the textured
- * surface defined by @ref displacement_map.\n
+ * surface defined by @ref displacement_map and set the
+ * other map specified by @ref color_map as main texture.
  * The whitest points of the texture map are the most "displaced",
- * contrary to the most black which are not at all.\n
- * This displacement map have to be bound on texture unit 1.
- * The color of the mapping can be set either by @ref color or by a texture bound on texture unit 0, but also both.
+ * contrary to the most black which are not at all.
  *
  * @param ratio displacement ratio
  *
+ * @attention In order to obtain a good displacement, the used shapes must have important geometrical subdivision.
  * @attention In case where lights have been placed in the current scene, a normal map have to be bind on texture unit 2 to
  * adjust correct normals of the model. It is possible to create a normal map with @ref normal_map
  *
- * @note In order to obtain a good displacement, the used shapes must have important geometrical subdivision.
  * @note For that reason, this module includes a new 2D shape, @ref plane , which can be easily subdivided.
  */
 displacement_mapping(ratio:real);
@@ -67,11 +69,10 @@ displacement_mapping(ratio:real);
  * Makes alpha mapping.
  *
  * Allow to define certain area of an objet as transparent or translucent thanks to
- * the texture defined by @ref alpha_map.\n
+ * the texture defined by @ref alpha_map and set the
+ * other map specified by @ref color_map as main texture.
  * The most dark points of the texture map allow to define
- * a transparent area during the mapping.\n
- * This alpha map have to be bound on texture unit 1.
- * The color of the mapping can be set either by @ref color or by a texture bound on texture unit 0, but also both.
+ * a transparent area during the mapping.
  *
  * @param threshold alpha threshold
  *
@@ -91,13 +92,13 @@ normal_map();
  * Makes normal mapping.
  *
  * Simulate 3D on an object thanks to the association of normal map defined by @ref normal_map
- * with some light and material effets.\n
- * This normal map have to be bound on texture unit 1.
- * The color of the mapping can be set either by @ref color or by a texture bound on texture unit 0, but also both.
+ * with some light and material effets.
+ * Set the other map specified by @ref color_map as main texture.
  *
  * @attention As normal mapping uses a light and some materials, it is largely recommended to add it
  * to the current scene to increase the effects.
  *
+ * @note This effect can support a maximum of 8 differents lights.
  * @note Contrary to displacement mapping, normal mapping doesn't modify geometric positions.
  * @note This mapping use a particular texture, which allows to define normals used during mapping.
  * @note There is an example of such an image below.
@@ -109,30 +110,18 @@ normal_map();
 normal_mapping();
 
 /**
- * Generates an image 2D with some noise.
- * Make a noise texture with width @p w and height @p h.
- * @p seed define the distribution of the noise on the image.
- * This type of texture can be use to make a noise mapping.
+ * Generates a random noise image.
+ * Make a random noise texture with width @p w and height @p h.
+ * This one can be use to make a noise mapping.
  *
  */
-noise_map(w:integer, h:integer, seed:integer);
-
-/**
- * Generates an image 3D with some noise.
- * Make a noise texture with width @p w and height @p h.
- * @p seed define the distribution of the noise on the image. In this case, there is limit of 200 seeds.
- * This type of texture can be use to make a noise mapping and can be set in a shader thanks to sampler3D.
- *
- */
-noise_map_3D(w:integer, h:integer, seed:integer);
+noise_map(w:integer, h:integer);
 
 /**
  * Makes noise mapping.
  *
  * Add noise to a main texture define by @ref color_map according to the textured
- * surface defined by @ref noise_map.\n
- * This noise map have to be bound on texture unit 1.
- * The color of the mapping can be set either by @ref color or by a texture bound on texture unit 0, but also both.
+ * surface defined by @ref noise_map.
  *
  * @param ratio noise ratio
  *
@@ -206,9 +195,7 @@ cube_map_flip(u:boolean, v:boolean);
  * Makes cube mapping.
  *
  * Allow to simulate easily the reflection of an environment on an object thanks
- * to a texture called cube map, which can be generated thanks to @ref cube_map.\n
- * This cube map have to be bound on texture unit 1.
- * The color of the mapping can be set either by @ref color or by a usual texture bound on texture unit 0, but also both.
+ * to a texture called cube map, which can be generated thanks to @ref cube_map.
  *
  * @param ratio ratio of the environment reflection.
  *
@@ -247,9 +234,7 @@ cube_mapping(ratio:integer);
  * Makes sphere mapping.
  *
  * Allow to simulate easily the reflection of an environment on an object thanks
- * to a texture called sphere map set by @ref texture.\n
- * This sphere map have to be bound on texture unit 1.
- * The color of the mapping can be set either by @ref color or by a usual texture bound on texture unit 0, but also both.
+ * to a texture called sphere map set by @ref texture.
  *
  * @param ratio ratio of the environment reflection.
  *

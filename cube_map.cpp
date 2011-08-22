@@ -89,7 +89,7 @@ bool CubeMap::loadCubeMap()
         glGenTextures (1, &cubeMapId);
         glBindTexture (GL_TEXTURE_CUBE_MAP, cubeMapId);
 
-        // Setup some parameters for texture filters and mapping
+        // Setup some parameters for texture filters and mipmapping
         glTexParameteri (GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri (GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
