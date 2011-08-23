@@ -961,6 +961,7 @@ noise_shader_lights ->
                 // Compute texture coordinates
                 gl_TexCoord[0] = gl_TextureMatrix[0] * gl_MultiTexCoord0;
                 gl_TexCoord[1] = gl_TextureMatrix[1] * gl_MultiTexCoord1;
+                gl_TexCoord[2] = gl_TextureMatrix[2] * gl_MultiTexCoord2;
 
                 // Compute world position and normal
                 normal  = gl_NormalMatrix * gl_Normal;
@@ -1039,10 +1040,10 @@ noise_shader_lights ->
             void main()
             {
                 // Get noise value from noise map.
-                vec4 noise = texture2D(noiseMap, gl_TexCoord[1].st );
+                vec4 noise = texture3D(noiseMap3D, gl_TexCoord[2].xyz );
 
                 if(noise.r == 0.0 && noise.g == 0.0 && noise.b == 0.0)
-                    noise = texture3D(noiseMap3D, gl_TexCoord[1].str );
+                    noise = texture2D(noiseMap, gl_TexCoord[1].xy );
 
                 // Compute noise coordinates
                 vec2 noiseCoord = gl_TexCoord[0].st + vec2( noise.r * 0.065, -noise.g * 0.025 ) *  ratio / 10.0;
@@ -1054,7 +1055,7 @@ noise_shader_lights ->
         >>
     shader_set colorMap   := 0           // Unit of the color map
     shader_set noiseMap   := 1           // Unit of the noise map 2D
-    shader_set noiseMap3D := 1           // Unit of the noise map 3D
+    shader_set noiseMap3D := 2           // Unit of the noise map 3D
     shader_set ratio      := NOISE_RATIO // Ratio of noise
     shader_set lights     := lights_mask // Bitmask of all enabled lights
 
