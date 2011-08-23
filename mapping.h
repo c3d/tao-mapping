@@ -28,6 +28,7 @@
 #include "tao/module_api.h"
 #include "plane.h"
 #include "cube_map.h"
+#include "noise_map.h"
 #include "texture_mapping.h"
 
 
@@ -39,6 +40,7 @@ Tree_p plane(Tree_p tree, Real_p x, Real_p y, Real_p w,
 Tree_p texture_cube(Context *context, Integer_p size, Tree_p, Tree_p prog);
 Tree_p cube_map_face(Tree_p tree, GLuint face, text name);
 Tree_p cube_map_flip(Tree_p tree, bool u, bool v);
+Tree_p noise_map_3D(Tree_p tree, GLuint w, GLuint h, GLuint seed);
 
 
 #endif // MAPPING_H
