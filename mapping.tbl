@@ -63,12 +63,3 @@ PREFIX(CubeFaceFlip,  tree, "cube_map_flip",
        GROUP(module.Mapping)
        SYNOPSIS("Flip u and v coordinates of following faces")
        DESCRIPTION("Flip u and v coordinates of following faces."))
-
-PREFIX(NoiseMap3D,  tree, "noise_map_3D",
-       PARM(w, integer, )
-       PARM(h, integer, )
-       PARM(seed, integer, ),
-       return noise_map_3D(self, w, h, seed),
-       GROUP(module.Mapping)
-       SYNOPSIS("Generate a 3D noise map")
-       DESCRIPTION("Generate a 3D noise map"))

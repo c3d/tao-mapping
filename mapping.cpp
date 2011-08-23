@@ -24,8 +24,6 @@
 
 XL_DEFINE_TRACES
 
-#define MAX_SEEDS 200 // Maximum of noise seeds
-
 CubeMap* cube;
 
 Tree_p plane(Tree_p, Real_p x, Real_p y, Real_p w,
@@ -91,29 +89,11 @@ Tree_p cube_map_flip(Tree_p tree, bool u, bool v)
     return xl_true;
 }
 
-Tree_p noise_map_3D(Tree_p tree, GLuint w, GLuint h, GLuint seed)
-// ----------------------------------------------------------------------------
-//   Generate a 3D noise texture
-// ----------------------------------------------------------------------------
-{
-    if(seed > MAX_SEEDS)
-    {
-        Ooops("Invalid value of seed '$1' ", tree);
-        return xl_false;
-    }
-
-    NoiseMap* noiseMap = new NoiseMap(w, h, seed);
-    TextureMapping::tao->addToLayout(TextureMapping::render_callback, noiseMap, TextureMapping::delete_callback);
-
-    return xl_true;
-}
-
 int module_init(const Tao::ModuleApi *api, const Tao::ModuleInfo *)
 // ----------------------------------------------------------------------------
 //   Initialize the Tao module
 // ----------------------------------------------------------------------------
 {
-    glewInit();
     XL_INIT_TRACES();
     TextureMapping::tao = api;
 
