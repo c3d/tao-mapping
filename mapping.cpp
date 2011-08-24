@@ -38,7 +38,7 @@ Tree_p plane(Tree_p, Real_p x, Real_p y, Real_p w,
     return xl_true;
 }
 
-Tree_p texture_cube(Context *context, Integer_p size, Tree_p, Tree_p prog)
+Tree_p texture_cube(Context_p context, Integer_p size, Tree_p, Tree_p prog)
 // ----------------------------------------------------------------------------
 //   Create a cube map texture
 // ----------------------------------------------------------------------------
