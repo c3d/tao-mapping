@@ -121,7 +121,7 @@ noise_map(w:integer, h:integer, seed:integer);
  * Generates an image 3D with some noise.
  * Make a noise texture with width @p w and height @p h.
  * @p seed define the distribution of the noise on the image. In this case, there is limit of 200 seeds.
- * This type of texture can be use to make a noise mapping and can be set in a shader thanks to sampler3D.
+ * This type of texture can be use to make a noise mapping and can be set in a GLSL shader thanks to \e sampler3D.
  *
  */
 noise_map_3D(w:integer, h:integer, seed:integer);
