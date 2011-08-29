@@ -36,7 +36,7 @@ using namespace XL;
 
 Tree_p plane(Tree_p tree, Real_p x, Real_p y, Real_p w,
              Real_p h, Integer_p lines_nb, Integer_p columns_nb);
-Tree_p texture_cube(Context_p context, Integer_p size, Tree_p, Tree_p prog);
+Tree_p texture_cube(Context *context, Integer_p size, Tree_p, Tree_p prog);
 Tree_p cube_map_face(Tree_p tree, GLuint face, text name);
 Tree_p cube_map_flip(Tree_p tree, bool u, bool v);
 
