@@ -36,6 +36,13 @@ has_color_map ->
     else
         HAS_COLOR_MAP := 0
 
+enable_pixel_blur ->
+    /**
+    * This trick enables blur on pixels of the result texture
+    **/
+    rotatex 0.05
+    rotatex -0.05
+
 // -------------------------------------------------------------------------------------------------------------------
 //   ALPHA MAPPING
 //   For further informations, see http://en.wikipedia.org/wiki/Alpha_mapping
@@ -51,11 +58,12 @@ alpha_mapping n:real ->
     * Apply alpha mapping with a full support of lights.
     **/
     has_color_map
+    enable_pixel_blur
     ALPHA_THRESHOLD := n
-    if SHADER4_AVAILABLE_MAPPING = true then
-        alpha_shader_lights
+    if SHADER4_AVAILABLE_MAPPING = false then
+        alpha_shader_no_lights
     else
-        alpha_shader_no_ligths
+        alpha_shader_lights
 
 
 alpha_shader_lights ->
@@ -157,7 +165,9 @@ alpha_shader_lights ->
                 vec4 alpha_color = texture2D(alphaMap, gl_TexCoord[1].st);
 
                 // Filter alpha map according to the threshold
-                if(alpha_color.r < threshold && alpha_color.g < threshold && alpha_color.b < threshold)
+                if(alpha_color.r < threshold
+                && alpha_color.g < threshold
+                && alpha_color.b < threshold)
                     discard;
 
                 // Get color map
@@ -213,7 +223,9 @@ alpha_shader_no_lights ->
                 vec4 alpha_color = texture2D(alphaMap, gl_TexCoord[1].st);
 
                 // Filter alpha map according to the threshold
-                if(alpha_color.r < threshold && alpha_color.g < threshold && alpha_color.b < threshold)
+                if(alpha_color.r < threshold
+                && alpha_color.g < threshold
+                && alpha_color.b < threshold)
                     discard;
 
                 // Get color map
@@ -248,11 +260,12 @@ displacement_mapping ratio:real ->
     * Apply displacement mapping.
     **/
     has_color_map
+    enable_pixel_blur
     DISPLACEMENT_RATIO := ratio
-    if SHADER4_AVAILABLE_MAPPING = true then
-        displacement_shader_lights
+    if SHADER4_AVAILABLE_MAPPING = false then
+        displacement_shader_no_lights
     else
-        displacement_shader_no_ligths
+        displacement_shader_lights
 
 
 displacement_shader_lights ->
@@ -477,6 +490,7 @@ normal_map ->
     /**
     * Convert the current texture into a basic normal map.
     **/
+    enable_pixel_blur
     CODE -> normal_map_shader
     render_to_texture CODE
     gaussian 2
@@ -563,11 +577,11 @@ normal_mapping ->
     * Apply normal mapping.
     **/
     has_color_map
-    if SHADER4_AVAILABLE_MAPPING = true then
-        normal_shader_lights
-    else
+    enable_pixel_blur
+    if SHADER4_AVAILABLE_MAPPING = false then
         normal_shader_no_lights
-
+    else
+        normal_shader_lights
 
 normal_shader_lights ->
     /**
@@ -879,6 +893,7 @@ noise_map w:integer, h:integer, s:integer ->
     /**
     * Generate a random noise image.
     **/
+    enable_pixel_blur
     frame_texture w, h,
         color "white"
         NOISE_SEED := s
@@ -938,10 +953,11 @@ noise_mapping n->
     * Apply noise mapping.
     **/
     NOISE_RATIO := n
-    if SHADER4_AVAILABLE_MAPPING = true then
-        noise_shader_lights
+    enable_pixel_blur
+    if SHADER4_AVAILABLE_MAPPING = false then
+        noise_shader_no_lights
     else
-        noise_shader_no_ligths
+        noise_shader_lights
 
 noise_shader_lights ->
     /**
@@ -1118,10 +1134,11 @@ cube_map s:integer, t:tree->
     /**
     * Create a cube map.
     **/
-    if SHADER4_AVAILABLE_MAPPING = true then
-        cube_map_shader_lights
+    enable_pixel_blur
+    if SHADER4_AVAILABLE_MAPPING = false then
+        cube_map_shader_no_lights
     else
-        cube_map_shader_no_ligths
+        cube_map_shader_lights
     texture_cube s, t
 
 
@@ -1230,7 +1247,7 @@ cube_map_shader_lights ->
     shader_set lights  := lights_mask  // Bitmask of all enabled lights
 
 
-cube_map_shader_no_ligths ->
+cube_map_shader_no_lights ->
     /**
     * Define shader to apply correctly cube map with no lights supported.
     * This is needed in case where GL_EXT_gpu_shader4 is not available.
@@ -1284,12 +1301,12 @@ cube_mapping r:real->
     * Apply cube mapping.
     **/
     has_color_map
+    enable_pixel_blur
     CUBE_RATIO := r
-    if SHADER4_AVAILABLE_MAPPING = true then
-        cube_shader_lights
+    if SHADER4_AVAILABLE_MAPPING = false then
+        cube_shader_no_lights
     else
-        cube_shader_no_ligths
-
+        cube_shader_lights
 
 cube_shader_lights ->
     /**
@@ -1513,11 +1530,12 @@ sphere_mapping r:real->
     * Apply sphere mapping.
     **/
     has_color_map
+    enable_pixel_blur
     SPHERE_RATIO := r
-    if SHADER4_AVAILABLE_MAPPING = true then
-        sphere_shader_lights
+    if SHADER4_AVAILABLE_MAPPING = false then
+        sphere_shader_no_lights
     else
-        sphere_shader_no_ligths
+        sphere_shader_lights
 
 
 sphere_shader_lights ->
