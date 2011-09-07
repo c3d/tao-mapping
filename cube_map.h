@@ -6,7 +6,7 @@
 //
 //   File Description:
 //
-//      Define a cube Map.
+//      Define a cube map.
 //
 //
 //
@@ -21,7 +21,6 @@
 // ****************************************************************************
 
 #include <stdio.h>
-
 #include "texture_mapping.h"
 
 struct  TextureFace
@@ -68,11 +67,13 @@ struct  TextureCube
 //   Define a cubemap texture
 // ----------------------------------------------------------------------------
 {
+    int size; //size of texture cube
     //name of cube faces
     TextureFace left, right, bottom, top, front, back;
 
     TextureCube & operator = (const TextureCube &o)
     {
+        size   = o.size;
         left   = o.left;
         right  = o.right;
         bottom = o.bottom;
@@ -85,6 +86,8 @@ struct  TextureCube
 
     bool operator == (const TextureCube&o) const
     {
+        if(o.size != size)
+            return false;
         if(o.left != left)
            return false;
         if(o.right != right)
@@ -117,7 +120,7 @@ struct CubeMap : public TextureMapping
     enum { MAX_TEXTURES = 20 };
 
     // Constructor and destructor
-    CubeMap();
+    CubeMap(int size = 0);
     ~CubeMap();
 
     // Draw cubemap
@@ -134,6 +137,7 @@ private:
     void         checkGLContext();
 
 private:
+    int                size;
     bool               flip_u : 1;
     bool               flip_v : 1;
     TextureCube        currentTexture;

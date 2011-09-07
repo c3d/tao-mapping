@@ -25,11 +25,12 @@
 
 CubeMap::context_to_textures CubeMap::texture_maps;
 
-CubeMap::CubeMap() : flip_u(false), flip_v(false)
+CubeMap::CubeMap(int size) : size(size), flip_u(false), flip_v(false)
 // ----------------------------------------------------------------------------
 //   Construction
 // ----------------------------------------------------------------------------
-{
+{    
+    currentTexture.size = size;
 }
 
 CubeMap::~CubeMap()
@@ -88,7 +89,7 @@ bool CubeMap::loadCubeMap()
         glGenTextures (1, &cubeMapId);
         glBindTexture (GL_TEXTURE_CUBE_MAP, cubeMapId);
 
-        // Setup some parameters for texture filters and mipmapping
+        // Setup some parameters for texture filters and mapping
         glTexParameteri (GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri (GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
@@ -111,7 +112,7 @@ bool CubeMap::loadCubeMap()
     }
 
     // Set to the textures list in Tao.
-    TextureMapping::tao->SetTexture(cubeMapId, GL_TEXTURE_CUBE_MAP);
+    TextureMapping::tao->BindTexture(cubeMapId, GL_TEXTURE_CUBE_MAP);
 
     return true;
 }
@@ -170,8 +171,14 @@ bool CubeMap::loadTexture (uint face)
     }
     if (!image.isNull())
     {
+        if (size <= 0)
+            size = image.width();
+        if (size != image.width() || size != image.height())
+            image = image.scaled(size, size, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+
         QImage texture = QGLWidget::convertToGLFormat(image);
         texture = texture.mirrored(currentFace->flip_u, currentFace->flip_v);
+
         glTexImage2D (GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, 0, GL_RGBA,
                       texture.width(), texture.height(), 0, GL_RGBA,
                       GL_UNSIGNED_BYTE, texture.bits());
