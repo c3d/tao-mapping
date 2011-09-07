@@ -105,6 +105,8 @@ void NoiseMap::loadNoiseMap()
 
     // Set to the textures list in Tao.
     TextureMapping::tao->BindTexture(textures[key], GL_TEXTURE_3D);
+
+    TextureMapping::tao->HasPixelBlur(true);
 }
 
 void NoiseMap::Draw()
