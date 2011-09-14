@@ -106,9 +106,8 @@ alpha_shader_lights ->
             varying vec3 normal;
             varying vec4 color;
             /**
-            * Compute render color according to materials,
-            * lights and colors parameters which are
-            * set in the current scene.
+            * Compute render color according to materials, lights and colors parameters
+            * which are set in the current scene.
             **/
             vec4 computeRenderColor(vec4 renderColor)
             {
@@ -124,8 +123,7 @@ alpha_shader_lights ->
                     vec4 ambient  = vec4(0.0);
                     vec4 diffuse  = vec4(0.0);
                     vec4 specular = vec4(0.0);
-                    ambient = gl_FrontLightModelProduct.sceneColor
-                            * gl_FrontMaterial.ambient;
+                    ambient  = gl_FrontLightModelProduct.sceneColor * gl_FrontMaterial.ambient;
 
                     // Compute render for each enabled lights
                     for(int i = 0; i < MAX_LIGHTS; i++)
@@ -142,18 +140,14 @@ alpha_shader_lights ->
                             if (nDotL > 0.0)
                             {
                                 // Compute diffuse part
-                                diffuse += gl_LightSource[i].diffuse
-                                         * gl_FrontMaterial.diffuse
-                                         * nDotL;
+                                diffuse += gl_LightSource[i].diffuse * gl_FrontMaterial.diffuse * nDotL;
 
                                 // Compute specular coefficient
                                 float nDotV = clamp(dot(reflect(-L, N), V), 0.0, 1.0);
                                 if (nDotV > 0.0)
                                 {
                                     // Compute specular part
-                                    specular += gl_LightSource[i].specular
-                                              * gl_FrontMaterial.specular
-                                              * pow(nDotV, gl_FrontMaterial.shininess);
+                                    specular += gl_LightSource[i].specular * gl_FrontMaterial.specular * pow(nDotV, gl_FrontMaterial.shininess);
                                 }
                             }
                         }
@@ -345,9 +339,8 @@ displacement_shader_lights ->
             }
 
             /**
-            * Compute render color according to materials,
-            * lights and colors parameters which are
-            * set in the current scene.
+            * Compute render color according to materials, lights and colors parameters
+            * which are set in the current scene.
             **/
             vec4 computeRenderColor(vec4 renderColor)
             {
@@ -373,8 +366,7 @@ displacement_shader_lights ->
                     vec4 ambient  = vec4(0.0);
                     vec4 diffuse  = vec4(0.0);
                     vec4 specular = vec4(0.0);
-                    ambient = gl_FrontLightModelProduct.sceneColor
-                            * gl_FrontMaterial.ambient;
+                    ambient  = gl_FrontLightModelProduct.sceneColor * gl_FrontMaterial.ambient;
 
                     // Compute render for each enabled lights
                     for(int i = 0; i < MAX_LIGHTS; i++)
@@ -391,18 +383,14 @@ displacement_shader_lights ->
                             if (nDotL > 0.0)
                             {
                                 // Compute diffuse part
-                                diffuse += gl_LightSource[i].diffuse
-                                         * gl_FrontMaterial.diffuse
-                                         * nDotL;
+                                diffuse += gl_LightSource[i].diffuse * gl_FrontMaterial.diffuse * nDotL;
 
                                 // Compute specular coefficient
                                 float nDotV = clamp(dot(reflect(-L, N), V), 0.0, 1.0);
                                 if (nDotV > 0.0)
                                 {
                                     // Compute specular part
-                                    specular += gl_LightSource[i].specular
-                                              * gl_FrontMaterial.specular
-                                              * pow(nDotV, gl_FrontMaterial.shininess);
+                                    specular += gl_LightSource[i].specular * gl_FrontMaterial.specular * pow(nDotV, gl_FrontMaterial.shininess);
                                 }
                             }
                         }
@@ -653,9 +641,8 @@ normal_shader_lights ->
             }
 
             /**
-            * Compute render color according to materials,
-            * lights and colors parameters which are
-            * set in the current scene.
+            * Compute render color according to materials, lights and colors parameters
+            * which are set in the current scene.
             **/
             vec4 computeRenderColor(vec3 N, vec3 V, vec4 renderColor)
             {
@@ -668,8 +655,7 @@ normal_shader_lights ->
                     vec4 ambient  = vec4(0.0);
                     vec4 diffuse  = vec4(0.0);
                     vec4 specular = vec4(0.0);
-                    ambient  = gl_FrontLightModelProduct.sceneColor
-                             * gl_FrontMaterial.ambient;
+                    ambient  = gl_FrontLightModelProduct.sceneColor * gl_FrontMaterial.ambient;
 
                     // Compute render for each enabled lights
                     for(int i = 0; i < MAX_LIGHTS; i++)
@@ -679,8 +665,7 @@ normal_shader_lights ->
                             vec3 L = normalize(gl_LightSource[i].position.xyz);
 
                             // Compute ambient part
-                            ambient += gl_LightSource[i].ambient
-                                     * gl_FrontMaterial.ambient;
+                            ambient += gl_LightSource[i].ambient * gl_FrontMaterial.ambient;
 
                             // Diffuse coefficient
                             float nDotL = max(clamp(dot(L, N), 0.0, 1.0), 0.0);
@@ -694,9 +679,7 @@ normal_shader_lights ->
                                 if (nDotV > 0.0)
                                 {
                                     // Compute specular part
-                                    specular += gl_LightSource[i].specular
-                                              * gl_FrontMaterial.specular
-                                              * pow(nDotV, gl_FrontMaterial.shininess);
+                                    specular += gl_LightSource[i].specular * gl_FrontMaterial.specular * pow(nDotV, gl_FrontMaterial.shininess);
                                 }
                             }
                         }
@@ -1017,9 +1000,8 @@ noise_shader_lights ->
             varying vec3 normal;
             varying vec4 color;
             /**
-            * Compute render color according to materials,
-            * lights and colors parameters which are
-            * set in the current scene.
+            * Compute render color according to materials, lights and colors parameters
+            * which are set in the current scene.
             **/
             vec4 computeRenderColor(vec4 renderColor)
             {
@@ -1035,8 +1017,7 @@ noise_shader_lights ->
                     vec4 ambient  = vec4(0.0);
                     vec4 diffuse  = vec4(0.0);
                     vec4 specular = vec4(0.0);
-                    ambient = gl_FrontLightModelProduct.sceneColor
-                            * gl_FrontMaterial.ambient;
+                    ambient  = gl_FrontLightModelProduct.sceneColor * gl_FrontMaterial.ambient;
 
                     for(int i = 0; i < MAX_LIGHTS; i++)
                     {
@@ -1045,26 +1026,21 @@ noise_shader_lights ->
                             vec3 L = normalize(gl_LightSource[i].position.xyz);
 
                             // Compute ambient part
-                            ambient += gl_LightSource[i].ambient
-                                     * gl_FrontMaterial.ambient;
+                            ambient += gl_LightSource[i].ambient * gl_FrontMaterial.ambient;
 
                             // Diffuse coefficient
                             float nDotL = max(clamp(dot(L, N), 0.0, 1.0), 0.0);
                             if (nDotL > 0.0)
                             {
                                 // Compute diffuse part
-                                diffuse += gl_LightSource[i].diffuse
-                                         * gl_FrontMaterial.diffuse
-                                         * nDotL;
+                                diffuse += gl_LightSource[i].diffuse * gl_FrontMaterial.diffuse * nDotL;
 
                                 // Compute specular coefficient
                                 float nDotV = clamp(dot(reflect(-L, N), V), 0.0, 1.0);
                                 if (nDotV > 0.0)
                                 {
                                     // Compute specular part
-                                    specular += gl_LightSource[i].specular
-                                              * gl_FrontMaterial.specular
-                                              * pow(nDotV, gl_FrontMaterial.shininess);
+                                    specular += gl_LightSource[i].specular * gl_FrontMaterial.specular * pow(nDotV, gl_FrontMaterial.shininess);
                                 }
                             }
                         }
@@ -1208,9 +1184,8 @@ cube_map_shader_lights ->
             varying vec3 normal;
             varying vec4 color;
             /**
-            * Compute render color according to materials,
-            * lights and colors parameters which are
-            * set in the current scene.
+            * Compute render color according to materials, lights and colors parameters
+            * which are set in the current scene.
             **/
             vec4 computeRenderColor(vec4 renderColor)
             {
@@ -1226,8 +1201,7 @@ cube_map_shader_lights ->
                     vec4 ambient  = vec4(0.0);
                     vec4 diffuse  = vec4(0.0);
                     vec4 specular = vec4(0.0);
-                    ambient = gl_FrontLightModelProduct.sceneColor
-                            * gl_FrontMaterial.ambient;
+                    ambient  = gl_FrontLightModelProduct.sceneColor * gl_FrontMaterial.ambient;
 
                     for(int i = 0; i < MAX_LIGHTS; i++)
                     {
@@ -1243,18 +1217,14 @@ cube_map_shader_lights ->
                             if (nDotL > 0.0)
                             {
                                 // Compute diffuse part
-                                diffuse += gl_LightSource[i].diffuse
-                                         * gl_FrontMaterial.diffuse
-                                         * nDotL;
+                                diffuse += gl_LightSource[i].diffuse * gl_FrontMaterial.diffuse * nDotL;
 
                                 // Compute specular coefficient
                                 float nDotV = clamp(dot(reflect(-L, N), V), 0.0, 1.0);
                                 if (nDotV > 0.0)
                                 {
                                     // Compute specular part
-                                    specular += gl_LightSource[i].specular
-                                              * gl_FrontMaterial.specular
-                                              * pow(nDotV, gl_FrontMaterial.shininess);
+                                    specular += gl_LightSource[i].specular * gl_FrontMaterial.specular * pow(nDotV, gl_FrontMaterial.shininess);
                                 }
                             }
                         }
@@ -1389,9 +1359,8 @@ cube_shader_lights ->
             varying vec3 normal;
             varying vec4 color;
             /**
-            * Compute render color according to materials,
-            * lights and colors parameters which are
-            * set in the current scene.
+            * Compute render color according to materials, lights and colors parameters
+            * which are set in the current scene.
             **/
             vec4 computeRenderColor(vec4 renderColor)
             {
@@ -1407,8 +1376,7 @@ cube_shader_lights ->
                     vec4 ambient  = vec4(0.0);
                     vec4 diffuse  = vec4(0.0);
                     vec4 specular = vec4(0.0);
-                    ambient = gl_FrontLightModelProduct.sceneColor
-                            * gl_FrontMaterial.ambient;
+                    ambient  = gl_FrontLightModelProduct.sceneColor * gl_FrontMaterial.ambient;
 
                     for(int i = 0; i < MAX_LIGHTS; i++)
                     {
@@ -1424,18 +1392,14 @@ cube_shader_lights ->
                             if (nDotL > 0.0)
                             {
                                 // Compute diffuse part
-                                diffuse += gl_LightSource[i].diffuse
-                                         * gl_FrontMaterial.diffuse
-                                         * nDotL;
+                                diffuse += gl_LightSource[i].diffuse * gl_FrontMaterial.diffuse * nDotL;
 
                                 // Compute specular coefficient
                                 float nDotV = clamp(dot(reflect(-L, N), V), 0.0, 1.0);
                                 if (nDotV > 0.0)
                                 {
                                     // Compute specular part
-                                    specular += gl_LightSource[i].specular
-                                              * gl_FrontMaterial.specular
-                                              * pow(nDotV, gl_FrontMaterial.shininess);
+                                    specular += gl_LightSource[i].specular * gl_FrontMaterial.specular * pow(nDotV, gl_FrontMaterial.shininess);
                                 }
                             }
                         }
@@ -1658,8 +1622,7 @@ sphere_shader_lights ->
                     vec4 ambient  = vec4(0.0);
                     vec4 diffuse  = vec4(0.0);
                     vec4 specular = vec4(0.0);
-                    ambient = gl_FrontLightModelProduct.sceneColor
-                            * gl_FrontMaterial.ambient;
+                    ambient  = gl_FrontLightModelProduct.sceneColor * gl_FrontMaterial.ambient;
 
                     for(int i = 0; i < MAX_LIGHTS; i++)
                     {
@@ -1675,18 +1638,14 @@ sphere_shader_lights ->
                             if (nDotL > 0.0)
                             {
                                 // Compute diffuse part
-                                diffuse += gl_LightSource[i].diffuse
-                                         * gl_FrontMaterial.diffuse
-                                         * nDotL;
+                                diffuse += gl_LightSource[i].diffuse * gl_FrontMaterial.diffuse * nDotL;
 
                                 // Compute specular coefficient
                                 float nDotV = clamp(dot(reflect(-L, N), V), 0.0, 1.0);
                                 if (nDotV > 0.0)
                                 {
                                     // Compute specular part
-                                    specular += gl_LightSource[i].specular
-                                              * gl_FrontMaterial.specular
-                                              * pow(nDotV, gl_FrontMaterial.shininess);
+                                    specular += gl_LightSource[i].specular * gl_FrontMaterial.specular * pow(nDotV, gl_FrontMaterial.shininess);
                                 }
                             }
                         }
