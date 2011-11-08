@@ -42,8 +42,6 @@ struct TextureMapping : public QObject
 public:
     // Pointer to Tao functions
     static const Tao::ModuleApi *tao;
-
-    static bool tested, licensed;
 };
 
 

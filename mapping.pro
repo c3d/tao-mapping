@@ -31,33 +31,12 @@ SOURCES      = mapping.cpp $${TAOTOPSRC}/tao/include/tao/GL/glew.c \
     noise_map.cpp \
     3rdparty/fbm.c \
 
-CRYPT_XL_SOURCES = alpha_mapping.xl displacement_mapping.xl normal_mapping.xl noise_mapping.xl cube_mapping.xl sphere_mapping.xl
-include(../crypt_xl.pri)
-
 TBL_SOURCES  = mapping.tbl
-OTHER_FILES  = mapping.xl mapping.tbl traces.tbl \
-    normal_mapping.xl \
-    noise_mapping.xl \
-    cube_mapping.xl \
-    sphere_mapping.xl \
-    alpha_mapping.xl \
-    displacement_mapping.xl
+OTHER_FILES  = mapping.xl mapping.tbl traces.tbl
 QT          += core \
                gui \
                opengl
 
 INSTALLS    += thismod_icon
-
-LICENSE_FILES = mapping.taokey.notsigned
-include(../licenses.pri)
-
-
-
-
-
-
-
-
-
 
 

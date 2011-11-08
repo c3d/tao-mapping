@@ -111,14 +111,6 @@ bool CubeMap::loadCubeMap()
         textures[cubeMapId] = currentTexture;
     }
 
-    if (!tested)
-    {
-        licensed = tao->checkLicense("Mapping 1.0", false);
-        tested = true;
-    }
-    if (!licensed && !tao->blink(1.0, 1.0))
-        return false;
-
     // Set to the textures list in Tao.
     TextureMapping::tao->BindTexture(cubeMapId, GL_TEXTURE_CUBE_MAP);
 
@@ -130,11 +122,6 @@ void CubeMap::Draw()
 //   Draw cube map texture
 // ----------------------------------------------------------------------------
 {
-    if (!licensed && !tao->blink(1.0, 1.0))
-        return;
-
-    // Enable pixel blur
-    TextureMapping::tao->HasPixelBlur(true);
 }
 
 uint CubeMap::isInclude()
