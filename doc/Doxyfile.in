@@ -1,5 +1,0 @@
-@INCLUDE = ../../Doxyfile
-PROJECT_NAME = \"Mapping\"
-PROJECT_NUMBER = 1.007
-QHP_NAMESPACE = com.taodyne.TaoPresentations.modules.Mapping.1.007
-QHP_VIRTUAL_FOLDER = Mapping

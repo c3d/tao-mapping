@@ -106,18 +106,11 @@ void Plane::Draw()
     Draw(plane);
 }
 
-
 void Plane::Draw(PlaneMesh* plane)
 // ----------------------------------------------------------------------------
 //   Draw a subdivided plane
 // ----------------------------------------------------------------------------
 {
-    if (!tested)
-    {
-        licensed = tao->checkImpressOrLicense(MAPPING_FEATURE);
-        tested = true;
-    }
-
     glPushMatrix();
     glPushAttrib(GL_ENABLE_BIT);
     glEnable(GL_NORMALIZE);

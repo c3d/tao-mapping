@@ -1,4 +1,4 @@
-﻿#ifndef CUBEMAP_H
+#ifndef CUBEMAP_H
 #define CUBEMAP_H
 // ****************************************************************************
 //  cube_map.h                                                      Tao project
@@ -19,10 +19,8 @@
 //  (C) 2010 Jerome Forissier <jerome@taodyne.com>
 //  (C) 2010 Taodyne SAS
 // ****************************************************************************
+
 #include <stdio.h>
-#include "tao/coords3d.h"
-#include "tao/module_api.h"
-#include "tao/tao_gl.h"
 #include "texture_mapping.h"
 
 struct  TextureFace
@@ -112,7 +110,6 @@ struct  TextureCube
     }
 };
 
-
 struct CubeMap : public TextureMapping
 // ----------------------------------------------------------------------------
 //   Apply a cubemap texture
@@ -127,36 +124,28 @@ struct CubeMap : public TextureMapping
     ~CubeMap();
 
     // Draw cubemap
-    virtual void    Draw();
+    virtual void Draw();
 
     void flip(bool u, bool v);
     bool setTexture(text filename, uint face);
     bool loadCubeMap();
 
-protected:
-    virtual void    createShaders();
+private:
+    uint         isInclude();
+    TextureFace* whichFace(uint face);
+    bool         loadTexture(uint face);
+    void         checkGLContext();
 
 private:
-    uint            isInclude();
-    TextureFace*    whichFace(uint face);
-    bool            loadTexture(uint face);
-    void            checkGLContext();
-
-private:
-    int             size;
-    bool            flip_u : 1;
-    bool            flip_v : 1;
-    TextureCube     currentTexture;
+    int                size;
+    bool               flip_u : 1;
+    bool               flip_v : 1;
+    TextureCube        currentTexture;
 
     // Textures cache
     static context_to_textures texture_maps;
 #   define textures texture_maps[QGLContext::currentContext()]
 
-    static bool failed;
-    static QGLShaderProgram* pgm;
-    static std::map<text, GLint> uniforms;
-    static const QGLContext* context;
 };
 
-
-#endif
+#endif // CUBEMAP_H
