@@ -17,9 +17,6 @@ module_description "fr",
     name "Mappage"
     description "Permet d'ajouter des détails visuels dans une scène à partir d'images."
 
-import Filters 1.0
-import RenderToTexture 1.0
-
 // Check if GL_EXT_gpu_shader4 is supported in Tao
 SHADER4_AVAILABLE_MAPPING -> true
 SHADER4_AVAILABLE_MAPPING := is_ext_available "GL_EXT_gpu_shader4"
@@ -504,8 +501,14 @@ normal_map ->
     **/
     enable_pixel_blur
     CODE -> normal_map_shader
-    render_to_texture CODE
-    gaussian 2
+    TEXTURE_WIDTH := texture_width
+    TEXTURE_HEIGHT := texture_height
+    TEXTURE_ID := texture
+    frame_texture TEXTURE_WIDTH, TEXTURE_HEIGHT,
+        color "white"
+        texture TEXTURE_ID
+        normal_map_shader
+        rectangle 0, 0, TEXTURE_WIDTH, TEXTURE_HEIGHT
 
 
 normal_map_shader ->
