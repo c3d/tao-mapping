@@ -23,6 +23,9 @@
 
 const Tao::ModuleApi *TextureMapping::tao = NULL;
 
+bool TextureMapping::tested = false;
+bool TextureMapping::licensed = false;
+
 // ============================================================================
 //
 //    Texture Mapping
