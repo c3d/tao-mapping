@@ -103,6 +103,17 @@ void NoiseMap::loadNoiseMap()
         textures[key] = generateNoiseMap();
     }
 
+    if (!tested)
+    {
+        if(tao->hasLicense("Mapping 1.0") || tao->hasLicense("Materials 1.0"))
+            licensed = true;
+        else
+            licensed = tao->checkLicense("Mapping 1.0", false);
+        tested = true;
+    }
+    if (!licensed && !tao->blink(1.0, 1.0))
+        return;
+
     // Set to the textures list in Tao.
     TextureMapping::tao->BindTexture(textures[key], GL_TEXTURE_3D);
 }
@@ -112,6 +123,9 @@ void NoiseMap::Draw()
 //   Draw noise map texture
 // ----------------------------------------------------------------------------
 {
+    if (!licensed && !tao->blink(1.0, 1.0))
+        return;
+
     // Enable pixel blur
     TextureMapping::tao->HasPixelBlur(true);
 }
