@@ -33,9 +33,9 @@ has_color_map ->
     else
         HAS_COLOR_MAP := 0
 
-import "alpha_mapping.xl.crypt"
-import "displacement_mapping.xl.crypt"
-import "normal_mapping.xl.crypt"
-import "noise_mapping.xl.crypt"
-import "cube_mapping.xl.crypt"
-import "sphere_mapping.xl.crypt"
+import "alpha_mapping.xl.bin"
+import "displacement_mapping.xl.bin"
+import "normal_mapping.xl.bin"
+import "noise_mapping.xl.bin"
+import "cube_mapping.xl.bin"
+import "sphere_mapping.xl.bin"
