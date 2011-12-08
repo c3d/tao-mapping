@@ -58,80 +58,54 @@ sphere_shader_lights ->
     **/
     shader_program
         vertex_shader <<
-            /********************************************************************************
-            **
-            ** Copyright (C) 2011 Taodyne.
-            ** All rights reserved.
-            ** Contact: Taodyne (contact@taodyne.com)
-            **
-            ** This file is part of the Tao Presentations application, developped by Taodyne.
-            ** It can be only used in the software and these modules.
-            **
-            ** If you have questions regarding the use of this file, please contact
-            ** Taodyne at contact@taodyne.com.
-            **
-            ********************************************************************************/
-            uniform mat4 model;
-            uniform vec3 camera;
+        uniform mat4 model;
+        uniform vec3 camera;
 
-            varying vec3 viewDir;
-            varying vec3 normal;
-            varying vec4 color;
-            void main()
-            {
-                mat3 normalMatrix;
+        varying vec3 viewDir;
+        varying vec3 normal;
+        varying vec4 color;
+        void main()
+        {
+            mat3 normalMatrix;
 
-                // Get linear part of model matrix
-                normalMatrix[0][0] = model[0][0];
-                normalMatrix[0][1] = model[0][1];
-                normalMatrix[0][2] = model[0][2];
+            // Get linear part of model matrix
+            normalMatrix[0][0] = model[0][0];
+            normalMatrix[0][1] = model[0][1];
+            normalMatrix[0][2] = model[0][2];
 
-                normalMatrix[1][0] = model[1][0];
-                normalMatrix[1][1] = model[1][1];
-                normalMatrix[1][2] = model[1][2];
+            normalMatrix[1][0] = model[1][0];
+            normalMatrix[1][1] = model[1][1];
+            normalMatrix[1][2] = model[1][2];
 
-                normalMatrix[2][0] = model[2][0];
-                normalMatrix[2][1] = model[2][1];
-                normalMatrix[2][2] = model[2][2];
+            normalMatrix[2][0] = model[2][0];
+            normalMatrix[2][1] = model[2][1];
+            normalMatrix[2][2] = model[2][2];
 
-                // Determine object parameters
-                gl_Position    = ftransform();
-                gl_TexCoord[0] = gl_TextureMatrix[0] * gl_MultiTexCoord0;
+            // Determine object parameters
+            gl_Position    = ftransform();
+            gl_TexCoord[0] = gl_TextureMatrix[0] * gl_MultiTexCoord0;
 
-                // Compute world position and normal
-                vec4 worldPos = model * gl_Vertex;
-                viewDir  = normalize(worldPos.xyz - camera);
-                normal   = normalize(normalMatrix * gl_Normal);
+            // Compute world position and normal
+            vec4 worldPos = model * gl_Vertex;
+            viewDir  = normalize(worldPos.xyz - camera);
+            normal   = normalize(normalMatrix * gl_Normal);
 
-                // Compute camera parameters
-                vec3  r  = reflect( viewDir, normal );
-                float m  = 2.0 * sqrt( r.x * r.x + r.y * r.y + (r.z + 1.0) * (r.z + 1.0) );
+            // Compute camera parameters
+            vec3  r  = reflect( viewDir, normal );
+            float m  = 2.0 * sqrt( r.x * r.x + r.y * r.y + (r.z + 1.0) * (r.z + 1.0) );
 
-                // Compute sphere coordinates
-                gl_TexCoord[1].s = r.x/m + 0.5;
-                gl_TexCoord[1].t = r.y/m + 0.5;
+            // Compute sphere coordinates
+            gl_TexCoord[1].s = r.x/m + 0.5;
+            gl_TexCoord[1].t = r.y/m + 0.5;
 
-                // Compute new values for lighting
-                normal   =  normalize(gl_NormalMatrix * gl_Normal);
-                viewDir  = -normalize((gl_ModelViewMatrix * gl_Vertex).xyz);
+            // Compute new values for lighting
+            normal   =  normalize(gl_NormalMatrix * gl_Normal);
+            viewDir  = -normalize((gl_ModelViewMatrix * gl_Vertex).xyz);
 
-                color = gl_Color;
-            }
+            color = gl_Color;
+        }
         >>
         fragment_shader <<
-            /********************************************************************************
-            **
-            ** Copyright (C) 2011 Taodyne.
-            ** All rights reserved.
-            ** Contact: Taodyne (contact@taodyne.com)
-            **
-            ** This file is part of the Tao Presentations application, developped by Taodyne.
-            ** It can be only used in the software and these modules.
-            **
-            ** If you have questions regarding the use of this file, please contact
-            ** Taodyne at contact@taodyne.com.
-            **
-            ********************************************************************************/
             #extension GL_EXT_gpu_shader4 : require
 
             // Mapping parameters
@@ -244,74 +218,48 @@ sphere_shader_no_lights ->
     **/
     shader_program
         vertex_shader <<
-            /********************************************************************************
-            **
-            ** Copyright (C) 2011 Taodyne.
-            ** All rights reserved.
-            ** Contact: Taodyne (contact@taodyne.com)
-            **
-            ** This file is part of the Tao Presentations application, developped by Taodyne.
-            ** It can be only used in the software and these modules.
-            **
-            ** If you have questions regarding the use of this file, please contact
-            ** Taodyne at contact@taodyne.com.
-            **
-            ********************************************************************************/
-            uniform mat4 model;
-            uniform vec3 camera;
+        uniform mat4 model;
+        uniform vec3 camera;
 
-            varying vec4 color;
-            void main()
-            {
-                mat3 normalMatrix;
+        varying vec4 color;
+        void main()
+        {
+            mat3 normalMatrix;
 
-                // Get linear part of model matrix
-                normalMatrix[0][0] = model[0][0];
-                normalMatrix[0][1] = model[0][1];
-                normalMatrix[0][2] = model[0][2];
+            // Get linear part of model matrix
+            normalMatrix[0][0] = model[0][0];
+            normalMatrix[0][1] = model[0][1];
+            normalMatrix[0][2] = model[0][2];
 
-                normalMatrix[1][0] = model[1][0];
-                normalMatrix[1][1] = model[1][1];
-                normalMatrix[1][2] = model[1][2];
+            normalMatrix[1][0] = model[1][0];
+            normalMatrix[1][1] = model[1][1];
+            normalMatrix[1][2] = model[1][2];
 
-                normalMatrix[2][0] = model[2][0];
-                normalMatrix[2][1] = model[2][1];
-                normalMatrix[2][2] = model[2][2];
+            normalMatrix[2][0] = model[2][0];
+            normalMatrix[2][1] = model[2][1];
+            normalMatrix[2][2] = model[2][2];
 
-                // Determine object parameters
-                gl_Position    = ftransform();
-                gl_TexCoord[0] = gl_TextureMatrix[0] * gl_MultiTexCoord0;
+            // Determine object parameters
+            gl_Position    = ftransform();
+            gl_TexCoord[0] = gl_TextureMatrix[0] * gl_MultiTexCoord0;
 
-                // Compute world position and normal
-                vec4 worldPos = model * gl_Vertex;
-                vec3 normal   = normalize(normalMatrix * gl_Normal);
-                vec3 eyePos   = normalize(worldPos.xyz - camera);
+            // Compute world position and normal
+            vec4 worldPos = model * gl_Vertex;
+            vec3 normal   = normalize(normalMatrix * gl_Normal);
+            vec3 eyePos   = normalize(worldPos.xyz - camera);
 
-                // Compute camera parameters
-                vec3  r  = reflect( eyePos, normal );
-                float m  = 2.0 * sqrt( r.x * r.x + r.y * r.y + (r.z + 1.0) * (r.z + 1.0) );
+            // Compute camera parameters
+            vec3  r  = reflect( eyePos, normal );
+            float m  = 2.0 * sqrt( r.x * r.x + r.y * r.y + (r.z + 1.0) * (r.z + 1.0) );
 
-                // Compute sphere coordinates
-                gl_TexCoord[1].s = r.x/m + 0.5;
-                gl_TexCoord[1].t = r.y/m + 0.5;
+            // Compute sphere coordinates
+            gl_TexCoord[1].s = r.x/m + 0.5;
+            gl_TexCoord[1].t = r.y/m + 0.5;
 
-                color = gl_Color;
-            }
+            color = gl_Color;
+        }
         >>
         fragment_shader <<
-            /********************************************************************************
-            **
-            ** Copyright (C) 2011 Taodyne.
-            ** All rights reserved.
-            ** Contact: Taodyne (contact@taodyne.com)
-            **
-            ** This file is part of the Tao Presentations application, developped by Taodyne.
-            ** It can be only used in the software and these modules.
-            **
-            ** If you have questions regarding the use of this file, please contact
-            ** Taodyne at contact@taodyne.com.
-            **
-            ********************************************************************************/
             // Mapping parameters
             uniform bool      hasColorMap;
             uniform float     ratio;
