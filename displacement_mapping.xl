@@ -60,6 +60,20 @@ displacement_shader_lights ->
     shader_program
         shader_log
         vertex_shader <<
+            /********************************************************************************
+            **
+            ** Copyright (C) 2011 Taodyne.
+            ** All rights reserved.
+            ** Contact: Taodyne (contact@taodyne.com)
+            **
+            ** This file is part of the Tao Presentations application, developped by Taodyne.
+            ** It can be only used in the software and these modules.
+            **
+            ** If you have questions regarding the use of this file, please contact
+            ** Taodyne at contact@taodyne.com.
+            **
+            ********************************************************************************/
+
             // Mapping paramaters
             uniform float     ratio;
             uniform sampler2D displacementMap;
@@ -93,6 +107,20 @@ displacement_shader_lights ->
             }
         >>
         fragment_shader <<
+            /********************************************************************************
+            **
+            ** Copyright (C) 2011 Taodyne.
+            ** All rights reserved.
+            ** Contact: Taodyne (contact@taodyne.com)
+            **
+            ** This file is part of the Tao Presentations application, developped by Taodyne.
+            ** It can be only used in the software and these modules.
+            **
+            ** If you have questions regarding the use of this file, please contact
+            ** Taodyne at contact@taodyne.com.
+            **
+            ********************************************************************************/
+
             #extension GL_EXT_gpu_shader4 : require
 
             uniform int       lights;
@@ -224,6 +252,19 @@ displacement_shader_no_lights ->
     shader_program
         shader_log
         vertex_shader <<
+            /********************************************************************************
+            **
+            ** Copyright (C) 2011 Taodyne.
+            ** All rights reserved.
+            ** Contact: Taodyne (contact@taodyne.com)
+            **
+            ** This file is part of the Tao Presentations application, developped by Taodyne.
+            ** It can be only used in the software and these modules.
+            **
+            ** If you have questions regarding the use of this file, please contact
+            ** Taodyne at contact@taodyne.com.
+            **
+            ********************************************************************************/
             // Mapping paramaters
             uniform float     ratio;
             uniform sampler2D displacementMap;
@@ -250,6 +291,19 @@ displacement_shader_no_lights ->
             }
         >>
         fragment_shader <<
+            /********************************************************************************
+            **
+            ** Copyright (C) 2011 Taodyne.
+            ** All rights reserved.
+            ** Contact: Taodyne (contact@taodyne.com)
+            **
+            ** This file is part of the Tao Presentations application, developped by Taodyne.
+            ** It can be only used in the software and these modules.
+            **
+            ** If you have questions regarding the use of this file, please contact
+            ** Taodyne at contact@taodyne.com.
+            **
+            ********************************************************************************/
             uniform bool      hasColorMap;
             uniform sampler2D colorMap;
 
