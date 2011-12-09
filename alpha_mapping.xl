@@ -57,20 +57,6 @@ alpha_shader_lights ->
     shader_program
         shader_log
         vertex_shader <<
-            /********************************************************************************
-            **
-            ** Copyright (C) 2011 Taodyne.
-            ** All rights reserved.
-            ** Contact: Taodyne (contact@taodyne.com)
-            **
-            ** This file is part of the Tao Presentations application, developped by Taodyne.
-            ** It can be only used in the software and these modules.
-            **
-            ** If you have questions regarding the use of this file, please contact
-            ** Taodyne at contact@taodyne.com.
-            **
-            ********************************************************************************/
-
             varying vec3 viewDir;
             varying vec3 normal;
             varying vec4 color;
@@ -91,19 +77,6 @@ alpha_shader_lights ->
             }
         >>
         fragment_shader <<
-            /********************************************************************************
-            **
-            ** Copyright (C) 2011 Taodyne.
-            ** All rights reserved.
-            ** Contact: Taodyne (contact@taodyne.com)
-            **
-            ** This file is part of the Tao Presentations application, developped by Taodyne.
-            ** It can be only used in the software and these modules.
-            **
-            ** If you have questions regarding the use of this file, please contact
-            ** Taodyne at contact@taodyne.com.
-            **
-            ********************************************************************************/
             #extension GL_EXT_gpu_shader4 : require
 
             // Mapping paramaters
@@ -214,20 +187,6 @@ alpha_shader_no_lights ->
     shader_program
         shader_log
         vertex_shader <<
-            /********************************************************************************
-            **
-            ** Copyright (C) 2011 Taodyne.
-            ** All rights reserved.
-            ** Contact: Taodyne (contact@taodyne.com)
-            **
-            ** This file is part of the Tao Presentations application, developped by Taodyne.
-            ** It can be only used in the software and these modules.
-            **
-            ** If you have questions regarding the use of this file, please contact
-            ** Taodyne at contact@taodyne.com.
-            **
-            ********************************************************************************/
-
             varying vec4 color;
             void main()
             {
@@ -242,20 +201,6 @@ alpha_shader_no_lights ->
             }
         >>
         fragment_shader <<
-            /********************************************************************************
-            **
-            ** Copyright (C) 2011 Taodyne.
-            ** All rights reserved.
-            ** Contact: Taodyne (contact@taodyne.com)
-            **
-            ** This file is part of the Tao Presentations application, developped by Taodyne.
-            ** It can be only used in the software and these modules.
-            **
-            ** If you have questions regarding the use of this file, please contact
-            ** Taodyne at contact@taodyne.com.
-            **
-            ********************************************************************************/
-
             // Mapping paramaters
             uniform bool      hasColorMap;
             uniform float     threshold;
