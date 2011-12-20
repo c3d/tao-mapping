@@ -32,12 +32,8 @@ NoiseMap::NoiseMap(uint w, uint h, uint seed) : w(w), h(h), seed(seed)
 //   Construction
 // ----------------------------------------------------------------------------
 {
-    IFTRACE(mapping)
-            debug() << "Create noise map" << "\n";
-
     loadNoiseMap();
 }
-
 
 NoiseMap::~NoiseMap()
 // ----------------------------------------------------------------------------
@@ -46,15 +42,11 @@ NoiseMap::~NoiseMap()
 {
 }
 
-
 uint NoiseMap::generateNoiseMap()
 // ----------------------------------------------------------------------------
 //   Generate noise texture 3D
 // ----------------------------------------------------------------------------
 {
-    IFTRACE(mapping)
-            debug() << "Generate sphere mapping shader" << "\n";
-
     uint texId = 0;
     glGenTextures(1, &texId);
     glBindTexture(GL_TEXTURE_3D, texId);
@@ -89,7 +81,6 @@ uint NoiseMap::generateNoiseMap()
     return texId;
 }
 
-
 void NoiseMap::loadNoiseMap()
 // ----------------------------------------------------------------------------
 //   Load noise map in the application
@@ -114,36 +105,30 @@ void NoiseMap::loadNoiseMap()
 
     if (!tested)
     {
-        if(tao->hasLicense("Materials 1.0"))
+        if(tao->hasLicense("Mapping 1.0") || tao->hasLicense("Materials 1.0"))
             licensed = true;
         else
-            licensed = tao->checkImpressOrLicense("Mapping 1.0");
+            licensed = tao->checkLicense("Mapping 1.0", false);
         tested = true;
     }
-    if (!licensed && !tao->blink(1.0, 1.0, 300.0))
+    if (!licensed && !tao->blink(1.0, 1.0))
         return;
-
-
-    IFTRACE(mapping)
-            debug() << "Apply noise map" << "\n";
 
     // Set to the textures list in Tao.
     TextureMapping::tao->BindTexture(textures[key], GL_TEXTURE_3D);
 }
-
 
 void NoiseMap::Draw()
 // ----------------------------------------------------------------------------
 //   Draw noise map texture
 // ----------------------------------------------------------------------------
 {
-    if (!licensed && !tao->blink(1.0, 1.0, 300.0))
+    if (!licensed && !tao->blink(1.0, 1.0))
         return;
 
     // Enable pixel blur
     TextureMapping::tao->HasPixelBlur(true);
 }
-
 
 void NoiseMap::checkGLContext()
 // ----------------------------------------------------------------------------

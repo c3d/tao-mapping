@@ -1,18 +1,18 @@
 // ****************************************************************************
 //  mapping.tbl                                                     Tao project
 // ****************************************************************************
-//
+// 
 //   File Description:
-//
+// 
 //     Definition of the interface between XLR and native code
 //     for the "Mapping" module.
-//
-//
-//
-//
-//
-//
-//
+// 
+// 
+// 
+// 
+// 
+// 
+// 
 // ****************************************************************************
 // This software is property of Taodyne SAS - Confidential
 // Ce logiciel est la propriété de Taodyne SAS - Confidentiel
@@ -40,12 +40,10 @@ PREFIX(Plane,  tree, "plane",
        SYNOPSIS("Generate a subdivided plane")
        DESCRIPTION("Generate a subdivided plane."))
 
-
-
-PREFIX(CubeMap,  tree, "cube_map",
+PREFIX(CubeMap,  tree, "texture_cube",
        PARM(size, integer, )
        PARM(p, code, "The program that represent a cube map"),
-       return cube_map(context, size, self, p),
+       return texture_cube(context, size, self, p),
        GROUP(module.Mapping)
        SYNOPSIS("Generate a cube map")
        DESCRIPTION("Generate a cube map."))
@@ -65,23 +63,6 @@ PREFIX(CubeFaceFlip,  tree, "cube_map_flip",
        GROUP(module.Mapping)
        SYNOPSIS("Flip u and v coordinates of following faces")
        DESCRIPTION("Flip u and v coordinates of following faces."))
-
-
-PREFIX(CubeMapping,  tree, "cube_mapping",
-       PARM(r, real, ),
-       return cube_mapping(self, r),
-       GROUP(module.Mapping)
-       SYNOPSIS("Apply cube mapping")
-       DESCRIPTION("Apply cube mapping."))
-
-
-PREFIX(SphereMapping,  tree, "sphere_mapping",
-       PARM(r, real, ),
-       return sphere_mapping(self, r),
-       GROUP(module.Mapping)
-       SYNOPSIS("Apply sphere mapping")
-       DESCRIPTION("Apply sphere mapping."))
-
 
 PREFIX(NoiseMap3D,  tree, "noise_map_3D",
        PARM(w, integer, )

@@ -1,0 +1,300 @@
+// ****************************************************************************
+//  sphere_mapping.xl                                               Tao project
+// ****************************************************************************
+//
+//   File Description:
+//
+//    Implement sphere mapping
+//    For further informations, see http://en.wikipedia.org/wiki/Sphere_mapping
+//
+//
+//
+//
+//
+//
+//
+//
+// ****************************************************************************
+// This document is released under the GNU General Public License.
+// See http://www.gnu.org/copyleft/gpl.html and Matthew 25:22 for details
+//  (C) 2011 Christophe de Dinechin <christophe@taodyne.com>
+//  (C) 2011 Jérôme Forissier <jerome@taodyne.com>
+//  (C) 2011 Catherine Burvelle <cathy@taodyne.com>
+//  (C) 2011 Taodyne SAS
+// ****************************************************************************
+
+sphere_mapping_license_ok ->
+    if check_license ("Mapping 1.0", false) then
+        true
+    else
+        if blink (1.0, 1.0) then
+           true
+        else
+           false
+
+// -------------------------------------------------------------------------------------------------------------------
+//   SPHERE MAPPING
+// -------------------------------------------------------------------------------------------------------------------
+
+// Define sphere mapping ratio
+SPHERE_RATIO -> 0.0
+SPHERE_RATIO := 0.0
+
+sphere_mapping r:real->
+    /**
+    * Apply sphere mapping.
+    **/
+    has_color_map
+    SPHERE_RATIO := r
+    if sphere_mapping_license_ok then
+        if SHADER4_AVAILABLE_MAPPING = false then
+            sphere_shader_no_lights
+        else
+            sphere_shader_lights
+
+sphere_shader_lights ->
+    /**
+    * Define sphere mapping shader with a full support of lights.
+    **/
+    shader_program
+        vertex_shader <<
+        uniform mat4 model;
+        uniform vec3 camera;
+
+        varying vec3 viewDir;
+        varying vec3 normal;
+        varying vec4 color;
+        void main()
+        {
+            mat3 normalMatrix;
+
+            // Get linear part of model matrix
+            normalMatrix[0][0] = model[0][0];
+            normalMatrix[0][1] = model[0][1];
+            normalMatrix[0][2] = model[0][2];
+
+            normalMatrix[1][0] = model[1][0];
+            normalMatrix[1][1] = model[1][1];
+            normalMatrix[1][2] = model[1][2];
+
+            normalMatrix[2][0] = model[2][0];
+            normalMatrix[2][1] = model[2][1];
+            normalMatrix[2][2] = model[2][2];
+
+            // Determine object parameters
+            gl_Position    = ftransform();
+            gl_TexCoord[0] = gl_TextureMatrix[0] * gl_MultiTexCoord0;
+
+            // Compute world position and normal
+            vec4 worldPos = model * gl_Vertex;
+            viewDir  = normalize(worldPos.xyz - camera);
+            normal   = normalize(normalMatrix * gl_Normal);
+
+            // Compute camera parameters
+            vec3  r  = reflect( viewDir, normal );
+            float m  = 2.0 * sqrt( r.x * r.x + r.y * r.y + (r.z + 1.0) * (r.z + 1.0) );
+
+            // Compute sphere coordinates
+            gl_TexCoord[1].s = r.x/m + 0.5;
+            gl_TexCoord[1].t = r.y/m + 0.5;
+
+            // Compute new values for lighting
+            normal   =  normalize(gl_NormalMatrix * gl_Normal);
+            viewDir  = -normalize((gl_ModelViewMatrix * gl_Vertex).xyz);
+
+            color = gl_Color;
+        }
+        >>
+        fragment_shader <<
+            #extension GL_EXT_gpu_shader4 : require
+
+            // Mapping parameters
+            uniform int      lights;
+            uniform bool      hasColorMap;
+            uniform float     ratio;
+            uniform sampler2D colorMap;
+            uniform sampler2D sphereMap;
+
+            varying vec3 viewDir;
+            varying vec3 normal;
+            varying vec4 color;
+            /**
+            * Compute render color according to materials, lights and colors parameters
+            * which are set in the current scene.
+            **/
+            vec4 computeRenderColor(vec4 renderColor)
+            {
+                vec4 lighting_color = renderColor;
+                if(lights > 0)
+                {
+                    // Define a maximum of lights supported
+                    int MAX_LIGHTS = 8;
+
+                    vec3 N = normalize(normal);
+                    vec3 V = normalize(viewDir);
+
+                    vec4 ambient  = vec4(0.0);
+                    vec4 diffuse  = vec4(0.0);
+                    vec4 specular = vec4(0.0);
+                    ambient = gl_FrontLightModelProduct.sceneColor
+                            * gl_FrontMaterial.ambient;
+
+                    for(int i = 0; i < MAX_LIGHTS; i++)
+                    {
+                        if(bool(lights & (1 << i)))
+                        {
+                            vec3 L = normalize(gl_LightSource[i].position.xyz);
+
+                            // Compute ambient part
+                            ambient += gl_LightSource[i].ambient * gl_FrontMaterial.ambient;
+
+                            // Diffuse coefficient
+                            float nDotL = max(clamp(dot(L, N), 0.0, 1.0), 0.0);
+                            if (nDotL > 0.0)
+                            {
+                                // Compute diffuse part
+                                diffuse += gl_LightSource[i].diffuse
+                                         * gl_FrontMaterial.diffuse
+                                         * nDotL;
+
+                                // Compute specular coefficient
+                                float nDotV = clamp(dot(reflect(-L, N), V), 0.0, 1.0);
+                                if (nDotV > 0.0)
+                                {
+                                    // Compute specular part
+                                    specular += gl_LightSource[i].specular
+                                              * gl_FrontMaterial.specular
+                                              * pow(nDotV, gl_FrontMaterial.shininess);
+                                }
+                            }
+                        }
+                    }
+
+                     // Define new render color
+                    lighting_color  = (ambient + diffuse) * renderColor + specular;
+                }
+
+                return lighting_color;
+            }
+
+            void main()
+            {
+                vec4 sphereColor, mainColor, renderColor;
+
+                // Get sphere map
+                sphereColor = texture2D(sphereMap, gl_TexCoord[1].st);
+
+                // Get color map
+                mainColor = texture2D(colorMap, gl_TexCoord[0].st);
+
+                // Check if there is really a color map
+                if(hasColorMap)
+                   mainColor *= color;
+                else
+                   mainColor  = color;
+
+                renderColor  = mix(mainColor, sphereColor, ratio);
+                gl_FragColor = computeRenderColor(renderColor);
+            }
+        >>
+    shader_set colorMap    := 0             // Unit of the color map
+    shader_set sphereMap   := 1             // Unit of the cube map
+    shader_set ratio       := SPHERE_RATIO  // Reflection ratio
+    shader_set lights      := lights_mask   // Bitmask of all enabled lights
+    shader_set hasColorMap := HAS_COLOR_MAP // Check if a color map is bound
+
+    //FOLLOWING PARAMETERS ARE NEEDED BUT NOT OPTIMIZED BECAUSE LISTS ARE RELOAD FULLY TO EACH XL FUNCTIONS CALL
+    shader_set camera   := (camera_position at 1; camera_position at 2; camera_position at 3)
+    shader_set model    := (model_matrix at 1;  model_matrix at 2;  model_matrix at 3;  model_matrix at 4;
+                            model_matrix at 5;  model_matrix at 6;  model_matrix at 7;  model_matrix at 8;
+                            model_matrix at 9;  model_matrix at 10; model_matrix at 11; model_matrix at 12;
+                            model_matrix at 13; model_matrix at 14; model_matrix at 15; model_matrix at 16)
+
+
+sphere_shader_no_lights ->
+    /**
+    * Define sphere mapping shader with no lights supported.
+    * This is needed in case where GL_EXT_gpu_shader4 is not available.
+    **/
+    shader_program
+        vertex_shader <<
+        uniform mat4 model;
+        uniform vec3 camera;
+
+        varying vec4 color;
+        void main()
+        {
+            mat3 normalMatrix;
+
+            // Get linear part of model matrix
+            normalMatrix[0][0] = model[0][0];
+            normalMatrix[0][1] = model[0][1];
+            normalMatrix[0][2] = model[0][2];
+
+            normalMatrix[1][0] = model[1][0];
+            normalMatrix[1][1] = model[1][1];
+            normalMatrix[1][2] = model[1][2];
+
+            normalMatrix[2][0] = model[2][0];
+            normalMatrix[2][1] = model[2][1];
+            normalMatrix[2][2] = model[2][2];
+
+            // Determine object parameters
+            gl_Position    = ftransform();
+            gl_TexCoord[0] = gl_TextureMatrix[0] * gl_MultiTexCoord0;
+
+            // Compute world position and normal
+            vec4 worldPos = model * gl_Vertex;
+            vec3 normal   = normalize(normalMatrix * gl_Normal);
+            vec3 eyePos   = normalize(worldPos.xyz - camera);
+
+            // Compute camera parameters
+            vec3  r  = reflect( eyePos, normal );
+            float m  = 2.0 * sqrt( r.x * r.x + r.y * r.y + (r.z + 1.0) * (r.z + 1.0) );
+
+            // Compute sphere coordinates
+            gl_TexCoord[1].s = r.x/m + 0.5;
+            gl_TexCoord[1].t = r.y/m + 0.5;
+
+            color = gl_Color;
+        }
+        >>
+        fragment_shader <<
+            // Mapping parameters
+            uniform bool      hasColorMap;
+            uniform float     ratio;
+            uniform sampler2D colorMap;
+            uniform sampler2D sphereMap;
+
+            varying vec4 color;
+            void main()
+            {
+                vec4 sphereColor, mainColor, renderColor;
+
+                // Get sphere map
+                sphereColor = texture2D(sphereMap, gl_TexCoord[1].st);
+
+                // Get color map
+                mainColor = texture2D(colorMap, gl_TexCoord[0].st);
+
+                // Check if there is really a color map
+                if(hasColorMap)
+                   mainColor *= color;
+                else
+                   mainColor  = color;
+
+                renderColor  = mix(mainColor, sphereColor, ratio);
+                gl_FragColor = renderColor;
+            }
+        >>
+    shader_set colorMap    := 0             // Unit of the color map
+    shader_set sphereMap   := 1             // Unit of the cube map
+    shader_set ratio       := SPHERE_RATIO  // Reflection ratio
+    shader_set hasColorMap := HAS_COLOR_MAP // Check if a color map is bound
+
+    //FOLLOWING PARAMETERS ARE NEEDED BUT NOT OPTIMIZED BECAUSE LISTS ARE RELOAD FULLY TO EACH XL FUNCTIONS CALL
+    shader_set camera   := (camera_position at 1; camera_position at 2; camera_position at 3)
+    shader_set model    := (model_matrix at 1;  model_matrix at 2;  model_matrix at 3;  model_matrix at 4;
+                            model_matrix at 5;  model_matrix at 6;  model_matrix at 7;  model_matrix at 8;
+                            model_matrix at 9;  model_matrix at 10; model_matrix at 11; model_matrix at 12;
+                            model_matrix at 13; model_matrix at 14; model_matrix at 15; model_matrix at 16)

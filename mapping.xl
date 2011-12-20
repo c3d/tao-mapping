@@ -6,16 +6,16 @@
 
 module_description
     id "a2cdbc99-ce81-42b2-a218-f51938ef2414"
-    name "Texture Mapping"
+    name "Mapping"
     import_name "Mapping"
     description "Allow to add details in a scene thanks to a surface texture"
     author "Taodyne SAS"
     website "http://www.taodyne.com"
-    version 1.003
+    version "1.0"
 
 module_description "fr",
-    name "Placage de texture"
-    description "Permet d'ajouter des détails visuels dans une scène à partir une combinaison d'images."
+    name "Mappage"
+    description "Permet d'ajouter des détails visuels dans une scène à partir d'images."
 
 // Check if GL_EXT_gpu_shader4 is supported in Tao
 SHADER4_AVAILABLE_MAPPING -> true
@@ -37,3 +37,5 @@ import "alpha_mapping.xl.crypt"
 import "displacement_mapping.xl.crypt"
 import "normal_mapping.xl.crypt"
 import "noise_mapping.xl.crypt"
+import "cube_mapping.xl.crypt"
+import "sphere_mapping.xl.crypt"

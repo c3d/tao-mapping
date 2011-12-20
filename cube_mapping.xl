@@ -1,0 +1,437 @@
+// ****************************************************************************
+//  cube_mapping.xl                                                 Tao project
+// ****************************************************************************
+//
+//   File Description:
+//
+//    Implement cube mapping
+//    For further informations, see http://en.wikipedia.org/wiki/Cube_mapping
+//
+//
+//
+//
+//
+//
+//
+//
+// ****************************************************************************
+// This document is released under the GNU General Public License.
+// See http://www.gnu.org/copyleft/gpl.html and Matthew 25:22 for details
+//  (C) 2011 Christophe de Dinechin <christophe@taodyne.com>
+//  (C) 2011 Jérôme Forissier <jerome@taodyne.com>
+//  (C) 2011 Catherine Burvelle <cathy@taodyne.com>
+//  (C) 2011 Taodyne SAS
+// ****************************************************************************
+
+cube_mapping_license_ok ->
+    if check_license ("Mapping 1.0", false) then
+        true
+    else
+        if blink (1.0, 1.0) then
+           true
+        else
+           false
+
+// -------------------------------------------------------------------------------------------------------------------
+//   CUBE MAP
+//   For further informations, see http://wiki.polycount.com/CubeMap
+// -------------------------------------------------------------------------------------------------------------------
+
+cube_map s:integer, t:tree->
+    /**
+    * Create a cube map.
+    **/
+    if cube_mapping_license_ok then
+        if SHADER4_AVAILABLE_MAPPING = false then
+            cube_map_shader_no_lights
+        else
+            cube_map_shader_lights
+        texture_cube s, t
+
+
+cube_map_shader_lights ->
+    /**
+    * Define shader to apply correctly cube map with a full support of lights.
+    **/
+    shader_program
+        shader_log
+        vertex_shader <<
+            varying vec3 viewDir;
+            varying vec3 normal;
+            varying vec4 color;
+            void main()
+            {
+                // Generate texture coordinates (equivalent to glTexGen)
+                vec4 xPlane = vec4( 1.0, 0.0, 0.0, 0.0 );
+                vec4 yPlane = vec4( 0.0, 1.0, 0.0, 0.0 );
+                vec4 zPlane = vec4( 0.0, 0.0, 1.0, 0.0 );
+
+                gl_TexCoord[0].x = dot(gl_TextureMatrix[0] * vec4(gl_Vertex.xyz, 1.0), xPlane);
+                gl_TexCoord[0].y = dot(gl_TextureMatrix[0] * vec4(gl_Vertex.xyz, 1.0), yPlane);
+                gl_TexCoord[0].z = dot(gl_TextureMatrix[0] * vec4(gl_Vertex.xyz, 1.0), zPlane);
+
+                // Compute position
+                gl_Position = ftransform();
+
+                // Compute world position and normal
+                normal  = gl_NormalMatrix * gl_Normal;
+                viewDir = -vec3(gl_ModelViewMatrix * gl_Vertex);
+
+                color = gl_Color;
+            }
+        >>
+        fragment_shader <<
+            #extension GL_EXT_gpu_shader4 : require
+
+            // Mapping parameters
+            uniform samplerCube cubeMap;
+            uniform int lights;
+
+            varying vec3 viewDir;
+            varying vec3 normal;
+            varying vec4 color;
+            /**
+            * Compute render color according to materials,
+            * lights and colors parameters which are
+            * set in the current scene.
+            **/
+            vec4 computeRenderColor(vec4 renderColor)
+            {
+                vec4 lighting_color = renderColor;
+                if(lights > 0)
+                {
+                    // Define a maximum of lights supported
+                    int MAX_LIGHTS = 8;
+
+                    vec3 N = normalize(normal);
+                    vec3 V = normalize(viewDir);
+
+                    vec4 ambient  = vec4(0.0);
+                    vec4 diffuse  = vec4(0.0);
+                    vec4 specular = vec4(0.0);
+                    ambient = gl_FrontLightModelProduct.sceneColor
+                            * gl_FrontMaterial.ambient;
+
+                    for(int i = 0; i < MAX_LIGHTS; i++)
+                    {
+                        if(bool(lights & (1 << i)))
+                        {
+                            vec3 L = normalize(gl_LightSource[i].position.xyz);
+
+                            // Compute ambient part
+                            ambient += gl_LightSource[i].ambient * gl_FrontMaterial.ambient;
+
+                            // Diffuse coefficient
+                            float nDotL = max(clamp(dot(L, N), 0.0, 1.0), 0.0);
+                            if (nDotL > 0.0)
+                            {
+                                // Compute diffuse part
+                                diffuse += gl_LightSource[i].diffuse
+                                         * gl_FrontMaterial.diffuse
+                                         * nDotL;
+
+                                // Compute specular coefficient
+                                float nDotV = clamp(dot(reflect(-L, N), V), 0.0, 1.0);
+                                if (nDotV > 0.0)
+                                {
+                                    // Compute specular part
+                                    specular += gl_LightSource[i].specular
+                                              * gl_FrontMaterial.specular
+                                              * pow(nDotV, gl_FrontMaterial.shininess);
+                                }
+                            }
+                        }
+                    }
+
+                     // Define new render color
+                    lighting_color  = (ambient + diffuse) * renderColor + specular;
+                }
+
+                return lighting_color;
+            }
+
+            void main()
+            {
+                vec4 renderColor = textureCube(cubeMap, gl_TexCoord[0].xyz) * color;
+                gl_FragColor     = computeRenderColor(renderColor);
+            }
+        >>
+    shader_set cubeMap := texture_unit // Unit of the cube map
+    shader_set lights  := lights_mask  // Bitmask of all enabled lights
+
+
+cube_map_shader_no_lights ->
+    /**
+    * Define shader to apply correctly cube map with no lights supported.
+    * This is needed in case where GL_EXT_gpu_shader4 is not available.
+    **/
+    shader_program
+        shader_log
+        vertex_shader <<
+            varying vec4 color;
+
+            void main()
+            {
+                // Generate texture coordinates (equivalent to glTexGen)
+                vec4 xPlane = vec4( 1.0, 0.0, 0.0, 0.0 );
+                vec4 yPlane = vec4( 0.0, 1.0, 0.0, 0.0 );
+                vec4 zPlane = vec4( 0.0, 0.0, 1.0, 0.0 );
+
+                gl_TexCoord[0].x = dot(gl_TextureMatrix[0] * vec4(gl_Vertex.xyz, 1.0), xPlane);
+                gl_TexCoord[0].y = dot(gl_TextureMatrix[0] * vec4(gl_Vertex.xyz, 1.0), yPlane);
+                gl_TexCoord[0].z = dot(gl_TextureMatrix[0] * vec4(gl_Vertex.xyz, 1.0), zPlane);
+
+                // Compute position
+                gl_Position = ftransform();
+
+                color = gl_Color;
+            }
+        >>
+        fragment_shader <<
+            varying vec4 color;
+
+            // Mapping parameters
+            uniform samplerCube cubeMap;
+            void main()
+            {
+                vec4 cubeColor = textureCube(cubeMap, gl_TexCoord[0].xyz);
+                gl_FragColor   = cubeColor * color;
+            }
+        >>
+    shader_set cubeMap := texture_unit // Unit of the cube map
+
+
+
+// -------------------------------------------------------------------------------------------------------------------
+//   CUBE MAPPING
+// -------------------------------------------------------------------------------------------------------------------
+
+// Define cube mapping ratio
+CUBE_RATIO -> 0.0
+CUBE_RATIO := 0.0
+
+cube_mapping r:real->
+    /**
+    * Apply cube mapping.
+    **/
+    has_color_map
+    CUBE_RATIO := r
+    if cube_mapping_license_ok then
+        if SHADER4_AVAILABLE_MAPPING = false then
+            cube_shader_no_lights
+        else
+            cube_shader_lights
+
+cube_shader_lights ->
+    /**
+    * Define cube mapping shader with a full support of lights.
+    **/
+    shader_program
+        shader_log
+        vertex_shader <<
+            uniform mat3 normalMatrix;
+            uniform vec3 camera;
+
+            varying vec3 viewDir;
+            varying vec3 normal;
+            varying vec4 color;
+            void main()
+            {
+                // Compute world position and normal
+                vec4 worldPos = gl_Vertex;
+                viewDir  = normalize(worldPos.xyz - camera);
+                normal   = normalize(normalMatrix * gl_Normal);
+
+                // Compute reflection vector
+                vec3 r = reflect (viewDir, normal);
+
+                // Compute texture coordinates
+                gl_TexCoord[1] = gl_TextureMatrix[1] * vec4 (r, 1.0);
+                gl_TexCoord[0] = gl_TextureMatrix[0] * gl_MultiTexCoord0;
+
+                // Compute position
+                gl_Position = ftransform();
+
+                // Compute new values for lighting
+                normal   =  normalize(gl_NormalMatrix * gl_Normal);
+                viewDir  = -normalize((gl_ModelViewMatrix * gl_Vertex).xyz);
+
+                color = gl_Color;
+            }
+        >>
+        fragment_shader <<
+            #extension GL_EXT_gpu_shader4 : require
+
+            // Mapping parameters
+            uniform float       ratio;
+            uniform sampler2D   colorMap;
+            uniform samplerCube cubeMap;
+            uniform int         lights;
+            uniform bool        hasColorMap;
+
+            varying vec3 viewDir;
+            varying vec3 normal;
+            varying vec4 color;
+            /**
+            * Compute render color according to materials,
+            * lights and colors parameters which are
+            * set in the current scene.
+            **/
+            vec4 computeRenderColor(vec4 renderColor)
+            {
+                vec4 lighting_color = renderColor;
+                if(lights > 0)
+                {
+                    // Define a maximum of lights supported
+                    int MAX_LIGHTS = 8;
+
+                    vec3 N = normalize(normal);
+                    vec3 V = normalize(viewDir);
+
+                    vec4 ambient  = vec4(0.0);
+                    vec4 diffuse  = vec4(0.0);
+                    vec4 specular = vec4(0.0);
+                    ambient = gl_FrontLightModelProduct.sceneColor
+                            * gl_FrontMaterial.ambient;
+
+                    for(int i = 0; i < MAX_LIGHTS; i++)
+                    {
+                        if(bool(lights & (1 << i)))
+                        {
+                            vec3 L = normalize(gl_LightSource[i].position.xyz);
+
+                            // Compute ambient part
+                            ambient += gl_LightSource[i].ambient * gl_FrontMaterial.ambient;
+
+                            // Diffuse coefficient
+                            float nDotL = max(clamp(dot(L, N), 0.0, 1.0), 0.0);
+                            if (nDotL > 0.0)
+                            {
+                                // Compute diffuse part
+                                diffuse += gl_LightSource[i].diffuse
+                                         * gl_FrontMaterial.diffuse
+                                         * nDotL;
+
+                                // Compute specular coefficient
+                                float nDotV = clamp(dot(reflect(-L, N), V), 0.0, 1.0);
+                                if (nDotV > 0.0)
+                                {
+                                    // Compute specular part
+                                    specular += gl_LightSource[i].specular
+                                              * gl_FrontMaterial.specular
+                                              * pow(nDotV, gl_FrontMaterial.shininess);
+                                }
+                            }
+                        }
+                    }
+
+                     // Define new render color
+                    lighting_color  = (ambient + diffuse) * renderColor + specular;
+                }
+
+                return lighting_color;
+            }
+
+            void main()
+            {
+                vec4 cubeColor, mainColor, renderColor;
+
+                // Get cube map
+                cubeColor = textureCube(cubeMap, gl_TexCoord[1].xyz);
+
+                // Get color map
+                mainColor = texture2D(colorMap, gl_TexCoord[0].st);
+
+                // Check if there is really a color map
+                if(hasColorMap)
+                   mainColor *= color;
+                else
+                   mainColor  = color;
+
+                renderColor  = mix(mainColor, cubeColor, ratio);
+                gl_FragColor = computeRenderColor(renderColor);
+            }
+        >>
+    shader_set colorMap    := 0             // Unit of the color map
+    shader_set cubeMap     := 1             // Unit of the cube map
+    shader_set lights      := lights_mask   // Bitmask of enabled lights
+    shader_set ratio       := CUBE_RATIO    // Reflection ratio
+    shader_set hasColorMap := HAS_COLOR_MAP // Check if a color map is bound
+
+    //FOLLOWING PARAMETERS ARE NEEDED BUT NOT OPTIMIZED BECAUSE LISTS ARE RELOAD FULLY TO EACH XL FUNCTIONS CALL
+    shader_set camera       := (camera_position at 1; camera_position at 2; camera_position at 3)
+    shader_set normalMatrix := (model_matrix at 1;  model_matrix at 2;  model_matrix at 3;
+                                model_matrix at 5;  model_matrix at 6;  model_matrix at 7;
+                                model_matrix at 9;  model_matrix at 10; model_matrix at 11)
+
+
+cube_shader_no_lights ->
+    /**
+    * Define cube mapping shader with no lights supported.
+    * This is needed in case where GL_EXT_gpu_shader4 is not available.
+    **/
+    shader_program
+        shader_log
+        vertex_shader <<
+            uniform mat3 normalMatrix;
+            uniform vec3 camera;
+
+            varying vec4 color;
+            void main()
+            {
+                // Compute world position and normal
+                vec4 worldPos = gl_Vertex;
+                vec3 normal   = normalize(normalMatrix * gl_Normal);
+                vec3 eyePos   = normalize(worldPos.xyz - camera);
+
+                // Compute reflection vector
+                vec3 r = reflect (eyePos, normal);
+
+                // Compute texture coordinates
+                gl_TexCoord[1] = gl_TextureMatrix[1] * vec4 (r, 1.0);
+                gl_TexCoord[0] = gl_TextureMatrix[0] * gl_MultiTexCoord0;
+
+                // Compute position
+                gl_Position = ftransform();
+
+                color = gl_Color;
+            }
+        >>
+        fragment_shader <<
+            // Mapping parameters
+            uniform bool        hasColorMap;
+            uniform float       ratio;
+            uniform sampler2D   colorMap;
+            uniform samplerCube cubeMap;
+
+            varying vec4 color;
+            void main()
+            {
+                vec4 cubeColor, mainColor, renderColor;
+
+                // Get cube map
+                cubeColor = textureCube(cubeMap, gl_TexCoord[1].xyz);
+
+                // Get color map
+                mainColor = texture2D(colorMap, gl_TexCoord[0].st);
+
+                // Check if there is really a color map
+                if(hasColorMap)
+                   mainColor *= color;
+                else
+                   mainColor  = color;
+
+                renderColor  = mix(mainColor, cubeColor, ratio);
+                gl_FragColor = renderColor;
+            }
+        >>
+    shader_set colorMap    := 0             // Unit of the color map
+    shader_set cubeMap     := 1             // Unit of the cube map
+    shader_set ratio       := CUBE_RATIO    // Reflection ratio
+    shader_set hasColorMap := HAS_COLOR_MAP // Check if a color map is bound
+
+    //FOLLOWING PARAMETERS ARE NEEDED BUT NOT OPTIMIZED BECAUSE LISTS ARE RELOAD FULLY TO EACH XL FUNCTIONS CALL
+    shader_set camera       := (camera_position at 1; camera_position at 2; camera_position at 3)
+    shader_set normalMatrix := (model_matrix at 1;  model_matrix at 2;  model_matrix at 3;
+                                model_matrix at 5;  model_matrix at 6;  model_matrix at 7;
+                                model_matrix at 9;  model_matrix at 10; model_matrix at 11)
