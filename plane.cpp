@@ -111,6 +111,14 @@ void Plane::Draw(PlaneMesh* plane)
 //   Draw a subdivided plane
 // ----------------------------------------------------------------------------
 {
+    if (!tested)
+    {
+        licensed = tao->checkLicense("Mapping 1.0", false);
+        tested = true;
+    }
+    if (!licensed && !tao->blink(1.0, 1.0))
+        return;
+
     glPushMatrix();
     glPushAttrib(GL_ENABLE_BIT);
     glEnable(GL_NORMALIZE);

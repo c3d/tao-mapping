@@ -1,6 +1,5 @@
 /**
- * @defgroup Mapping Mapping
- * @ingroup Modules
+ * @taomoduledescription{Mapping, Mapping}
  *
  * Define some mapping techniques.
  *
@@ -28,7 +27,7 @@
  *
  * @image html displacement.png "Output from displacement.ddd"
  *
- *
+ * @endtaomoduledescription{Mapping}
  * @{
  */
 
