@@ -1,7 +1,7 @@
 /**
  * @taomoduledescription{Mapping, Mapping}
  *
- * Define some mapping techniques.
+ * Define some texture mapping techniques.
  *
  * Texture mapping is a method for adding detail onto a triangle,
  * thanks to a surface texture (a bitmap or raster image).
