@@ -32,14 +32,12 @@ bool TextureMapping::licensed = false;
 //
 // ============================================================================
 
-TextureMapping::TextureMapping(const QGLContext **pcontext)
+TextureMapping::TextureMapping()
 // ----------------------------------------------------------------------------
 //   Construction
 // ----------------------------------------------------------------------------
-    : pcontext(pcontext)
 {
 }
-
 
 TextureMapping::~TextureMapping()
 // ----------------------------------------------------------------------------
@@ -47,7 +45,6 @@ TextureMapping::~TextureMapping()
 // ----------------------------------------------------------------------------
 {
 }
-
 
 void TextureMapping::render_callback(void *arg)
 // ----------------------------------------------------------------------------
@@ -57,15 +54,6 @@ void TextureMapping::render_callback(void *arg)
     ((TextureMapping *)arg)->Draw();
 }
 
-
-void TextureMapping::identify_callback(void *)
-// ----------------------------------------------------------------------------
-//   Identify callback: don't do anything
-// ----------------------------------------------------------------------------
-{
-}
-
-
 void TextureMapping::delete_callback(void *arg)
 // ----------------------------------------------------------------------------
 //   Delete callback: destroy object
@@ -74,32 +62,7 @@ void TextureMapping::delete_callback(void *arg)
     delete (TextureMapping *)arg;
 }
 
-
 void TextureMapping::Draw()
-// ----------------------------------------------------------------------------
-//   Draw mapping
-// ----------------------------------------------------------------------------
-{
-}
-
-
-void TextureMapping::checkGLContext()
-// ----------------------------------------------------------------------------
-//   Re-create context-dependent resources if GL context has changed
-// ----------------------------------------------------------------------------
-{
-    if (*pcontext != QGLContext::currentContext())
-    {
-        createShaders();
-        *pcontext = QGLContext::currentContext();
-    }
-}
-
-
-void TextureMapping::createShaders()
-// ----------------------------------------------------------------------------
-//   Create shader programs for the material
-// ----------------------------------------------------------------------------
 {
 }
 
