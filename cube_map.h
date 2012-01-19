@@ -21,6 +21,9 @@
 // ****************************************************************************
 
 #include <stdio.h>
+#include "tao/coords3d.h"
+#include "tao/module_api.h"
+#include "tao/tao_gl.h"
 #include "texture_mapping.h"
 
 struct  TextureFace
@@ -130,22 +133,29 @@ struct CubeMap : public TextureMapping
     bool setTexture(text filename, uint face);
     bool loadCubeMap();
 
-private:
-    uint         isInclude();
-    TextureFace* whichFace(uint face);
-    bool         loadTexture(uint face);
-    void         checkGLContext();
+protected:
+    virtual void    createShaders();
 
 private:
-    int                size;
-    bool               flip_u : 1;
-    bool               flip_v : 1;
-    TextureCube        currentTexture;
+    uint            isInclude();
+    TextureFace*    whichFace(uint face);
+    bool            loadTexture(uint face);
+    void            checkGLContext();
+
+private:
+    int             size;
+    bool            flip_u : 1;
+    bool            flip_v : 1;
+    TextureCube     currentTexture;
 
     // Textures cache
     static context_to_textures texture_maps;
 #   define textures texture_maps[QGLContext::currentContext()]
 
+    static bool failed;
+    static QGLShaderProgram* pgm;
+    static std::map<text, GLint> uniforms;
+    static const QGLContext* context;
 };
 
 #endif // CUBEMAP_H
