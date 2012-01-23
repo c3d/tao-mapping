@@ -91,7 +91,7 @@ void CubeMapping::Draw()
         tested = true;
     }
 
-    if (!licensed && !tao->blink(1.0, 1.0, 300.0))
+    if (!licensed && !tao->blink(1.0, 1.0))
         return;
 
     checkGLContext();

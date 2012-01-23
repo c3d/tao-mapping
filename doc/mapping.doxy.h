@@ -109,7 +109,7 @@ plane(x:real, y:real, w:real, h:real, l:integer, c:integer);
  * carte des normales (<em>normal map</em>) à l'unité 2 afin de corriger les
  * normales du modèle. La fonction @ref normal_map peut être utile pour cela.
  *
- * @note Afin d'obtenir de bons résultats, la forme géométrique doit être très
+ * @note Afin d'obtenir de bons résultats, la forme géométriue doit être très
  * subdivisée. Cf. @ref plane.
  *
  * @param ratio Importance du déplacement.
@@ -159,7 +159,7 @@ alpha_mapping(threshold:real);
  * (for instance: a displacement map)
  *
  * @~french
- * Convertit la texture courante en une carte de normales simples.
+ * Convertit la texture courante en une carte de normales simple.
  * Génère une texture qui peut servir de <em>normal map</em> pour un
  * <em>normal mapping</em> (@ref normal_mapping) ou un
  * <em>displacement mapping</em> (@ref displacement_mapping).
@@ -306,7 +306,7 @@ cube 0, 0, 0, 30000, 30000, 30000
  * Une <em>cube map</em> se construit en utilisant @ref cube_map_face.
  * Le résultat peut être ensuite utilisé par @ref cube_mapping pour générer
  * un environnement (un très grand cube qui englobe la caméra) et sur un objet
- * pour simuler des réflexions de l'environnement sur l'objet.
+ * pour simuler des réflections de l'environnement sur l'objet.
  *
  * @param size Permet de redimensionner les images sous forme de carrés. Si 0,
  * il n'y a pas de redimensionnement.

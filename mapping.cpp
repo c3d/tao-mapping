@@ -97,7 +97,7 @@ Tree_p cube_map_flip(Tree_p tree, bool u, bool v)
 }
 
 
-Tree_p cube_mapping(Tree_p /*tree*/, Real_p ratio)
+Tree_p cube_mapping(Tree_p tree, Real_p ratio)
 // ----------------------------------------------------------------------------
 //   Apply cube mapping
 // ----------------------------------------------------------------------------
@@ -111,7 +111,7 @@ Tree_p cube_mapping(Tree_p /*tree*/, Real_p ratio)
 }
 
 
-Tree_p sphere_mapping(Tree_p /*tree*/, Real_p ratio)
+Tree_p sphere_mapping(Tree_p tree, Real_p ratio)
 // ----------------------------------------------------------------------------
 //   Apply cube mapping
 // ----------------------------------------------------------------------------
