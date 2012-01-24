@@ -1,10 +1,10 @@
 // ****************************************************************************
-//  cube_map.cpp                                                    Tao project
+//  sphere_mapping.cpp                                              Tao project
 // ****************************************************************************
 //
 //   File Description:
 //
-//   cubeMap implementation.
+//   Sphere mapping implementation.
 //
 //
 //
@@ -15,31 +15,37 @@
 // ****************************************************************************
 // This software is property of Taodyne SAS - Confidential
 // Ce logiciel est la propriété de Taodyne SAS - Confidentiel
-//  (C) 1992-2010 Christophe de Dinechin <christophe@taodyne.com>
-//  (C) 2010 Jerome Forissier <jerome@taodyne.com>
-//  (C) 2010 Taodyne SAS
+//  (C) 2011 Baptiste Soulisse <baptiste.soulisse@taodyne.com>
+//  (C) 2011 Taodyne SAS
 // ****************************************************************************
-#include <string.h>
-#include <math.h>
-#include "cube_map.h"
+#include "sphere_mapping.h"
 
-CubeMap::context_to_textures CubeMap::texture_maps;
-bool                         CubeMap::failed = false;
-QGLShaderProgram*            CubeMap::pgm = NULL;
-std::map<text, GLint>        CubeMap::uniforms;
-const QGLContext*            CubeMap::context = NULL;
+// ============================================================================
+//
+//   Cube Mapping
+//
+// ============================================================================
 
-CubeMap::CubeMap(int size)
+bool                  SphereMapping::failed = false;
+QGLShaderProgram*     SphereMapping::pgm = NULL;
+std::map<text, GLint> SphereMapping::uniforms;
+const QGLContext*     SphereMapping::context = NULL;
+
+SphereMapping::SphereMapping(float ratio)
 // ----------------------------------------------------------------------------
 //   Construction
 // ----------------------------------------------------------------------------
-    : TextureMapping(&context), size(size), flip_u(false), flip_v(false)
-{    
-    currentTexture.size = size;
+    : TextureMapping(&context), ratio(ratio)
+{
+    checkGLContext();
+
+    // Get model matrix
+    Matrix4 m = tao->ModelMatrix();
+    std::copy(m.Data(), m.Data() + 16, model[0]);
 }
 
 
-CubeMap::~CubeMap()
+SphereMapping::~SphereMapping()
 // ----------------------------------------------------------------------------
 //   Destruction
 // ----------------------------------------------------------------------------
@@ -47,104 +53,46 @@ CubeMap::~CubeMap()
 }
 
 
-void CubeMap::flip(bool u, bool v)
+void SphereMapping::render_callback(void *arg)
 // ----------------------------------------------------------------------------
-//   Flip faces of the cube map
+//   Rendering callback: call the render function for the object
 // ----------------------------------------------------------------------------
 {
-    flip_u = u;
-    flip_v = v;
+    ((SphereMapping *)arg)->Draw();
 }
 
 
-bool CubeMap::setTexture(text filename, uint face)
+void SphereMapping::identify_callback(void *arg)
 // ----------------------------------------------------------------------------
-//   Set a texture to a given face of the cube
+//   Identify callback: don't do anything
 // ----------------------------------------------------------------------------
 {
-    if(face < 6)
-    {
-        TextureFace* currentFace = whichFace(face);
-        currentFace->name = filename;
-        currentFace->flip_u = flip_u;
-        currentFace->flip_v = flip_v;
-
-        return true;
-    }
-    return false;
+    (void) arg;
 }
 
 
-bool CubeMap::loadCubeMap()
+void SphereMapping::delete_callback(void *arg)
 // ----------------------------------------------------------------------------
-//   Create a cubemap texture according to textures of the different faces
-//   and set it to the textures list in Tao
+//   Delete callback: destroy object
 // ----------------------------------------------------------------------------
 {
-    checkGLContext();
-    GLuint cubeMapId = isInclude();
+    delete (SphereMapping *)arg;
+}
 
-    if(! cubeMapId)
-    {
-        // Prune the map if it gets too big
-        while (textures.size() > MAX_TEXTURES)
-        {
-            texture_map::iterator first = textures.begin();
-            glDeleteTextures(1, &(*first).first);
-            textures.erase(first);
-        }
 
-        // Load cubemap texture
-        glGenTextures (1, &cubeMapId);
-        glBindTexture (GL_TEXTURE_CUBE_MAP, cubeMapId);
-
-        // Setup some parameters for texture filters and mapping
-        glTexParameteri (GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri (GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-        glTexParameteri (GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri (GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glTexParameteri (GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-
-        for(int i = 0; i < 6; i++)
-        {
-            // Load each face of the cube map
-            if (!loadTexture (i))
-            {
-                glDeleteTextures (1, &cubeMapId);
-                return false;
-            }
-        }
-
-        // Remember for the next time
-        textures[cubeMapId] = currentTexture;
-    }
-
+void SphereMapping::Draw()
+// ----------------------------------------------------------------------------
+//   Apply plastic material
+// ----------------------------------------------------------------------------
+{
     if (!tested)
     {
         licensed = tao->checkLicense("Mapping 1.0", false);
         tested = true;
     }
-    if (!licensed && !tao->blink(1.0, 1.0, 300.0))
-        return false;
 
-    // Set to the textures list in Tao.
-    TextureMapping::tao->BindTexture(cubeMapId, GL_TEXTURE_CUBE_MAP);
-
-    return true;
-}
-
-
-void CubeMap::Draw()
-// ----------------------------------------------------------------------------
-//   Draw cube map texture
-// ----------------------------------------------------------------------------
-{
     if (!licensed && !tao->blink(1.0, 1.0, 300.0))
         return;
-
-    // Enable pixel blur
-    TextureMapping::tao->HasPixelBlur(true);
 
     checkGLContext();
 
@@ -158,7 +106,17 @@ void CubeMap::Draw()
         tao->SetShader(prg_id);
 
         // Set uniform values
-        glUniform1i(uniforms["cubeMap"], tao->TextureUnit());
+        glUniform1i(uniforms["colorMap"], 0);
+        glUniform1i(uniforms["sphereMap"], 1);
+        glUniform1i(uniforms["hasColorMap"], tao->HasTexture(0));
+        glUniform1f(uniforms["ratio"], ratio);
+        glUniformMatrix4fv(uniforms["modelMatrix"], 1, 0, &model[0][0]);
+
+        // Get and set camera position
+        Vector3 cam;
+        tao->getCamera(&cam, NULL, NULL, NULL);
+        GLfloat camera[3] = {cam.x, cam.y, cam.z};
+        glUniform3fv(uniforms["camera"], 1, camera);
 
         if(tao->isGLExtensionAvailable("GL_EXT_gpu_shader4"))
         {
@@ -169,88 +127,7 @@ void CubeMap::Draw()
 }
 
 
-uint CubeMap::isInclude()
-// ----------------------------------------------------------------------------
-//  Check if the current cubemap texture has been already created
-// ----------------------------------------------------------------------------
-{
-   if(textures.size() != 0)
-   {
-       texture_map::iterator it;
-       for(it = textures.begin(); it != textures.end(); it++)
-           if(textures.find((*it).first) != textures.end())
-                if(textures[(*it).first] == currentTexture)
-                    return (*it).first;
-   }
-   return 0;
-}
-
-
-TextureFace* CubeMap::whichFace(uint face)
-// ----------------------------------------------------------------------------
-//  Get adress of the texture name according to a given face
-// ----------------------------------------------------------------------------
-{
-    switch(face)
-    {
-        case 0:  return &currentTexture.right;  break;
-        case 1:  return &currentTexture.left;   break;
-        case 2:  return &currentTexture.top;    break;
-        case 3:  return &currentTexture.bottom; break;
-        case 4:  return &currentTexture.front ; break;
-        default: return &currentTexture.back;   break;
-    }
-}
-
-
-bool CubeMap::loadTexture (uint face)
-// ----------------------------------------------------------------------------
-//   Load a texture according to a given face and
-//   bind it to the face of the cubemap texture
-// ----------------------------------------------------------------------------
-{
-    TextureFace* currentFace = whichFace(face);
-    QImage image(currentFace->name.c_str());
-    if (image.isNull())
-    {
-        text qualified = "texture:" + currentFace->name;
-        image.load(qualified.c_str());
-    }
-    if (!image.isNull())
-    {
-        if (size <= 0)
-            size = image.width();
-        if (size != image.width() || size != image.height())
-            image = image.scaled(size, size, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
-
-        QImage texture = QGLWidget::convertToGLFormat(image);
-        texture = texture.mirrored(currentFace->flip_u, currentFace->flip_v);
-
-        glTexImage2D (GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, 0, GL_RGBA,
-                      texture.width(), texture.height(), 0, GL_RGBA,
-                      GL_UNSIGNED_BYTE, texture.bits());
-
-        return true;
-    }
-    return false;
-}
-
-
-void CubeMap::checkGLContext()
-// ----------------------------------------------------------------------------
-//   Make sure a texture_map has been allocated for the current GL context
-// ----------------------------------------------------------------------------
-{
-    TextureMapping::checkGLContext();
-    if (!texture_maps.count(QGLContext::currentContext()))
-    {
-        texture_map m;
-        texture_maps[QGLContext::currentContext()] = m;
-    }
-}
-
-
-void CubeMap::createShaders()
+void SphereMapping::createShaders()
 // ----------------------------------------------------------------------------
 //   Create shader programs
 // ----------------------------------------------------------------------------
@@ -275,28 +152,56 @@ void CubeMap::createShaders()
                 "** Taodyne at contact@taodyne.com.                                               \n"
                 "**                                                                               \n"
                 "********************************************************************************/\n"
+                "uniform mat4 modelMatrix;"
+                "uniform vec3 camera;"
+
                 "varying vec3 viewDir;"
                 "varying vec3 normal;"
                 "varying vec4 color;"
+
                 "void main()"
                 "{"
-                "   /* Generate texture coordinates (equivalent to glTexGen) */"
-                "    vec4 xPlane = vec4( 1.0, 0.0, 0.0, 0.0 );"
-                "    vec4 yPlane = vec4( 0.0, 1.0, 0.0, 0.0 );"
-                "    vec4 zPlane = vec4( 0.0, 0.0, 1.0, 0.0 );"
+                "   mat3 normalMatrix;"
 
-                "    gl_TexCoord[0].x = dot(gl_TextureMatrix[0] * vec4(gl_Vertex.xyz, 1.0), xPlane);"
-                "    gl_TexCoord[0].y = dot(gl_TextureMatrix[0] * vec4(gl_Vertex.xyz, 1.0), yPlane);"
-                "    gl_TexCoord[0].z = dot(gl_TextureMatrix[0] * vec4(gl_Vertex.xyz, 1.0), zPlane);"
+                "   /* First column */"
+                "   normalMatrix[0][0] = modelMatrix[0][0];"
+                "   normalMatrix[0][1] = modelMatrix[0][1];"
+                "   normalMatrix[0][2] = modelMatrix[0][2];"
 
-                "    /* Compute position */"
-                "    gl_Position = ftransform();"
+                "   /* Second column */"
+                "   normalMatrix[1][0] = modelMatrix[1][0];"
+                "   normalMatrix[1][1] = modelMatrix[1][1];"
+                "   normalMatrix[1][2] = modelMatrix[1][2];"
 
-                "    /* Compute world position and normal */"
-                "    normal  = gl_NormalMatrix * gl_Normal;"
-                "    viewDir = -vec3(gl_ModelViewMatrix * gl_Vertex);"
+                "   /* Third column */"
+                "   normalMatrix[2][0] = modelMatrix[2][0];"
+                "   normalMatrix[2][1] = modelMatrix[2][1];"
+                "   normalMatrix[2][2] = modelMatrix[2][2];"
 
-                "    color = gl_Color;"
+                "   /* Compute world position and normal */"
+                "   vec4 worldPos = modelMatrix * gl_Vertex;"
+                "   viewDir  = normalize(worldPos.xyz - camera);"
+                "   normal   = normalize(normalMatrix * gl_Normal);"
+
+                "   /* Compute reflection vector */"
+                "   vec3 r = reflect (viewDir, normal);"
+                "   float m  = 2.0 * sqrt( r.x * r.x +"
+                "                          r.y * r.y +"
+                "                         (r.z + 1.0) * (r.z + 1.0));"
+
+                "   /* Compute texture coordinates */"
+                "   gl_TexCoord[0] = gl_TextureMatrix[0] * gl_MultiTexCoord0;"
+                "   gl_TexCoord[1].s = r.x/m + 0.5;"
+                "   gl_TexCoord[1].t = r.y/m + 0.5;"
+
+                "   /* Compute position */"
+                "   gl_Position = ftransform();"
+
+                "   /* Compute new values for lighting */"
+                "   normal   =  normalize(gl_NormalMatrix * gl_Normal);"
+                "   viewDir  = -normalize((gl_ModelViewMatrix * gl_Vertex).xyz);"
+
+                "   color = gl_Color;"
                 "}";
 
         static string fSrc;
@@ -322,7 +227,10 @@ void CubeMap::createShaders()
 
                     "/* Mapping parameters */"
                     "uniform int         lights;"
-                    "uniform samplerCube cubeMap;"
+                    "uniform bool        hasColorMap;"
+                    "uniform float       ratio;"
+                    "uniform sampler2D   colorMap;"
+                    "uniform sampler2D   sphereMap;"
 
                     "varying vec3 viewDir;"
                     "varying vec3 normal;"
@@ -391,8 +299,22 @@ void CubeMap::createShaders()
 
                     "void main()"
                     "{"
-                    "   vec4 renderColor = textureCube(cubeMap, gl_TexCoord[0].xyz) * color;"
-                    "   gl_FragColor     = computeRenderColor(renderColor);"
+                    "   vec4 sphereColor, mainColor, renderColor;"
+
+                    "   /* Get sphere map */"
+                    "   sphereColor = texture2D(sphereMap, gl_TexCoord[1].st);"
+
+                    "   /* Get color map */"
+                    "   mainColor = texture2D(colorMap, gl_TexCoord[0].st);"
+
+                    "   /* Check if there is really a color map */"
+                    "   if(hasColorMap)"
+                    "      mainColor *= color;"
+                    "   else"
+                    "      mainColor  = color;"
+
+                    "   renderColor  = mix(mainColor, sphereColor, ratio);"
+                    "   gl_FragColor = computeRenderColor(renderColor);"
                     "}";
 
         }
@@ -415,13 +337,30 @@ void CubeMap::createShaders()
                     **
                     ********************************************************************************/
                     "/* Mapping parameters */"
+                    "uniform bool        hasColorMap;"
+                    "uniform float       ratio;"
+                    "uniform sampler2D   colorMap;"
                     "uniform samplerCube cubeMap;"
 
                     "varying vec4 color;"
                     "void main()"
                     "{"
-                    "   vec4 renderColor = textureCube(cubeMap, gl_TexCoord[0].xyz) * color;"
-                    "   gl_FragColor     = renderColor * color;"
+                    "   vec4 sphereColor, mainColor, renderColor;"
+
+                    "   /* Get sphere map */"
+                    "   sphereColor = texture2D(sphereMap, gl_TexCoord[1].st);"
+
+                    "   /* Get color map */"
+                    "   mainColor = texture2D(colorMap, gl_TexCoord[0].st);"
+
+                    "   /* Check if there is really a color map */"
+                    "   if(hasColorMap)"
+                    "      mainColor *= color;"
+                    "   else"
+                    "      mainColor  = color;"
+
+                    "   renderColor  = mix(mainColor, sphereColor, ratio);"
+                    "   gl_FragColor = renderColor;"
                     "}";
         }
 
@@ -455,8 +394,13 @@ void CubeMap::createShaders()
             // Save uniform locations
             uint id = pgm->programId();
 
-            uniforms["cubeMap"] = glGetUniformLocation(id, "cubeMap");
+            uniforms["ratio"] = glGetUniformLocation(id, "ratio");
             uniforms["lights"] = glGetUniformLocation(id, "lights");
+            uniforms["colorMap"] = glGetUniformLocation(id, "colorMap");
+            uniforms["sphereMap"] = glGetUniformLocation(id, "sphereMap");
+            uniforms["hasColorMap"] = glGetUniformLocation(id, "hasColorMap");
+            uniforms["camera"] = glGetUniformLocation(id, "camera");
+            uniforms["modelMatrix"] = glGetUniformLocation(id, "modelMatrix");
         }
     }
 }

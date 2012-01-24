@@ -21,6 +21,8 @@ HEADERS      = \
     texture_mapping.h \
     plane.h \
     cube_map.h \
+    cube_mapping.h \
+    sphere_mapping.h \
     noise_map.h \
     3rdparty/fbm.h \
 
@@ -28,18 +30,18 @@ SOURCES      = mapping.cpp $${TAOTOPSRC}/tao/include/tao/GL/glew.c \
     texture_mapping.cpp \
     plane.cpp \
     cube_map.cpp \
+    cube_mapping.cpp \
+    sphere_mapping.cpp \
     noise_map.cpp \
     3rdparty/fbm.c \
 
-CRYPT_XL_SOURCES = alpha_mapping.xl displacement_mapping.xl normal_mapping.xl noise_mapping.xl cube_mapping.xl sphere_mapping.xl
+CRYPT_XL_SOURCES = alpha_mapping.xl displacement_mapping.xl normal_mapping.xl noise_mapping.xl
 include(../crypt_xl.pri)
 
 TBL_SOURCES  = mapping.tbl
 OTHER_FILES  = mapping.xl mapping.tbl traces.tbl \
     normal_mapping.xl \
     noise_mapping.xl \
-    cube_mapping.xl \
-    sphere_mapping.xl \
     alpha_mapping.xl \
     displacement_mapping.xl
 QT          += core \
@@ -53,4 +55,5 @@ include(../licenses.pri)
 
 QMAKE_SUBSTITUTES = doc/Doxyfile.in
 DOXYFILE = doc/Doxyfile
+DOXYLANG = en,fr
 include(../modules_doc.pri)
