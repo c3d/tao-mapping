@@ -1,0 +1,291 @@
+// ****************************************************************************
+//  alpha_mapping.xl                                                Tao project
+// ****************************************************************************
+//
+//   File Description:
+//
+//    Implement alpha mapping
+//    For further informations, see http://en.wikipedia.org/wiki/Alpha_mapping
+//
+//
+//
+//
+//
+//
+//
+//
+// ****************************************************************************
+// This document is released under the GNU General Public License.
+// See http://www.gnu.org/copyleft/gpl.html and Matthew 25:22 for details
+//  (C) 2011 Christophe de Dinechin <christophe@taodyne.com>
+//  (C) 2011 Jérôme Forissier <jerome@taodyne.com>
+//  (C) 2011 Catherine Burvelle <cathy@taodyne.com>
+//  (C) 2011 Taodyne SAS
+// ****************************************************************************
+
+
+alpha_mapping_license_ok ->
+    if check_license ("Mapping 1.0", false) then
+        true
+    else
+        if blink (1.0, 1.0) then
+           true
+        else
+           false
+
+// -------------------------------------------------------------------------------------------------------------------
+//   ALPHA MAPPING
+// -------------------------------------------------------------------------------------------------------------------
+
+//Define alpha thresold
+ALPHA_THRESHOLD -> 0.01
+ALPHA_THRESHOLD := 0.01
+
+alpha_mapping n:real ->
+    ALPHA_THRESHOLD := n
+    has_color_map
+    if alpha_mapping_license_ok then
+        if SHADER4_AVAILABLE_MAPPING = false then
+            alpha_shader_no_lights
+        else
+            alpha_shader_lights
+
+alpha_shader_lights ->
+    /**
+    * Define alpha shader.
+    **/
+    shader_program
+        shader_log
+        vertex_shader <<
+            /********************************************************************************
+            **
+            ** Copyright (C) 2011 Taodyne.
+            ** All rights reserved.
+            ** Contact: Taodyne (contact@taodyne.com)
+            **
+            ** This file is part of the Tao Presentations application, developped by Taodyne.
+            ** It can be only used in the software and these modules.
+            **
+            ** If you have questions regarding the use of this file, please contact
+            ** Taodyne at contact@taodyne.com.
+            **
+            ********************************************************************************/
+
+            varying vec3 viewDir;
+            varying vec3 normal;
+            varying vec4 color;
+            void main()
+            {
+                // Compute position
+                gl_Position = ftransform();
+
+                // Compute texture coordinates
+                gl_TexCoord[0] = gl_TextureMatrix[0] * gl_MultiTexCoord0;
+                gl_TexCoord[1] = gl_TextureMatrix[1] * gl_MultiTexCoord1;
+
+                // Compute world position and normal
+                normal  = gl_NormalMatrix * gl_Normal;
+                viewDir = -vec3(gl_ModelViewMatrix * gl_Vertex);
+
+                color = gl_Color;
+            }
+        >>
+        fragment_shader <<
+            /********************************************************************************
+            **
+            ** Copyright (C) 2011 Taodyne.
+            ** All rights reserved.
+            ** Contact: Taodyne (contact@taodyne.com)
+            **
+            ** This file is part of the Tao Presentations application, developped by Taodyne.
+            ** It can be only used in the software and these modules.
+            **
+            ** If you have questions regarding the use of this file, please contact
+            ** Taodyne at contact@taodyne.com.
+            **
+            ********************************************************************************/
+            #extension GL_EXT_gpu_shader4 : require
+
+            // Mapping paramaters
+            uniform int       lights;
+            uniform bool      hasColorMap;
+            uniform float     threshold;
+            uniform sampler2D alphaMap;
+            uniform sampler2D colorMap;
+
+            varying vec3 viewDir;
+            varying vec3 normal;
+            varying vec4 color;
+            /**
+            * Compute render color according to materials,
+            * lights and colors parameters which are
+            * set in the current scene.
+            **/
+            vec4 computeRenderColor(vec4 renderColor)
+            {
+                vec4 lighting_color = renderColor;
+                if(lights > 0)
+                {
+                    // Define a maximum of lights supported
+                    int MAX_LIGHTS = 8;
+
+                    vec3 N = normalize(normal);
+                    vec3 V = normalize(viewDir);
+
+                    vec4 ambient  = vec4(0.0);
+                    vec4 diffuse  = vec4(0.0);
+                    vec4 specular = vec4(0.0);
+                    ambient = gl_FrontLightModelProduct.sceneColor
+                            * gl_FrontMaterial.ambient;
+
+                    // Compute render for each enabled lights
+                    for(int i = 0; i < MAX_LIGHTS; i++)
+                    {
+                        if(bool(lights & (1 << i)))
+                        {
+                            vec3 L = normalize(gl_LightSource[i].position.xyz);
+
+                            // Compute ambient part
+                            ambient += gl_LightSource[i].ambient * gl_FrontMaterial.ambient;
+
+                            // Diffuse coefficient
+                            float nDotL = max(clamp(dot(L, N), 0.0, 1.0), 0.0);
+                            if (nDotL > 0.0)
+                            {
+                                // Compute diffuse part
+                                diffuse += gl_LightSource[i].diffuse
+                                         * gl_FrontMaterial.diffuse
+                                         * nDotL;
+
+                                // Compute specular coefficient
+                                float nDotV = clamp(dot(reflect(-L, N), V), 0.0, 1.0);
+                                if (nDotV > 0.0)
+                                {
+                                    // Compute specular part
+                                    specular += gl_LightSource[i].specular
+                                              * gl_FrontMaterial.specular
+                                              * pow(nDotV, gl_FrontMaterial.shininess);
+                                }
+                            }
+                        }
+                    }
+
+                     // Define new render color
+                    lighting_color  = (ambient + diffuse) * renderColor + specular;
+                }
+
+                return lighting_color;
+            }
+
+            void main()
+            {
+                vec4 alpha_color = texture2D(alphaMap, gl_TexCoord[1].st);
+
+                // Filter alpha map according to the threshold
+                if(alpha_color.r < threshold
+                && alpha_color.g < threshold
+                && alpha_color.b < threshold)
+                    discard;
+
+                // Get color map
+                vec4 mainColor = texture2D(colorMap, gl_TexCoord[0].xy);
+
+                // Check if there is really a color map
+                if(hasColorMap)
+                    mainColor *= color;
+                else
+                    mainColor  = color;
+
+                gl_FragColor  = computeRenderColor(mainColor);
+            }
+        >>
+    shader_set colorMap    := 0               // Unit of the color map
+    shader_set alphaMap    := 1               // Unit of the alpha map
+    shader_set threshold   := ALPHA_THRESHOLD // Threshold of the mapping
+    shader_set lights      := lights_mask     // Bitmask of all enabled lights
+    shader_set hasColorMap := HAS_COLOR_MAP   // Check if there is a color map
+
+
+alpha_shader_no_lights ->
+    /**
+    * Define alpha shader with no lights supported.
+    * This is needed in case where GL_EXT_gpu_shader4 is not available.
+    **/
+    shader_program
+        shader_log
+        vertex_shader <<
+            /********************************************************************************
+            **
+            ** Copyright (C) 2011 Taodyne.
+            ** All rights reserved.
+            ** Contact: Taodyne (contact@taodyne.com)
+            **
+            ** This file is part of the Tao Presentations application, developped by Taodyne.
+            ** It can be only used in the software and these modules.
+            **
+            ** If you have questions regarding the use of this file, please contact
+            ** Taodyne at contact@taodyne.com.
+            **
+            ********************************************************************************/
+
+            varying vec4 color;
+            void main()
+            {
+                // Compute position
+                gl_Position = ftransform();
+
+                // Compute texture coordinates
+                gl_TexCoord[0] = gl_TextureMatrix[0] * gl_MultiTexCoord0;
+                gl_TexCoord[1] = gl_TextureMatrix[1] * gl_MultiTexCoord1;
+
+                color = gl_Color;
+            }
+        >>
+        fragment_shader <<
+            /********************************************************************************
+            **
+            ** Copyright (C) 2011 Taodyne.
+            ** All rights reserved.
+            ** Contact: Taodyne (contact@taodyne.com)
+            **
+            ** This file is part of the Tao Presentations application, developped by Taodyne.
+            ** It can be only used in the software and these modules.
+            **
+            ** If you have questions regarding the use of this file, please contact
+            ** Taodyne at contact@taodyne.com.
+            **
+            ********************************************************************************/
+
+            // Mapping paramaters
+            uniform bool      hasColorMap;
+            uniform float     threshold;
+            uniform sampler2D alphaMap;
+            uniform sampler2D colorMap;
+
+            varying vec4 color;
+            void main()
+            {
+                vec4 alpha_color = texture2D(alphaMap, gl_TexCoord[1].st);
+
+                // Filter alpha map according to the threshold
+                if(alpha_color.r < threshold
+                && alpha_color.g < threshold
+                && alpha_color.b < threshold)
+                    discard;
+
+                // Get color map
+                vec4 mainColor = texture2D(colorMap, gl_TexCoord[0].xy);
+
+                // Check if there is really a color map
+                if(hasColorMap)
+                    mainColor *= color;
+                else
+                    mainColor  = color;
+
+                gl_FragColor = mainColor;
+            }
+        >>
+    shader_set colorMap    := 0               // Unit of the color map
+    shader_set alphaMap    := 1               // Unit of the alpha map
+    shader_set threshold   := ALPHA_THRESHOLD // Threshold of the mapping
+    shader_set hasColorMap := HAS_COLOR_MAP   // Check if there is a color map

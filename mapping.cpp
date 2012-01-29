@@ -24,7 +24,9 @@
 
 XL_DEFINE_TRACES
 
-CubeMap* cube;
+#define MAX_SEEDS 200 // Maximum of noise seeds
+
+CubeMap* cubeMap;
 
 Tree_p plane(Tree_p, Real_p x, Real_p y, Real_p w,
              Real_p h, Integer_p lines_nb, Integer_p columns_nb)
@@ -33,38 +35,43 @@ Tree_p plane(Tree_p, Real_p x, Real_p y, Real_p w,
 // ----------------------------------------------------------------------------
 {
     Plane* plane = new Plane(x, y, w, h, lines_nb, columns_nb);
-    TextureMapping::tao->addToLayout(TextureMapping::render_callback, plane, TextureMapping::delete_callback);
+    TextureMapping::tao->addToLayout(TextureMapping::render_callback,
+                                     plane, TextureMapping::delete_callback);
 
     return xl_true;
 }
 
-Tree_p texture_cube(Context *context, Integer_p size, Tree_p, Tree_p prog)
+
+Tree_p cube_map(Context *context, Integer_p size, Tree_p, Tree_p prog)
 // ----------------------------------------------------------------------------
 //   Create a cube map texture
 // ----------------------------------------------------------------------------
 {
-    cube = new CubeMap(size);
+    cubeMap = new CubeMap(size);
     context->Evaluate(prog);
 
-    cube->loadCubeMap();
+    cubeMap->loadCubeMap();
 
-    TextureMapping::tao->addToLayout(TextureMapping::render_callback, cube, TextureMapping::delete_callback);
+    TextureMapping::tao->AddToLayout2(TextureMapping::render_callback,
+                                      TextureMapping::identify_callback,
+                                      cubeMap, TextureMapping::delete_callback);
 
     return xl_true;
 }
+
 
 Tree_p cube_map_face(Tree_p tree, GLuint face, text filename)
 // ----------------------------------------------------------------------------
 //   Add texture to the current cube map
 // ----------------------------------------------------------------------------
 {
-    if(! cube)
+    if (!cubeMap)
     {
         Ooops("No mapping defined '$1' ", tree);
         return xl_false;
     }
 
-    if(! cube->setTexture( filename, face))
+    if (!cubeMap->setTexture( filename, face))
     {
         Ooops("No correct face '$1' ", tree);
         return xl_false;
@@ -78,27 +85,78 @@ Tree_p cube_map_flip(Tree_p tree, bool u, bool v)
 //   Allow to flip faces of the current cube map
 // ----------------------------------------------------------------------------
 {
-    if(! cube)
+    if (!cubeMap)
     {
         Ooops("No mapping defined '$1' ", tree);
         return xl_false;
     }
 
-    cube->flip( u, v);
+    cubeMap->flip( u, v);
 
     return xl_true;
 }
+
+
+Tree_p cube_mapping(Tree_p /*tree*/, Real_p ratio)
+// ----------------------------------------------------------------------------
+//   Apply cube mapping
+// ----------------------------------------------------------------------------
+{
+    CubeMapping* cubeMapping = new CubeMapping(ratio);
+    TextureMapping::tao->AddToLayout2(TextureMapping::render_callback,
+                                      TextureMapping::identify_callback,
+                                      cubeMapping, TextureMapping::delete_callback);
+
+    return xl_true;
+}
+
+
+Tree_p sphere_mapping(Tree_p /*tree*/, Real_p ratio)
+// ----------------------------------------------------------------------------
+//   Apply cube mapping
+// ----------------------------------------------------------------------------
+{
+    SphereMapping* sphereMapping = new SphereMapping(ratio);
+    TextureMapping::tao->AddToLayout2(TextureMapping::render_callback,
+                                      TextureMapping::identify_callback,
+                                      sphereMapping, TextureMapping::delete_callback);
+
+    return xl_true;
+}
+
+
+
+Tree_p noise_map_3D(Tree_p tree, GLuint w, GLuint h, GLuint seed)
+// ----------------------------------------------------------------------------
+//   Generate a 3D noise texture
+// ----------------------------------------------------------------------------
+{
+    if(seed > MAX_SEEDS)
+    {
+        Ooops("Invalid value of seed '$1' ", tree);
+        return xl_false;
+    }
+
+    NoiseMap* noiseMap = new NoiseMap(w, h, seed);
+    TextureMapping::tao->addToLayout(TextureMapping::render_callback,
+                                     noiseMap, TextureMapping::delete_callback);
+
+    return xl_true;
+}
+
 
 int module_init(const Tao::ModuleApi *api, const Tao::ModuleInfo *)
 // ----------------------------------------------------------------------------
 //   Initialize the Tao module
 // ----------------------------------------------------------------------------
 {
+    glewInit();
     XL_INIT_TRACES();
     TextureMapping::tao = api;
 
     return 0;
 }
+
 
 int module_exit()
 // ----------------------------------------------------------------------------
