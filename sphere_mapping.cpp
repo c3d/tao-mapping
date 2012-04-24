@@ -87,7 +87,7 @@ void SphereMapping::Draw()
 {
     if (!tested)
     {
-        licensed = tao->checkLicense("Mapping 1.0", false);
+        licensed = tao->checkImpressOrLicense("Mapping 1.0");
         tested = true;
     }
 

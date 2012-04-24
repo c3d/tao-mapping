@@ -113,7 +113,7 @@ void Plane::Draw(PlaneMesh* plane)
 {
     if (!tested)
     {
-        licensed = tao->checkLicense("Mapping 1.0", false);
+        licensed = tao->checkImpressOrLicense("Mapping 1.0");
         tested = true;
     }
     if (!licensed && !tao->blink(1.0, 1.0, 300.0))
