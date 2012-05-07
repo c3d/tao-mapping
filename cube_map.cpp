@@ -4,7 +4,7 @@
 //
 //   File Description:
 //
-//   Cube map implementation.
+//   cubeMap implementation.
 //
 //
 //
@@ -15,16 +15,13 @@
 // ****************************************************************************
 // This software is property of Taodyne SAS - Confidential
 // Ce logiciel est la propriété de Taodyne SAS - Confidentiel
-//  (C) 2011 Baptiste Soulisse <baptiste.soulisse@taodyne.com>
-//  (C) 2011 Taodyne SAS
+//  (C) 1992-2010 Christophe de Dinechin <christophe@taodyne.com>
+//  (C) 2010 Jerome Forissier <jerome@taodyne.com>
+//  (C) 2010 Taodyne SAS
 // ****************************************************************************
+#include <string.h>
+#include <math.h>
 #include "cube_map.h"
-
-// ============================================================================
-//
-//   Cube Map
-//
-// ============================================================================
 
 CubeMap::context_to_textures CubeMap::texture_maps;
 bool                         CubeMap::failed = false;
@@ -37,12 +34,7 @@ CubeMap::CubeMap(int size)
 //   Construction
 // ----------------------------------------------------------------------------
     : TextureMapping(&context), size(size), flip_u(false), flip_v(false)
-{
-    IFTRACE(mapping)
-            debug() << "Create cube map" << "\n";
-
-    checkGLContext();
-
+{    
     currentTexture.size = size;
 }
 
@@ -102,9 +94,6 @@ bool CubeMap::loadCubeMap()
             textures.erase(first);
         }
 
-        IFTRACE(mapping)
-                debug() << "Generate cube map" << "\n";
-
         // Load cubemap texture
         glGenTextures (1, &cubeMapId);
         glBindTexture (GL_TEXTURE_CUBE_MAP, cubeMapId);
@@ -151,16 +140,16 @@ bool CubeMap::loadCubeMap()
 
 void CubeMap::Draw()
 // ----------------------------------------------------------------------------
-//   Apply fresnel material
+//   Draw cube map texture
 // ----------------------------------------------------------------------------
 {
     if (!licensed && !tao->blink(1.0, 1.0, 300.0))
         return;
 
-    checkGLContext();
-
     // Enable pixel blur
     TextureMapping::tao->HasPixelBlur(true);
+
+    checkGLContext();
 
     uint prg_id = 0;
     if(pgm)
@@ -168,9 +157,6 @@ void CubeMap::Draw()
 
     if(prg_id)
     {
-        IFTRACE(mapping)
-                debug() << "Apply cube map" << "\n";
-
         // Set shader
         tao->SetShader(prg_id);
 
@@ -274,52 +260,47 @@ void CubeMap::createShaders()
 {
     if(!failed)
     {
-        IFTRACE(mapping)
-                debug() << "Create cube map shader" << "\n";
-
-        delete pgm;
-
-        pgm = new QGLShaderProgram(*pcontext);
+        pgm = new QGLShaderProgram();
         bool ok = false;
 
         // Basic vertex shader
         static string vSrc =
-              "/********************************************************************************\n"
-              "**                                                                               \n"
-              "** Copyright (C) 2011 Taodyne.                                                   \n"
-              "** All rights reserved.                                                          \n"
-              "** Contact: Taodyne (contact@taodyne.com)                                        \n"
-              "**                                                                               \n"
-              "** This file is part of the Tao Presentations application, developped by Taodyne.\n"
-              "** It can be only used in the software and these modules.                        \n"
-              "**                                                                               \n"
-              "** If you have questions regarding the use of this file, please contact          \n"
-              "** Taodyne at contact@taodyne.com.                                               \n"
-              "**                                                                               \n"
-              "********************************************************************************/\n"
-              "varying vec3 viewDir;"
-              "varying vec3 normal;"
-              "varying vec4 color;"
-              "void main()"
-              "{"
-              "   /* Generate texture coordinates (equivalent to glTexGen) */"
-              "    vec4 xPlane = vec4( 1.0, 0.0, 0.0, 0.0 );"
-              "    vec4 yPlane = vec4( 0.0, 1.0, 0.0, 0.0 );"
-              "    vec4 zPlane = vec4( 0.0, 0.0, 1.0, 0.0 );"
+                "/********************************************************************************\n"
+                "**                                                                               \n"
+                "** Copyright (C) 2011 Taodyne.                                                   \n"
+                "** All rights reserved.                                                          \n"
+                "** Contact: Taodyne (contact@taodyne.com)                                        \n"
+                "**                                                                               \n"
+                "** This file is part of the Tao Presentations application, developped by Taodyne.\n"
+                "** It can be only used in the software and these modules.                        \n"
+                "**                                                                               \n"
+                "** If you have questions regarding the use of this file, please contact          \n"
+                "** Taodyne at contact@taodyne.com.                                               \n"
+                "**                                                                               \n"
+                "********************************************************************************/\n"
+                "varying vec3 viewDir;"
+                "varying vec3 normal;"
+                "varying vec4 color;"
+                "void main()"
+                "{"
+                "   /* Generate texture coordinates (equivalent to glTexGen) */"
+                "    vec4 xPlane = vec4( 1.0, 0.0, 0.0, 0.0 );"
+                "    vec4 yPlane = vec4( 0.0, 1.0, 0.0, 0.0 );"
+                "    vec4 zPlane = vec4( 0.0, 0.0, 1.0, 0.0 );"
 
-              "    gl_TexCoord[0].x = dot(gl_TextureMatrix[0] * vec4(gl_Vertex.xyz, 1.0), xPlane);"
-              "    gl_TexCoord[0].y = dot(gl_TextureMatrix[0] * vec4(gl_Vertex.xyz, 1.0), yPlane);"
-              "    gl_TexCoord[0].z = dot(gl_TextureMatrix[0] * vec4(gl_Vertex.xyz, 1.0), zPlane);"
+                "    gl_TexCoord[0].x = dot(gl_TextureMatrix[0] * vec4(gl_Vertex.xyz, 1.0), xPlane);"
+                "    gl_TexCoord[0].y = dot(gl_TextureMatrix[0] * vec4(gl_Vertex.xyz, 1.0), yPlane);"
+                "    gl_TexCoord[0].z = dot(gl_TextureMatrix[0] * vec4(gl_Vertex.xyz, 1.0), zPlane);"
 
-              "    /* Compute position */"
-              "    gl_Position = ftransform();"
+                "    /* Compute position */"
+                "    gl_Position = ftransform();"
 
-              "    /* Compute world position and normal */"
-              "    normal  = gl_NormalMatrix * gl_Normal;"
-              "    viewDir = -vec3(gl_ModelViewMatrix * gl_Vertex);"
+                "    /* Compute world position and normal */"
+                "    normal  = gl_NormalMatrix * gl_Normal;"
+                "    viewDir = -vec3(gl_ModelViewMatrix * gl_Vertex);"
 
-              "    color = gl_Color;"
-              "}";
+                "    color = gl_Color;"
+                "}";
 
         static string fSrc;
         if(tao->isGLExtensionAvailable("GL_EXT_gpu_shader4"))
