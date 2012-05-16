@@ -38,10 +38,6 @@ struct CubeMapping : public TextureMapping
     // Draw cube mapping
     virtual void    Draw();
 
-    static void     render_callback(void *arg);
-    static void     identify_callback(void *arg);
-    static void     delete_callback(void *arg);
-
 protected:
     virtual void    createShaders();
 
