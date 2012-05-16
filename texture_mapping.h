@@ -1,4 +1,4 @@
-#ifndef TEXTURE_MAPPING_H
+﻿#ifndef TEXTURE_MAPPING_H
 #define TEXTURE_MAPPING_H
 // ****************************************************************************
 //  texture_mapping.h                                               Tao project
@@ -6,7 +6,7 @@
 //
 //   File Description:
 //
-//      Define a texture mapping.
+//      Define texture mapping.
 //
 //
 //
@@ -35,9 +35,12 @@ struct TextureMapping : public QObject
 
     // Draw mapping
     virtual void    Draw();
+
     // Re-create shaders if GL context has changed
     void            checkGLContext();
     virtual void    createShaders();
+
+    std::ostream &  debug();
 
     static void     render_callback(void *arg);
     static void     identify_callback(void *arg);
@@ -45,11 +48,13 @@ struct TextureMapping : public QObject
 
 public:
     const QGLContext    **pcontext;
+
+public:
+    static bool tested, licensed;
+
     // Pointer to Tao functions
     static const Tao::ModuleApi *tao;
-
-    static bool tested, licensed;
 };
 
 
-#endif // TEXTURE_MAPPING_H
+#endif
