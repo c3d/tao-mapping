@@ -38,10 +38,6 @@ struct SphereMapping : public TextureMapping
     // Draw sphere mapping
     virtual void    Draw();
 
-    static void     render_callback(void *arg);
-    static void     identify_callback(void *arg);
-    static void     delete_callback(void *arg);
-
 protected:
     virtual void    createShaders();
 
