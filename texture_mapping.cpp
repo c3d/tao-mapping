@@ -28,7 +28,7 @@ bool TextureMapping::licensed = false;
 
 // ============================================================================
 //
-//    Material
+//    Texture Mapping
 //
 // ============================================================================
 
@@ -58,12 +58,11 @@ void TextureMapping::render_callback(void *arg)
 }
 
 
-void TextureMapping::identify_callback(void *arg)
+void TextureMapping::identify_callback(void *)
 // ----------------------------------------------------------------------------
 //   Identify callback: don't do anything
 // ----------------------------------------------------------------------------
 {
-    (void) arg;
 }
 
 
@@ -78,7 +77,7 @@ void TextureMapping::delete_callback(void *arg)
 
 void TextureMapping::Draw()
 // ----------------------------------------------------------------------------
-//   Draw texture mapping
+//   Draw mapping
 // ----------------------------------------------------------------------------
 {
 }
@@ -89,14 +88,10 @@ void TextureMapping::checkGLContext()
 //   Re-create context-dependent resources if GL context has changed
 // ----------------------------------------------------------------------------
 {
-    tao->makeGLContextCurrent();
     if (*pcontext != QGLContext::currentContext())
     {
-        IFTRACE(mapping)
-                debug() << "Context has changed" << "\n";
-
-        *pcontext = QGLContext::currentContext();
         createShaders();
+        *pcontext = QGLContext::currentContext();
     }
 }
 
@@ -106,15 +101,5 @@ void TextureMapping::createShaders()
 //   Create shader programs for the material
 // ----------------------------------------------------------------------------
 {
-}
-
-
-std::ostream & TextureMapping::debug()
-// ----------------------------------------------------------------------------
-//   Convenience method to log with a common prefix
-// ----------------------------------------------------------------------------
-{
-    std::cerr << "[Mapping] " << (void*)this << " ";
-    return std::cerr;
 }
 

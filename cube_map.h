@@ -1,4 +1,4 @@
-﻿#ifndef CUBEMAP_H
+#ifndef CUBEMAP_H
 #define CUBEMAP_H
 // ****************************************************************************
 //  cube_map.h                                                      Tao project
@@ -19,6 +19,7 @@
 //  (C) 2010 Jerome Forissier <jerome@taodyne.com>
 //  (C) 2010 Taodyne SAS
 // ****************************************************************************
+
 #include <stdio.h>
 #include "tao/coords3d.h"
 #include "tao/module_api.h"
@@ -112,7 +113,6 @@ struct  TextureCube
     }
 };
 
-
 struct CubeMap : public TextureMapping
 // ----------------------------------------------------------------------------
 //   Apply a cubemap texture
@@ -127,7 +127,7 @@ struct CubeMap : public TextureMapping
     ~CubeMap();
 
     // Draw cubemap
-    virtual void    Draw();
+    virtual void Draw();
 
     void flip(bool u, bool v);
     bool setTexture(text filename, uint face);
@@ -158,5 +158,4 @@ private:
     static const QGLContext* context;
 };
 
-
-#endif
+#endif // CUBEMAP_H

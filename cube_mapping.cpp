@@ -37,9 +37,6 @@ CubeMapping::CubeMapping(float ratio)
 // ----------------------------------------------------------------------------
     : TextureMapping(&context), ratio(ratio)
 {
-    IFTRACE(mapping)
-            debug() << "Create cube mapping" << "\n";
-
     checkGLContext();
 
     // Get model matrix
@@ -56,9 +53,36 @@ CubeMapping::~CubeMapping()
 }
 
 
+void CubeMapping::render_callback(void *arg)
+// ----------------------------------------------------------------------------
+//   Rendering callback: call the render function for the object
+// ----------------------------------------------------------------------------
+{
+    ((CubeMapping *)arg)->Draw();
+}
+
+
+void CubeMapping::identify_callback(void *arg)
+// ----------------------------------------------------------------------------
+//   Identify callback: don't do anything
+// ----------------------------------------------------------------------------
+{
+    (void) arg;
+}
+
+
+void CubeMapping::delete_callback(void *arg)
+// ----------------------------------------------------------------------------
+//   Delete callback: destroy object
+// ----------------------------------------------------------------------------
+{
+    delete (CubeMapping *)arg;
+}
+
+
 void CubeMapping::Draw()
 // ----------------------------------------------------------------------------
-//   Apply cube mapping
+//   Apply plastic material
 // ----------------------------------------------------------------------------
 {
     if (!tested)
@@ -78,9 +102,6 @@ void CubeMapping::Draw()
 
     if(prg_id)
     {
-        IFTRACE(mapping)
-                debug() << "Apply cube mapping" << "\n";
-
         // Set shader
         tao->SetShader(prg_id);
 
@@ -113,12 +134,7 @@ void CubeMapping::createShaders()
 {
     if(!failed)
     {
-        IFTRACE(mapping)
-                debug() << "Create cube mapping shader" << "\n";
-
-        delete pgm;
-
-        pgm = new QGLShaderProgram(*pcontext);
+        pgm = new QGLShaderProgram();
         bool ok = false;
 
         // Basic vertex shader
