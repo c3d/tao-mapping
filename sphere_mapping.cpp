@@ -37,6 +37,9 @@ SphereMapping::SphereMapping(float ratio)
 // ----------------------------------------------------------------------------
     : TextureMapping(&context), ratio(ratio)
 {
+    IFTRACE(mapping)
+            debug() << "Create sphere mapping" << "\n";
+
     checkGLContext();
 
     // Get model matrix
@@ -53,36 +56,9 @@ SphereMapping::~SphereMapping()
 }
 
 
-void SphereMapping::render_callback(void *arg)
-// ----------------------------------------------------------------------------
-//   Rendering callback: call the render function for the object
-// ----------------------------------------------------------------------------
-{
-    ((SphereMapping *)arg)->Draw();
-}
-
-
-void SphereMapping::identify_callback(void *arg)
-// ----------------------------------------------------------------------------
-//   Identify callback: don't do anything
-// ----------------------------------------------------------------------------
-{
-    (void) arg;
-}
-
-
-void SphereMapping::delete_callback(void *arg)
-// ----------------------------------------------------------------------------
-//   Delete callback: destroy object
-// ----------------------------------------------------------------------------
-{
-    delete (SphereMapping *)arg;
-}
-
-
 void SphereMapping::Draw()
 // ----------------------------------------------------------------------------
-//   Apply plastic material
+//   Apply sphere mapping
 // ----------------------------------------------------------------------------
 {
     if (!tested)
@@ -102,6 +78,9 @@ void SphereMapping::Draw()
 
     if(prg_id)
     {
+        IFTRACE(mapping)
+                debug() << "Apply sphere mapping" << "\n";
+
         // Set shader
         tao->SetShader(prg_id);
 
@@ -134,7 +113,12 @@ void SphereMapping::createShaders()
 {
     if(!failed)
     {
-        pgm = new QGLShaderProgram();
+        IFTRACE(mapping)
+                debug() << "Create sphere mapping shader" << "\n";
+
+        delete pgm;
+
+        pgm = new QGLShaderProgram(*pcontext);
         bool ok = false;
 
         // Basic vertex shader
