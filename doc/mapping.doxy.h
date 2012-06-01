@@ -521,7 +521,3 @@ sphere 0, 0, 0, 500, 500, 500, 50, 50
 @endcode
  */
 sphere_mapping(ratio:integer);
-
-/**
- * @}
- */
