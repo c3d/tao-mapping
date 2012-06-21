@@ -12,6 +12,8 @@
 
 MODINSTDIR = mapping
 
+DEFINES     += GLEW_STATIC
+
 include(../modules.pri)
 INCLUDEPATH += $${TAOTOPSRC}/tao/include/tao/
 HEADERS      = \
@@ -24,7 +26,7 @@ HEADERS      = \
     noise_map.h \
     3rdparty/fbm.h \
 
-SOURCES      = mapping.cpp \
+SOURCES      = mapping.cpp $${TAOTOPSRC}/tao/include/tao/GL/glew.c \
     texture_mapping.cpp \
     plane.cpp \
     cube_map.cpp \
@@ -32,11 +34,6 @@ SOURCES      = mapping.cpp \
     sphere_mapping.cpp \
     noise_map.cpp \
     3rdparty/fbm.c \
-
-win32 {
-  DEFINES     += GLEW_STATIC
-  SOURCES     += $${TAOTOPSRC}/tao/include/tao/GL/glew.c
-}
 
 CRYPT_XL_SOURCES = alpha_mapping.xl displacement_mapping.xl normal_mapping.xl noise_mapping.xl
 include(../crypt_xl.pri)
