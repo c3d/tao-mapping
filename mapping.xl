@@ -11,11 +11,11 @@ module_description
     description "Allow to add details in a scene thanks to a surface texture"
     author "Taodyne SAS"
     website "http://www.taodyne.com"
-    version 1.004
+    version 1.003
 
 module_description "fr",
     name "Placage de texture"
-    description "Permet d'ajouter des détails visuels dans une scène à partir une combinaison d'images."
+    description "Permet d'ajouter des dÃ©tails visuels dans une scÃ¨ne Ã  partir une combinaison d'images."
 
 // Check if GL_EXT_gpu_shader4 is supported in Tao
 SHADER4_AVAILABLE_MAPPING -> true
