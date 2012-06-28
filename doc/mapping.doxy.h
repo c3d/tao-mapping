@@ -474,7 +474,6 @@ cube_mapping(ratio:integer);
 texture_unit 0
 texture "color_map.png"
 // Define sphere map for reflection
-texture_unit 1
 texture "sphere_map.png"
 rotatex time * 20
 rotatey 90
@@ -513,7 +512,6 @@ sphere 0, 0, 0, 500, 500, 500, 50, 50
 texture_unit 0
 texture "color_map.png"
 // Définition d'une sphere map pour simuler une réflexion
-texture_unit 1
 texture "sphere_map.png"
 rotatex time * 20
 rotatey 90
