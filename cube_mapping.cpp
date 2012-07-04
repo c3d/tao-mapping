@@ -63,7 +63,7 @@ void CubeMapping::Draw()
 {
     if (!tested)
     {
-        licensed = tao->checkImpressOrLicense(MAPPING_FEATURE);
+        licensed = tao->checkImpressOrLicense("Mapping 1.0");
         tested = true;
     }
 
