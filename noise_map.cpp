@@ -117,7 +117,7 @@ void NoiseMap::loadNoiseMap()
         if(tao->hasLicense("Materials 1.0"))
             licensed = true;
         else
-            licensed = tao->checkImpressOrLicense("Mapping 1.0");
+            licensed = tao->checkImpressOrLicense(MAPPING_FEATURE);
         tested = true;
     }
     if (!licensed && !tao->blink(1.0, 1.0, 300.0))
