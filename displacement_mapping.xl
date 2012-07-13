@@ -25,7 +25,7 @@
 // ****************************************************************************
 
 displacement_mapping_license_ok ->
-    if check_impress_or_license "Mapping 1.0" then
+    if check_impress_or_license "Mapping 1.004" then
         true
     else
         if blink (1.0, 1.0, 300.0) then
