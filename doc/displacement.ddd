@@ -1,8 +1,7 @@
-
-import Mapping 1.0 
+import Mapping
 clear_color 1, 1, 1, 1 
 
-//Define texture maps
+// Define texture maps
 COLOR_MAP -> "colorMap.png" 
 DISPLACEMENT_MAP -> "displacementMap.png" 
 
