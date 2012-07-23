@@ -26,7 +26,7 @@
  * The example below presents a use case of displacement mapping.
  * @include displacement.ddd
  *
- * @image html displacement.png "Output from displacement.ddd"
+ * @image html displacement.png "Displacement mapping"
  *
  * @~french
  * Techniques de mapping.
