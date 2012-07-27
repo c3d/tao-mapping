@@ -81,7 +81,7 @@ plane(x:real, y:real, w:real, h:real, l:integer, c:integer);
  * The whitest points of the texture map are the most "displaced",
  * contrary to the most black which are not at all.\n
  * This displacement map have to be bound on texture unit 1.
- * The color of the mapping can be set either by @p color or by a texture bound on texture unit 0, but also both.
+ * The color of the mapping can be set either by @ref color or by a texture bound on texture unit 0, but also both.
  *
  * @param ratio displacement ratio
  *
@@ -121,11 +121,11 @@ displacement_mapping(ratio:real);
  * Makes alpha mapping.
  *
  * Allow to define certain area of an objet as transparent or translucent thanks to
- * the texture defined by @p alpha_map.\n
+ * the texture defined by @ref alpha_map.\n
  * The most dark points of the texture map allow to define
  * a transparent area during the mapping.\n
  * This alpha map have to be bound on texture unit 1.
- * The color of the mapping can be set either by @p color or by a texture bound on texture unit 0, but also both.
+ * The color of the mapping can be set either by @ref color or by a texture bound on texture unit 0, but also both.
  *
  * @param threshold alpha threshold
  *
@@ -179,7 +179,7 @@ normal_map();
  * Simulate 3D on an object thanks to the association of normal map defined by @ref normal_map
  * with some light and material effets.\n
  * This normal map have to be bound on texture unit 1.
- * The color of the mapping can be set either by @p color or by a texture bound on texture unit 0, but also both.
+ * The color of the mapping can be set either by @ref color or by a texture bound on texture unit 0, but also both.
  *
  * @attention As normal mapping uses a light and some materials, it is largely recommended to add it
  * to the current scene to increase the effects.
@@ -386,7 +386,7 @@ cube_map_flip(u:boolean, v:boolean);
  * Allow to simulate easily the reflection of an environment on an object thanks
  * to a texture called cube map, which can be generated thanks to @ref cube_map.\n
  * This cube map have to be bound on texture unit 1.
- * The color of the mapping can be set either by @p color or by a usual texture bound on texture unit 0, but also both.
+ * The color of the mapping can be set either by @ref color or by a usual texture bound on texture unit 0, but also both.
  *
  * @param ratio ratio of the environment reflection.
  *
@@ -460,9 +460,9 @@ cube_mapping(ratio:integer);
  * Makes sphere mapping.
  *
  * Allow to simulate easily the reflection of an environment on an object thanks
- * to a texture called sphere map set by @p texture.\n
+ * to a texture called sphere map set by @ref texture.\n
  * This sphere map have to be bound on texture unit 1.
- * The color of the mapping can be set either by @p color or by a usual texture bound on texture unit 0, but also both.
+ * The color of the mapping can be set either by @ref color or by a usual texture bound on texture unit 0, but also both.
  *
  * @param ratio ratio of the environment reflection.
  *

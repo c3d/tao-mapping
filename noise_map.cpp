@@ -114,12 +114,15 @@ void NoiseMap::loadNoiseMap()
 
     if (!tested)
     {
-        if(tao->hasImpressOrLicense("Materials 1.0"))
+        if(tao->hasLicense("Materials 1.0"))
             licensed = true;
         else
             licensed = tao->checkImpressOrLicense(MAPPING_FEATURE);
         tested = true;
     }
+    if (!licensed && !tao->blink(1.0, 1.0, 300.0))
+        return;
+
 
     IFTRACE(mapping)
             debug() << "Apply noise map" << "\n";
@@ -134,6 +137,9 @@ void NoiseMap::Draw()
 //   Draw noise map texture
 // ----------------------------------------------------------------------------
 {
+    if (!licensed && !tao->blink(1.0, 1.0, 300.0))
+        return;
+
     // Enable pixel blur
     TextureMapping::tao->HasPixelBlur(true);
 }
