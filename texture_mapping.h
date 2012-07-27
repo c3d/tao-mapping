@@ -29,7 +29,7 @@ using namespace std;
 using namespace Tao;
 
 
-#define MAPPING_FEATURE "Mapping 1.005"  // Used in checkLicense etc.
+#define MAPPING_FEATURE "Mapping 1.004"  // Used in checkLicense etc.
 
 struct TextureMapping : public QObject
 {
