@@ -136,11 +136,9 @@ bool CubeMap::loadCubeMap()
         if(tao->hasLicense("Materials 1.0"))
             licensed = true;
         else
-            licensed = tao->checkImpressOrLicense("Mapping 1.0");
+            licensed = tao->checkImpressOrLicense(MAPPING_FEATURE);
         tested = true;
     }
-    if (!licensed && !tao->blink(1.0, 1.0, 300.0))
-        return false;
 
     // Set to the textures list in Tao.
     TextureMapping::tao->BindTexture(cubeMapId, GL_TEXTURE_CUBE_MAP);
@@ -154,9 +152,6 @@ void CubeMap::Draw()
 //   Apply fresnel material
 // ----------------------------------------------------------------------------
 {
-    if (!licensed && !tao->blink(1.0, 1.0, 300.0))
-        return;
-
     checkGLContext();
 
     // Enable pixel blur

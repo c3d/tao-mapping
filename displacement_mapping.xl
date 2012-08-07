@@ -24,18 +24,12 @@
 //  (C) 2011 Taodyne SAS
 // ****************************************************************************
 
-displacement_mapping_license_ok ->
-    if check_license ("Mapping 1.0", false) then
-        true
-    else
-        if blink (1.0, 1.0, 300.0) then
-           true
-        else
-           false
+displacement_mapping_license_check -> check_impress_or_license "Mapping 1.005"
 
-// -------------------------------------------------------------------------------------------------------------------
+
+// ----------------------------------------------------------------------------
 //   DISPLACEMENT MAPPING
-// -------------------------------------------------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 // Define displacement ratio
 DISPLACEMENT_RATIO -> 0.0
@@ -47,11 +41,11 @@ displacement_mapping ratio:real ->
     **/
     has_color_map
     DISPLACEMENT_RATIO := ratio
-    if displacement_mapping_license_ok then
-        if SHADER4_AVAILABLE_MAPPING = false then
-            displacement_shader_no_lights
-        else
-            displacement_shader_lights
+    displacement_mapping_license_check
+    if SHADER4_AVAILABLE_MAPPING = false then
+        displacement_shader_no_lights
+    else
+        displacement_shader_lights
 
 displacement_shader_lights ->
     /**

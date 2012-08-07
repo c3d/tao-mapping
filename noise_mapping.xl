@@ -23,18 +23,11 @@
 //  (C) 2011 Taodyne SAS
 // ****************************************************************************
 
-noise_mapping_license_ok ->
-    if check_license ("Mapping 1.0", false) then
-        true
-    else
-        if blink (1.0, 1.0, 300.0) then
-           true
-        else
-           false
+noise_mapping_license_check -> check_impress_or_license "Mapping 1.005"
 
-// -------------------------------------------------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 //   NOISE MAP
-// -------------------------------------------------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 NOISE_SEED -> 0
 NOISE_SEED := 0
@@ -45,13 +38,13 @@ noise_map w:integer, h:integer, s:integer ->
     **/
     rotatex 0.05
     rotatex -0.05
-    if noise_mapping_license_ok then
+    noise_mapping_license_check
+    color "white"
+    frame_texture w, h,
         color "white"
-        frame_texture w, h,
-            color "white"
-            NOISE_SEED := s
-            generate_noise
-            rectangle 0, 0, w, h
+        NOISE_SEED := s
+        generate_noise
+        rectangle 0, 0, w, h
 
 generate_noise ->
     /**
@@ -133,11 +126,11 @@ noise_mapping n->
     * Apply noise mapping.
     **/
     NOISE_RATIO := n
-    if noise_mapping_license_ok then
-        if SHADER4_AVAILABLE_MAPPING = false then
-            noise_shader_no_lights
-        else
-            noise_shader_lights
+    noise_mapping_license_check
+    if SHADER4_AVAILABLE_MAPPING = false then
+        noise_shader_no_lights
+    else
+        noise_shader_lights
 
 noise_shader_lights ->
     /**
