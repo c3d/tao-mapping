@@ -1,4 +1,4 @@
-// Mapping module definition
+ï»¿// Mapping module definition
 //
 // This module defines mapping techniques.
 //
@@ -15,10 +15,11 @@ module_description
 
 module_description "fr",
     name "Placage de texture"
-    description "Permet d'ajouter des dÃ©tails visuels dans une scÃ¨ne Ã  partir une combinaison d'images."
+    description "Permet d'ajouter des détails visuels dans une scène à partir une combinaison d'images."
 
 // Check if GL_EXT_gpu_shader4 is supported in Tao
-SHADER4_AVAILABLE_MAPPING -> is_ext_available "GL_EXT_gpu_shader4"
+SHADER4_AVAILABLE_MAPPING -> true
+SHADER4_AVAILABLE_MAPPING := is_ext_available "GL_EXT_gpu_shader4"
 
 HAS_COLOR_MAP -> 0
 HAS_COLOR_MAP := 0
