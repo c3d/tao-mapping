@@ -24,7 +24,7 @@
 //  (C) 2011 Taodyne SAS
 // ****************************************************************************
 
-displacement_mapping_license_check -> check_impress_or_license "Mapping 1.006"
+displacement_mapping_license_check -> check_impress_or_license "Mapping 1.005"
 
 
 // ----------------------------------------------------------------------------
