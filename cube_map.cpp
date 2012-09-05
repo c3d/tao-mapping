@@ -133,7 +133,7 @@ bool CubeMap::loadCubeMap()
 
     if (!tested)
     {
-        if(tao->hasLicense("Materials 1.0"))
+        if(tao->hasImpressOrLicense("Materials 1.0"))
             licensed = true;
         else
             licensed = tao->checkImpressOrLicense(MAPPING_FEATURE);
