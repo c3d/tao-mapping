@@ -2,8 +2,8 @@ import Mapping
 clear_color 1, 1, 1, 1 
 
 // Define texture maps
-COLOR_MAP -> "Mapping:colorMap.png"
-DISPLACEMENT_MAP -> "Mapping:displacementMap.png"
+COLOR_MAP -> "colorMap.png" 
+DISPLACEMENT_MAP -> "displacementMap.png" 
 
 font "Arial" 
 font_size 16 

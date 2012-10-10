@@ -2,7 +2,7 @@
  * @taomoduledescription{Mapping, Mapping}
  *
  * @~english
- * <tt>import Mapping</tt> - Define some texture mapping techniques.
+ * Define some texture mapping techniques.
  *
  * Texture mapping is a method for adding detail onto a triangle,
  * thanks to a surface texture (a bitmap or raster image).
@@ -29,7 +29,7 @@
  * @image html displacement.png "Displacement mapping"
  *
  * @~french
- * i<tt>import Mapping</tt> - Techniques de mapping.
+ * Techniques de mapping.
  *
  * Le @a mapping de textures est une méthode pour ajouter des détails sur un
  * triangle grâce à une texture (une image @a bitmap). Elle permet d'ajouter
@@ -81,12 +81,7 @@ plane(x:real, y:real, w:real, h:real, l:integer, c:integer);
  * The whitest points of the texture map are the most "displaced",
  * contrary to the most black which are not at all.\n
  * This displacement map have to be bound on texture unit 1.
- *
- * @image html displacementMap.png "Example of displacement map"
- *
  * The color of the mapping can be set either by @p color or by a texture bound on texture unit 0, but also both.
- *
- * @image html colorMap.png "Example of color map"
  *
  * @param ratio displacement ratio
  *
@@ -107,12 +102,8 @@ plane(x:real, y:real, w:real, h:real, l:integer, c:integer);
  * La carte des déplacements (<em>displacement map</em>) doit étre sur l'unité
  * de texture numéro 1.
  *
- * @image html displacementMap.png "Exemple de carte des déplacements"
- *
  * La couleur d'un point de l'objet est déterminée par la couleur en cours et
- * par la texture éventuellement présente sur l'unité de texture 0 (carte des couleurs).
- *
- * @image html colorMap.png "Exemple de carte des couleurs"
+ * par la texture éventuellement présente sur l'unité de texture 0.
  *
  * Si la scène comporte des lumières, il peut être souhaitable d'associer une
  * carte des normales (<em>normal map</em>) à l'unité 2 afin de corriger les
