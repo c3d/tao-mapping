@@ -81,7 +81,12 @@ plane(x:real, y:real, w:real, h:real, l:integer, c:integer);
  * The whitest points of the texture map are the most "displaced",
  * contrary to the most black which are not at all.\n
  * This displacement map have to be bound on texture unit 1.
+ *
+ * @image html displacementMap.png "Example of displacement map"
+ *
  * The color of the mapping can be set either by @p color or by a texture bound on texture unit 0, but also both.
+ *
+ * @image html colorMap.png "Example of color map"
  *
  * @param ratio displacement ratio
  *
@@ -102,8 +107,12 @@ plane(x:real, y:real, w:real, h:real, l:integer, c:integer);
  * La carte des déplacements (<em>displacement map</em>) doit étre sur l'unité
  * de texture numéro 1.
  *
+ * @image html displacementMap.png "Exemple de carte des déplacements"
+ *
  * La couleur d'un point de l'objet est déterminée par la couleur en cours et
- * par la texture éventuellement présente sur l'unité de texture 0.
+ * par la texture éventuellement présente sur l'unité de texture 0 (carte des couleurs).
+ *
+ * @image html colorMap.png "Exemple de carte des couleurs"
  *
  * Si la scène comporte des lumières, il peut être souhaitable d'associer une
  * carte des normales (<em>normal map</em>) à l'unité 2 afin de corriger les

@@ -33,6 +33,14 @@ SOURCES      = mapping.cpp \
     noise_map.cpp \
     3rdparty/fbm.c \
 
+PICTURES = \
+    colorMap.png \
+    displacementMap.png \
+    $$NULL
+
+pics.path  = $$MODINSTPATH
+pics.files = $$PICTURES
+
 win32 {
   DEFINES     += GLEW_STATIC
   SOURCES     += $${TAOTOPSRC}/tao/include/tao/GL/glew.c
@@ -51,7 +59,7 @@ QT          += core \
                gui \
                opengl
 
-INSTALLS    += thismod_icon
+INSTALLS    += thismod_icon pics
 
 LICENSE_FILES = mapping.taokey.notsigned
 include(../licenses.pri)
