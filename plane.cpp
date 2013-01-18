@@ -129,7 +129,7 @@ void Plane::Draw(PlaneMesh* plane)
     glVertexPointer(3, GL_DOUBLE, 0, &plane->vertices[0].x);
     glEnableClientState(GL_VERTEX_ARRAY);
 
-    TextureMapping::tao->EnableTexCoords(&plane->textures[0].x);
+    TextureMapping::tao->EnableTexCoords(&plane->textures[0].x, ~0ULL);
     TextureMapping::tao->SetTextures();
 
     GLuint size = stacks * slices * 4;
@@ -143,7 +143,7 @@ void Plane::Draw(PlaneMesh* plane)
         for(GLuint i = 0; i < size; i+= 4)
             glDrawElements(GL_LINE_LOOP, 4 , GL_UNSIGNED_INT, &plane->indices[0] + i);
 
-    TextureMapping::tao->DisableTexCoords();
+    TextureMapping::tao->DisableTexCoords(~0ULL);
 
     glDisableClientState(GL_VERTEX_ARRAY);
 
