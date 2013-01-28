@@ -2,7 +2,7 @@
  * @taomoduledescription{Mapping, Mapping}
  *
  * @~english
- * Define some texture mapping techniques.
+ * <tt>import Mapping</tt> - Define some texture mapping techniques.
  *
  * Texture mapping is a method for adding detail onto a triangle,
  * thanks to a surface texture (a bitmap or raster image).
@@ -29,7 +29,7 @@
  * @image html displacement.png "Displacement mapping"
  *
  * @~french
- * Techniques de mapping.
+ * i<tt>import Mapping</tt> - Techniques de mapping.
  *
  * Le @a mapping de textures est une méthode pour ajouter des détails sur un
  * triangle grâce à une texture (une image @a bitmap). Elle permet d'ajouter
