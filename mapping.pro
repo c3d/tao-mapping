@@ -17,7 +17,6 @@ INCLUDEPATH += $${TAOTOPSRC}/tao/include/tao/
 HEADERS      = \
                mapping.h \
     texture_mapping.h \
-    plane.h \
     cube_map.h \
     cube_mapping.h \
     sphere_mapping.h \
@@ -26,7 +25,6 @@ HEADERS      = \
 
 SOURCES      = mapping.cpp \
     texture_mapping.cpp \
-    plane.cpp \
     cube_map.cpp \
     cube_mapping.cpp \
     sphere_mapping.cpp \
