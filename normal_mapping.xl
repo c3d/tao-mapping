@@ -328,7 +328,7 @@ normal_shader_lights ->
                     }
 
                      // Define new render color
-                    lighting_color  = (ambient + diffuse) * renderColor + specular;
+                    lighting_color  = (ambient + diffuse) * renderColor * color + specular;
                 }
 
                 return lighting_color;
@@ -350,13 +350,11 @@ normal_shader_lights ->
                 n = TBN * bump;
 
                 // Get color map
-                vec4 renderColor = texture2D(colorMap, gl_TexCoord[0].st);
+                vec4 renderColor = vec4(1.0);
 
                 // Check if there is really a color map
                 if(hasColorMap)
-                    renderColor *= color;
-                else
-                    renderColor  = color;
+                    renderColor = texture2D(colorMap, gl_TexCoord[0].st);
 
                 gl_FragColor = computeRenderColor(n, v, renderColor);
             }

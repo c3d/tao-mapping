@@ -271,6 +271,10 @@ void CubeMapping::createShaders()
                     "         /* Define new render color */"
                     "        lighting_color  = (ambient + diffuse) * renderColor + specular;"
                     "    }"
+                    "    else"
+                    "    {"
+                    "        lighting_color = renderColor * color;"
+                    "    }"
 
                     "    return lighting_color;"
                     "}"
@@ -284,13 +288,11 @@ void CubeMapping::createShaders()
                     "   cubeColor = textureCube(cubeMap, gl_TexCoord[1].xyz);"
 
                     "   /* Get color map */"
-                    "   mainColor = texture2D(colorMap, gl_TexCoord[0].st);"
+                    "   mainColor = vec4(1.0);"
 
                     "   /* Check if there is really a color map */"
                     "   if(hasColorMap)"
-                    "      mainColor *= color;"
-                    "   else"
-                    "      mainColor  = color;"
+                    "       mainColor = texture2D(colorMap, gl_TexCoord[0].st);"
 
                     "   renderColor  = mix(mainColor, cubeColor, ratio);"
                     "   gl_FragColor = computeRenderColor(renderColor);"

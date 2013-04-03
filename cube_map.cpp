@@ -403,14 +403,18 @@ void CubeMap::createShaders()
                     "         /* Define new render color */"
                     "        lighting_color  = (ambient + diffuse) * renderColor + specular;"
                     "    }"
-
+                    "    else"
+                    "    {"
+                    "        lighting_color = renderColor * color;"
+                    "    }"
+                    ""
                     "    return lighting_color;"
                     "}"
 
 
                     "void main()"
                     "{"
-                    "   vec4 renderColor = textureCube(cubeMap, gl_TexCoord[0].xyz) * color;"
+                    "   vec4 renderColor = textureCube(cubeMap, gl_TexCoord[0].xyz);"
                     "   gl_FragColor     = computeRenderColor(renderColor);"
                     "}";
 
