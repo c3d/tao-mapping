@@ -122,7 +122,7 @@ void NoiseMap::loadNoiseMap()
             debug() << "Apply noise map" << "\n";
 
     // Set to the textures list in Tao.
-    TextureMapping::tao->BindTexture(textures[key], GL_TEXTURE_3D);
+    //TextureMapping::tao->BindTexture(textures[key], GL_TEXTURE_3D);
 }
 
 
