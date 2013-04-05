@@ -29,14 +29,17 @@
 CubeMap::context_to_textures CubeMap::texture_maps;
 bool                         CubeMap::failed = false;
 QGLShaderProgram*            CubeMap::pgm = NULL;
-std::map<text, GLint>        CubeMap::uniforms;
+std::map<text, GLuint>        CubeMap::uniforms;
 const QGLContext*            CubeMap::context = NULL;
+
+
+#define GL (*graphic_state)
 
 CubeMap::CubeMap(int size)
 // ----------------------------------------------------------------------------
 //   Construction
 // ----------------------------------------------------------------------------
-    : TextureMapping(&context), size(size), flip_u(false), flip_v(false)
+    : TextureMapping(&context), cubeMapId(0), flip_u(false), flip_v(false)
 {
     IFTRACE(mapping)
             debug() << "Create cube map" << "\n";
@@ -90,15 +93,14 @@ bool CubeMap::loadCubeMap()
 // ----------------------------------------------------------------------------
 {
     checkGLContext();
-    GLuint cubeMapId = isInclude();
-
+    cubeMapId = isInclude();
     if(! cubeMapId)
     {
         // Prune the map if it gets too big
         while (textures.size() > MAX_TEXTURES)
         {
             texture_map::iterator first = textures.begin();
-            glDeleteTextures(1, &(*first).first);
+            GL.DeleteTextures(1, (GLuint*) &(*first).first);
             textures.erase(first);
         }
 
@@ -106,23 +108,15 @@ bool CubeMap::loadCubeMap()
                 debug() << "Generate cube map" << "\n";
 
         // Load cubemap texture
-        glGenTextures (1, &cubeMapId);
-        glBindTexture (GL_TEXTURE_CUBE_MAP, cubeMapId);
-
-        // Setup some parameters for texture filters and mapping
-        glTexParameteri (GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri (GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-        glTexParameteri (GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri (GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glTexParameteri (GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+        GL.GenTextures(1, &cubeMapId);
+        GL.BindTexture(GL_TEXTURE_CUBE_MAP, cubeMapId);
 
         for(int i = 0; i < 6; i++)
         {
             // Load each face of the cube map
             if (!loadTexture (i))
             {
-                glDeleteTextures (1, &cubeMapId);
+                GL.DeleteTextures(1, &cubeMapId);
                 return false;
             }
         }
@@ -131,8 +125,14 @@ bool CubeMap::loadCubeMap()
         textures[cubeMapId] = currentTexture;
     }
 
-    // Set to the textures list in Tao.
-    TextureMapping::tao->BindTexture(cubeMapId, GL_TEXTURE_CUBE_MAP);
+    if (!tested)
+    {
+        if(tao->hasImpressOrLicense("Materials 1.0"))
+            licensed = true;
+        else
+            licensed = tao->checkImpressOrLicense(MAPPING_FEATURE);
+        tested = true;
+    }
 
     return true;
 }
@@ -144,6 +144,17 @@ void CubeMap::Draw()
 // ----------------------------------------------------------------------------
 {
     checkGLContext();
+
+    GL.Enable(GL_TEXTURE_CUBE_MAP);
+    GL.BindTexture(GL_TEXTURE_CUBE_MAP, cubeMapId);
+
+    // Setup some parameters for texture filters and mapping
+    GL.TexParameter(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    GL.TexParameter(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    GL.TexParameter(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    GL.TexParameter(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    GL.TexParameter(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
     // Enable pixel blur
     TextureMapping::tao->HasPixelBlur(true);
@@ -161,12 +172,12 @@ void CubeMap::Draw()
         tao->SetShader(prg_id);
 
         // Set uniform values
-        glUniform1i(uniforms["cubeMap"], tao->TextureUnit());
+        GL.Uniform(uniforms["cubeMap"], tao->TextureUnit());
 
         if(tao->isGLExtensionAvailable("GL_EXT_gpu_shader4"))
         {
             GLint lightsmask = tao->EnabledLights();
-            glUniform1i(uniforms["lights"], lightsmask);
+            GL.Uniform(uniforms["lights"], lightsmask);
         }
     }
 }
@@ -221,15 +232,15 @@ bool CubeMap::loadTexture (uint face)
     }
     if (!image.isNull())
     {
-        if (size <= 0)
-            size = image.width();
-        if (size != image.width() || size != image.height())
-            image = image.scaled(size, size, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+        if (currentTexture.size <= 0)
+            currentTexture.size = image.width();
+        if (currentTexture.size != image.width() || currentTexture.size != image.height())
+            image = image.scaled(currentTexture.size, currentTexture.size, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
 
         QImage texture = QGLWidget::convertToGLFormat(image);
         texture = texture.mirrored(currentFace->flip_u, currentFace->flip_v);
 
-        glTexImage2D (GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, 0, GL_RGBA,
+        GL.TexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, 0, GL_RGBA,
                       texture.width(), texture.height(), 0, GL_RGBA,
                       GL_UNSIGNED_BYTE, texture.bits());
 
@@ -392,14 +403,18 @@ void CubeMap::createShaders()
                     "         /* Define new render color */"
                     "        lighting_color  = (ambient + diffuse) * renderColor + specular;"
                     "    }"
-
+                    "    else"
+                    "    {"
+                    "        lighting_color = renderColor * color;"
+                    "    }"
+                    ""
                     "    return lighting_color;"
                     "}"
 
 
                     "void main()"
                     "{"
-                    "   vec4 renderColor = textureCube(cubeMap, gl_TexCoord[0].xyz) * color;"
+                    "   vec4 renderColor = textureCube(cubeMap, gl_TexCoord[0].xyz);"
                     "   gl_FragColor     = computeRenderColor(renderColor);"
                     "}";
 

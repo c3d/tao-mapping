@@ -19,10 +19,14 @@
 // in the Tao Presentations license agreement, or alternatively, in a signed
 // license agreement between you and Taodyne SAS.
 //  (C) 2011 Christophe de Dinechin <christophe@taodyne.com>
-//  (C) 2011 JÃ©rÃ´me Forissier <jerome@taodyne.com>
+//  (C) 2011 Jérôme Forissier <jerome@taodyne.com>
 //  (C) 2011 Catherine Burvelle <cathy@taodyne.com>
 //  (C) 2011 Taodyne SAS
 // ****************************************************************************
+
+
+alpha_mapping_license_check -> check_impress_or_license "Mapping 1.006"
+
 
 
 // ----------------------------------------------------------------------------
@@ -36,6 +40,7 @@ ALPHA_THRESHOLD := 0.01
 alpha_mapping n:real ->
     ALPHA_THRESHOLD := n
     has_color_map
+    alpha_mapping_license_check
     if SHADER4_AVAILABLE_MAPPING = false then
         alpha_shader_no_lights
     else
@@ -164,6 +169,10 @@ alpha_shader_lights ->
                      // Define new render color
                     lighting_color  = (ambient + diffuse) * renderColor + specular;
                 }
+                else
+                {
+                    lighting_color = renderColor * color;
+                }
 
                 return lighting_color;
             }
@@ -178,14 +187,11 @@ alpha_shader_lights ->
                 && alpha_color.b < threshold)
                     discard;
 
-                // Get color map
-                vec4 mainColor = texture2D(colorMap, gl_TexCoord[0].xy);
+                vec4 mainColor = vec4(1.0);
 
                 // Check if there is really a color map
                 if(hasColorMap)
-                    mainColor *= color;
-                else
-                    mainColor  = color;
+                    mainColor = texture2D(colorMap, gl_TexCoord[0].st);
 
                 gl_FragColor  = computeRenderColor(mainColor);
             }

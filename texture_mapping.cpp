@@ -23,6 +23,13 @@
 
 const Tao::ModuleApi *TextureMapping::tao = NULL;
 
+bool TextureMapping::tested = false;
+bool TextureMapping::licensed = false;
+
+
+DLL_PUBLIC Tao::GraphicState * graphic_state = NULL;
+
+
 // ============================================================================
 //
 //    Material

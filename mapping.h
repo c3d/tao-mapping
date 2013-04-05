@@ -26,7 +26,6 @@
 #include "runtime.h"
 #include "base.h"
 #include "tao/module_api.h"
-#include "plane.h"
 #include "cube_map.h"
 #include "noise_map.h"
 #include "cube_mapping.h"
