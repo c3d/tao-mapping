@@ -28,6 +28,19 @@ XL_DEFINE_TRACES
 
 CubeMap* cubeMap;
 
+Tree_p plane(Tree_p, Real_p x, Real_p y, Real_p w,
+             Real_p h, Integer_p lines_nb, Integer_p columns_nb)
+// ----------------------------------------------------------------------------
+//   Define a subdivded plane
+// ----------------------------------------------------------------------------
+{
+    Plane* plane = new Plane(x, y, w, h, lines_nb, columns_nb);
+    TextureMapping::tao->addToLayout(TextureMapping::render_callback,
+                                     plane, TextureMapping::delete_callback);
+
+    return xl_true;
+}
+
 
 Tree_p cube_map(Context *context, Integer_p size, Tree_p, Tree_p prog)
 // ----------------------------------------------------------------------------
