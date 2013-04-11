@@ -24,6 +24,7 @@
 //  (C) 2011 Taodyne SAS
 // ****************************************************************************
 
+noise_mapping_license_check -> check_impress_or_license "Mapping 1.006"
 
 // ----------------------------------------------------------------------------
 //   NOISE MAP
@@ -38,6 +39,7 @@ noise_map w:integer, h:integer, s:integer ->
     **/
     rotatex 0.05
     rotatex -0.05
+    noise_mapping_license_check
     color "white"
     frame_texture w, h,
         color "white"
@@ -71,6 +73,8 @@ generate_noise ->
             {
                gl_TexCoord[0] = gl_Vertex;
                gl_Position    = ftransform();
+
+               color = gl_Color;
             }
         >>
         fragment_shader <<
@@ -91,6 +95,7 @@ generate_noise ->
             #extension GL_EXT_gpu_shader4 : require
             uniform int seed;
 
+            varying vec4 color;
             // Pseudo random number base generator use to make noise
             float noise(vec2 v)
             {
@@ -104,7 +109,7 @@ generate_noise ->
             void main()
             {
                 float noiseColor = (noise(gl_TexCoord[0].st)) * 0.5;
-                gl_FragColor     = vec4(noiseColor, noiseColor, noiseColor, 1.0);
+                gl_FragColor     = vec4(noiseColor, noiseColor, noiseColor, 1.0) * color;
             }
         >>
     shader_set seed := NOISE_SEED // Distribution of the noise
@@ -122,6 +127,7 @@ noise_mapping n->
     * Apply noise mapping.
     **/
     NOISE_RATIO := n
+    noise_mapping_license_check
     if SHADER4_AVAILABLE_MAPPING = false then
         noise_shader_no_lights
     else
@@ -250,10 +256,6 @@ noise_shader_lights ->
                      // Define new render color
                     lighting_color  = (ambient + diffuse) * renderColor + specular;
                 }
-                else
-                {
-                    lighting_color = renderColor * color;
-                }
 
                 return lighting_color;
             }
@@ -269,7 +271,7 @@ noise_shader_lights ->
                 // Compute noise coordinates
                 vec2 noiseCoord = gl_TexCoord[0].st + vec2( noise.r * 0.065, -noise.g * 0.025 ) *  ratio / 10.0;
 
-                vec4 renderColor = texture2D(colorMap, noiseCoord);
+                vec4 renderColor = texture2D(colorMap, noiseCoord) * color;
 
                 gl_FragColor = computeRenderColor(renderColor);
             }
