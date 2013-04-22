@@ -157,7 +157,7 @@ void CubeMap::Draw()
     GL.TexParameter(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
     // Enable pixel blur
-    TextureMapping::tao->HasPixelBlur(true);
+    GL.HasPixelBlur(true);
 
     uint prg_id = 0;
     if(pgm)

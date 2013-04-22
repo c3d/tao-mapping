@@ -134,7 +134,7 @@ void NoiseMap::Draw()
     checkGLContext();
 
     // Enable pixel blur
-    TextureMapping::tao->HasPixelBlur(true);
+    GL.HasPixelBlur(true);
 
     Key key(w, h, seed);
     GL.Enable(GL_TEXTURE_3D);
