@@ -18,6 +18,9 @@
 extern "C" {
 #endif
 
+//#define TRUE    1
+//#define FALSE   0
+
 typedef struct {
     double x;
     double y;
@@ -25,6 +28,8 @@ typedef struct {
 } Vector3D;
 
 float noise3(float vec[]);
+double fBm( Vector3D point, double H, double lacunarity, double octaves,
+	    int init );
 #endif
 
 #ifdef __cplusplus
