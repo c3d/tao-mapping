@@ -53,56 +53,6 @@ static void init(void);
 	r1 = r0 - 1.;
 #define at3(rx,ry,rz) ( rx * q[0] + ry * q[1] + rz * q[2] )
 
-/* Fractional Brownian Motion function */
-
-double fBm( Vector3D point, double H, double lacunarity, double octaves,
-	    int init )
-{
-
-    double            value, frequency, remainder;
-    int               i;
-    static double     exponent_array[10];
-    float             vec[3];
-
-    /* precompute and store spectral weights */
-    if ( init ) {
-	start = 1;
-	srand( time(0) );
-	/* seize required memory for exponent_array */
-	frequency = 1.0;
-	for (i=0; i<=octaves; i++) {
-	    /* compute weight for each frequency */
-	    exponent_array[i] = pow( frequency, -H );
-	    frequency *= lacunarity;
-	}
-    }
-
-    value = 0.0;            /* initialize vars to proper values */
-    frequency = 1.0;
-    vec[0]=point.x;
-    vec[1]=point.y;
-    vec[2]=point.z;
-
-
-    /* inner loop of spectral construction */
-    for (i=0; i<octaves; i++) {
-	/* value += noise3( vec ) * exponent_array[i];*/
-	value += noise3( vec ) * exponent_array[i];
-	vec[0] *= lacunarity;
-	vec[1] *= lacunarity;
-	vec[2] *= lacunarity;
-    } /* for */
-
-    remainder = octaves - (int)octaves;
-    if ( remainder )      /* add in ``octaves''  remainder */
-	/* ``i''  and spatial freq. are preset in loop above */
-	value += remainder * noise3( vec ) * exponent_array[i];
-
-    return( value );
-
-} /* fBm() */
-
-
 float noise3(float vec[3])
 {
     int bx0, bx1, by0, by1, bz0, bz1, b00, b10, b01, b11;
