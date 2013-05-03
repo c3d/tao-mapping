@@ -175,25 +175,26 @@ static void normalize3(float v[3])
 
 static void init(void)
 {
+    unsigned int s = 0;
     int i, j, k;
     
     for (i = 0 ; i < B ; i++) {
 	p[i] = i;
 
-	g1[i] = (float)((rand() % (B + B)) - B) / B;
+	g1[i] = (float)((rand_r(&s) % (B + B)) - B) / B;
 
 	for (j = 0 ; j < 2 ; j++)
-	    g2[i][j] = (float)((rand() % (B + B)) - B) / B;
+	g2[i][j] = (float)((rand_r(&s) % (B + B)) - B) / B;
 	normalize2(g2[i]);
 
 	for (j = 0 ; j < 3 ; j++)
-	    g3[i][j] = (float)((rand() % (B + B)) - B) / B;
+	g3[i][j] = (float)((rand_r(&s) % (B + B)) - B) / B;
 	normalize3(g3[i]);
     }
 
     while (--i) {
 	k = p[i];
-	p[i] = p[j = rand() % B];
+	p[i] = p[j = rand_r(&s) % B];
 	p[j] = k;
     }
 
