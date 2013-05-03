@@ -19,14 +19,10 @@
 // in the Tao Presentations license agreement, or alternatively, in a signed
 // license agreement between you and Taodyne SAS.
 //  (C) 2011 Christophe de Dinechin <christophe@taodyne.com>
-//  (C) 2011 Jérôme Forissier <jerome@taodyne.com>
+//  (C) 2011 JÃ©rÃ´me Forissier <jerome@taodyne.com>
 //  (C) 2011 Catherine Burvelle <cathy@taodyne.com>
 //  (C) 2011 Taodyne SAS
 // ****************************************************************************
-
-
-alpha_mapping_license_check -> check_impress_or_license "Mapping 1.006"
-
 
 
 // ----------------------------------------------------------------------------
@@ -40,7 +36,6 @@ ALPHA_THRESHOLD := 0.01
 alpha_mapping n:real ->
     ALPHA_THRESHOLD := n
     has_color_map
-    alpha_mapping_license_check
     if SHADER4_AVAILABLE_MAPPING = false then
         alpha_shader_no_lights
     else
