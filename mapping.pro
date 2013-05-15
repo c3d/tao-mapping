@@ -31,7 +31,7 @@ SOURCES      = mapping.cpp \
     cube_mapping.cpp \
     sphere_mapping.cpp \
     noise_map.cpp \
-    3rdparty/fbm.c \
+    3rdparty/fbm.cpp \
 
 PICTURES = \
     colorMap.png \
