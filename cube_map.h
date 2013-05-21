@@ -143,7 +143,7 @@ private:
     void            checkGLContext();
 
 private:
-    uint            cubeMapId;
+    int             size;
     bool            flip_u : 1;
     bool            flip_v : 1;
     TextureCube     currentTexture;
@@ -154,7 +154,7 @@ private:
 
     static bool failed;
     static QGLShaderProgram* pgm;
-    static std::map<text, GLuint> uniforms;
+    static std::map<text, GLint> uniforms;
     static const QGLContext* context;
 };
 
