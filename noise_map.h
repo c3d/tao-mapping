@@ -36,7 +36,17 @@ struct NoiseMap : public TextureMapping
 
         bool operator<(const Key &o) const
         {
-            return (((seed < o.seed) || (w < o.w)) || (h < o.h));
+            if (seed < o.seed)
+                return true;
+            if (seed > o.seed)
+                return false;
+            if (w < o.w)
+                return true;
+            if (w > o.w)
+                return false;
+            if (h < o.h)
+                return true;
+            return false;
         }
     };
 
