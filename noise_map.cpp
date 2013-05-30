@@ -26,7 +26,6 @@
 
 NoiseMap::context_to_textures NoiseMap::texture_maps;
 
-#define GL (*graphic_state)
 
 NoiseMap::NoiseMap(uint w, uint h, uint seed) : w(w), h(h), seed(seed)
 // ----------------------------------------------------------------------------
@@ -57,8 +56,8 @@ uint NoiseMap::generateNoiseMap()
             debug() << "Generate sphere mapping shader" << "\n";
 
     uint texId = 0;
-    GL.GenTextures(1, &texId);
-    GL.BindTexture(GL_TEXTURE_3D, texId);
+    glGenTextures(1, &texId);
+    glBindTexture(GL_TEXTURE_3D, texId);
 
     QRgb *data = new QRgb[w * h * seed];
     memset(data, 0, w * h * seed * sizeof(QRgb));
@@ -78,9 +77,13 @@ uint NoiseMap::generateNoiseMap()
         }
     }
 
-    GL.TexImage3D(GL_TEXTURE_3D, 0, 4, w, h, seed, 0,
-                  GL_BGRA, GL_UNSIGNED_BYTE, data);
+    glTexImage3D(GL_TEXTURE_3D, 0, 4, w, h, seed, 0,
+                 GL_BGRA, GL_UNSIGNED_BYTE, data);
 
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_REPEAT);
+    glBindTexture(GL_TEXTURE_3D, 0);
     delete[] data;
 
     return texId;
@@ -102,7 +105,7 @@ void NoiseMap::loadNoiseMap()
         while (textures.size() > MAX_TEXTURES)
         {
             noise_map::iterator first = textures.begin();
-            GL.DeleteTextures(1, &(*first).second);
+            glDeleteTextures(1, &(*first).second);
             textures.erase(first);
         }
 
@@ -122,7 +125,7 @@ void NoiseMap::loadNoiseMap()
             debug() << "Apply noise map" << "\n";
 
     // Set to the textures list in Tao.
-    //TextureMapping::tao->BindTexture(textures[key], GL_TEXTURE_3D);
+    TextureMapping::tao->BindTexture(textures[key], GL_TEXTURE_3D);
 }
 
 
@@ -131,21 +134,8 @@ void NoiseMap::Draw()
 //   Draw noise map texture
 // ----------------------------------------------------------------------------
 {
-    checkGLContext();
-
     // Enable pixel blur
-    GL.HasPixelBlur(true);
-
-    Key key(w, h, seed);
-    GL.Enable(GL_TEXTURE_3D);
-    GL.BindTexture(GL_TEXTURE_3D, textures[key]);
-
-    GL.TexParameter(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    GL.TexParameter(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-    GL.TexParameter(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    GL.TexParameter(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    GL.TexParameter(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_REPEAT);
+    TextureMapping::tao->HasPixelBlur(true);
 }
 
 

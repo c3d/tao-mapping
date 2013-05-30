@@ -10,9 +10,7 @@
 
 ******************************************************************/
 
-#if defined (_MSC_VER)
-#include <qglobal.h>
-#endif
+#include <QtGlobal>
 
 #include <time.h>
 #include <stdlib.h>
@@ -52,56 +50,6 @@ static void init(void);
 	r0 = t - (int)t;\
 	r1 = r0 - 1.;
 #define at3(rx,ry,rz) ( rx * q[0] + ry * q[1] + rz * q[2] )
-
-/* Fractional Brownian Motion function */
-
-double fBm( Vector3D point, double H, double lacunarity, double octaves,
-	    int init )
-{
-
-    double            value, frequency, remainder;
-    int               i;
-    static double     exponent_array[10];
-    float             vec[3];
-
-    /* precompute and store spectral weights */
-    if ( init ) {
-	start = 1;
-	srand( time(0) );
-	/* seize required memory for exponent_array */
-	frequency = 1.0;
-	for (i=0; i<=octaves; i++) {
-	    /* compute weight for each frequency */
-	    exponent_array[i] = pow( frequency, -H );
-	    frequency *= lacunarity;
-	}
-    }
-
-    value = 0.0;            /* initialize vars to proper values */
-    frequency = 1.0;
-    vec[0]=point.x;
-    vec[1]=point.y;
-    vec[2]=point.z;
-
-
-    /* inner loop of spectral construction */
-    for (i=0; i<octaves; i++) {
-	/* value += noise3( vec ) * exponent_array[i];*/
-	value += noise3( vec ) * exponent_array[i];
-	vec[0] *= lacunarity;
-	vec[1] *= lacunarity;
-	vec[2] *= lacunarity;
-    } /* for */
-
-    remainder = octaves - (int)octaves;
-    if ( remainder )      /* add in ``octaves''  remainder */
-	/* ``i''  and spatial freq. are preset in loop above */
-	value += remainder * noise3( vec ) * exponent_array[i];
-
-    return( value );
-
-} /* fBm() */
-
 
 float noise3(float vec[3])
 {
@@ -180,20 +128,20 @@ static void init(void)
     for (i = 0 ; i < B ; i++) {
 	p[i] = i;
 
-	g1[i] = (float)((rand() % (B + B)) - B) / B;
+	g1[i] = (float)((qrand() % (B + B)) - B) / B;
 
 	for (j = 0 ; j < 2 ; j++)
-	    g2[i][j] = (float)((rand() % (B + B)) - B) / B;
+	g2[i][j] = (float)((qrand() % (B + B)) - B) / B;
 	normalize2(g2[i]);
 
 	for (j = 0 ; j < 3 ; j++)
-	    g3[i][j] = (float)((rand() % (B + B)) - B) / B;
+	g3[i][j] = (float)((qrand() % (B + B)) - B) / B;
 	normalize3(g3[i]);
     }
 
     while (--i) {
 	k = p[i];
-	p[i] = p[j = rand() % B];
+	p[i] = p[j = qrand() % B];
 	p[j] = k;
     }
 
