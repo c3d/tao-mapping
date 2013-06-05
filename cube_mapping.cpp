@@ -83,10 +83,13 @@ void CubeMapping::Draw()
         // Set shader
         tao->SetShader(prg_id);
 
+        // Check if unit 0 has a texture or not
+        bool hasTexture = GL.ActiveTextureUnits() & 1;
+
         // Set uniform values
         GL.Uniform(uniforms["colorMap"], 0);
         GL.Uniform(uniforms["cubeMap"], 1);
-        GL.Uniform(uniforms["hasColorMap"], tao->HasTexture(0));
+        GL.Uniform(uniforms["hasColorMap"], hasTexture);
         GL.Uniform(uniforms["ratio"], ratio);
         GL.UniformMatrix4fv(uniforms["modelMatrix"], 1, 0, &model[0][0]);
 
@@ -98,7 +101,7 @@ void CubeMapping::Draw()
 
         if(tao->isGLExtensionAvailable("GL_EXT_gpu_shader4"))
         {
-            GLint lightsmask = tao->EnabledLights();
+            GLint lightsmask =  GL.LightsMask();
             GL.Uniform(uniforms["lights"], lightsmask);
         }
     }

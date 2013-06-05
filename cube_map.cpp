@@ -172,11 +172,11 @@ void CubeMap::Draw()
         tao->SetShader(prg_id);
 
         // Set uniform values
-        GL.Uniform(uniforms["cubeMap"], tao->TextureUnit());
+        GL.Uniform(uniforms["cubeMap"], GL.ActiveTextureUnitIndex() - GL_TEXTURE0);
 
         if(tao->isGLExtensionAvailable("GL_EXT_gpu_shader4"))
         {
-            GLint lightsmask = tao->EnabledLights();
+            GLint lightsmask =  GL.LightsMask();
             GL.Uniform(uniforms["lights"], lightsmask);
         }
     }
