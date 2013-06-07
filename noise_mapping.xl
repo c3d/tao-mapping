@@ -30,7 +30,6 @@
 // ----------------------------------------------------------------------------
 
 NOISE_SEED -> 0
-NOISE_SEED := 0
 
 noise_map w:integer, h:integer, s:integer ->
     /**
@@ -118,7 +117,6 @@ generate_noise ->
 
 // Define noise ratio
 NOISE_RATIO -> 0.0
-NOISE_RATIO := 0.0
 
 noise_mapping n->
     /**

@@ -32,7 +32,6 @@
 
 // Define displacement ratio
 DISPLACEMENT_RATIO -> 0.0
-DISPLACEMENT_RATIO := 0.0
 
 displacement_mapping ratio:real ->
     /**

@@ -31,7 +31,6 @@
 
 //Define alpha thresold
 ALPHA_THRESHOLD -> 0.01
-ALPHA_THRESHOLD := 0.01
 
 alpha_mapping n:real ->
     ALPHA_THRESHOLD := n
