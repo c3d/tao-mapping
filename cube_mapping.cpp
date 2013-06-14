@@ -63,12 +63,6 @@ void CubeMapping::Draw()
 //   Apply cube mapping
 // ----------------------------------------------------------------------------
 {
-    if (!tested)
-    {
-        licensed = tao->checkImpressOrLicense(MAPPING_FEATURE);
-        tested = true;
-    }
-
     checkGLContext();
 
     uint prg_id = 0;

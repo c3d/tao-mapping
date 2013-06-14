@@ -24,8 +24,6 @@
 //  (C) 2011 Taodyne SAS
 // ****************************************************************************
 
-normal_mapping_license_check -> check_impress_or_license "Mapping 1.006"
-
 
 // ----------------------------------------------------------------------------
 //   NORMAL MAP
@@ -42,7 +40,6 @@ normal_map ->
     TEXTURE_WIDTH := texture_width
     TEXTURE_HEIGHT := texture_height
     TEXTURE_ID := texture
-    normal_mapping_license_check
     frame_texture TEXTURE_WIDTH, TEXTURE_HEIGHT,
         color "white"
         texture TEXTURE_ID
@@ -156,7 +153,6 @@ normal_mapping ->
     * Apply normal mapping.
     **/
     has_color_map
-    normal_mapping_license_check
     if SHADER4_AVAILABLE_MAPPING = false then
         normal_shader_no_lights
     else

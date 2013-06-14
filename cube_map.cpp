@@ -125,15 +125,6 @@ bool CubeMap::loadCubeMap()
         textures[cubeMapId] = currentTexture;
     }
 
-    if (!tested)
-    {
-        if(tao->hasImpressOrLicense("Materials 1.0"))
-            licensed = true;
-        else
-            licensed = tao->checkImpressOrLicense(MAPPING_FEATURE);
-        tested = true;
-    }
-
     return true;
 }
 

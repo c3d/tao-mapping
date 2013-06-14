@@ -54,8 +54,6 @@ public:
     const QGLContext    **pcontext;
 
 public:
-    static bool tested, licensed;
-
     // Pointer to Tao functions
     static const Tao::ModuleApi *tao;
 };

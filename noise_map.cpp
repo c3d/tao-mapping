@@ -109,15 +109,6 @@ void NoiseMap::loadNoiseMap()
         textures[key] = generateNoiseMap();
     }
 
-    if (!tested)
-    {
-        if(tao->hasImpressOrLicense("Materials 1.0"))
-            licensed = true;
-        else
-            licensed = tao->checkImpressOrLicense(MAPPING_FEATURE);
-        tested = true;
-    }
-
     IFTRACE(mapping)
             debug() << "Apply noise map" << "\n";
 

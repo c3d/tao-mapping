@@ -24,7 +24,6 @@
 //  (C) 2011 Taodyne SAS
 // ****************************************************************************
 
-noise_mapping_license_check -> check_impress_or_license "Mapping 1.006"
 
 // ----------------------------------------------------------------------------
 //   NOISE MAP
@@ -39,7 +38,6 @@ noise_map w:integer, h:integer, s:integer ->
     **/
     rotatex 0.05
     rotatex -0.05
-    noise_mapping_license_check
     color "white"
     frame_texture w, h,
         color "white"
@@ -124,7 +122,6 @@ noise_mapping n->
     * Apply noise mapping.
     **/
     NOISE_RATIO := n
-    noise_mapping_license_check
     if SHADER4_AVAILABLE_MAPPING = false then
         noise_shader_no_lights
     else
