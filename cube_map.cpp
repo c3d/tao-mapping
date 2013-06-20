@@ -29,17 +29,14 @@
 CubeMap::context_to_textures CubeMap::texture_maps;
 bool                         CubeMap::failed = false;
 QGLShaderProgram*            CubeMap::pgm = NULL;
-std::map<text, GLuint>        CubeMap::uniforms;
+std::map<text, GLint>        CubeMap::uniforms;
 const QGLContext*            CubeMap::context = NULL;
-
-
-#define GL (*graphic_state)
 
 CubeMap::CubeMap(int size)
 // ----------------------------------------------------------------------------
 //   Construction
 // ----------------------------------------------------------------------------
-    : TextureMapping(&context), cubeMapId(0), flip_u(false), flip_v(false)
+    : TextureMapping(&context), size(size), flip_u(false), flip_v(false)
 {
     IFTRACE(mapping)
             debug() << "Create cube map" << "\n";
@@ -93,14 +90,15 @@ bool CubeMap::loadCubeMap()
 // ----------------------------------------------------------------------------
 {
     checkGLContext();
-    cubeMapId = isInclude();
+    GLuint cubeMapId = isInclude();
+
     if(! cubeMapId)
     {
         // Prune the map if it gets too big
         while (textures.size() > MAX_TEXTURES)
         {
             texture_map::iterator first = textures.begin();
-            GL.DeleteTextures(1, (GLuint*) &(*first).first);
+            glDeleteTextures(1, &(*first).first);
             textures.erase(first);
         }
 
@@ -108,15 +106,23 @@ bool CubeMap::loadCubeMap()
                 debug() << "Generate cube map" << "\n";
 
         // Load cubemap texture
-        GL.GenTextures(1, &cubeMapId);
-        GL.BindTexture(GL_TEXTURE_CUBE_MAP, cubeMapId);
+        glGenTextures (1, &cubeMapId);
+        glBindTexture (GL_TEXTURE_CUBE_MAP, cubeMapId);
+
+        // Setup some parameters for texture filters and mapping
+        glTexParameteri (GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri (GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+        glTexParameteri (GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri (GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri (GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
         for(int i = 0; i < 6; i++)
         {
             // Load each face of the cube map
             if (!loadTexture (i))
             {
-                GL.DeleteTextures(1, &cubeMapId);
+                glDeleteTextures (1, &cubeMapId);
                 return false;
             }
         }
@@ -125,9 +131,8 @@ bool CubeMap::loadCubeMap()
         textures[cubeMapId] = currentTexture;
     }
 
-    // This binding allows to get texture id in Tao
-    GL.Enable(GL_TEXTURE_CUBE_MAP);
-    GL.BindTexture(GL_TEXTURE_CUBE_MAP, cubeMapId);
+    // Set to the textures list in Tao.
+    TextureMapping::tao->BindTexture(cubeMapId, GL_TEXTURE_CUBE_MAP);
 
     return true;
 }
@@ -140,19 +145,8 @@ void CubeMap::Draw()
 {
     checkGLContext();
 
-    GL.Enable(GL_TEXTURE_CUBE_MAP);
-    GL.BindTexture(GL_TEXTURE_CUBE_MAP, cubeMapId);
-
-    // Setup some parameters for texture filters and mapping
-    GL.TexParameter(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    GL.TexParameter(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-    GL.TexParameter(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    GL.TexParameter(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    GL.TexParameter(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-
     // Enable pixel blur
-    GL.HasPixelBlur(true);
+    TextureMapping::tao->HasPixelBlur(true);
 
     uint prg_id = 0;
     if(pgm)
@@ -167,12 +161,12 @@ void CubeMap::Draw()
         tao->SetShader(prg_id);
 
         // Set uniform values
-        GL.Uniform(uniforms["cubeMap"], GL.ActiveTextureUnitIndex() - GL_TEXTURE0);
+        glUniform1i(uniforms["cubeMap"], tao->TextureUnit());
 
         if(tao->isGLExtensionAvailable("GL_EXT_gpu_shader4"))
         {
-            GLint lightsmask =  GL.LightsMask();
-            GL.Uniform(uniforms["lights"], lightsmask);
+            GLint lightsmask = tao->EnabledLights();
+            glUniform1i(uniforms["lights"], lightsmask);
         }
     }
 }
@@ -227,15 +221,15 @@ bool CubeMap::loadTexture (uint face)
     }
     if (!image.isNull())
     {
-        if (currentTexture.size <= 0)
-            currentTexture.size = image.width();
-        if (currentTexture.size != image.width() || currentTexture.size != image.height())
-            image = image.scaled(currentTexture.size, currentTexture.size, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+        if (size <= 0)
+            size = image.width();
+        if (size != image.width() || size != image.height())
+            image = image.scaled(size, size, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
 
         QImage texture = QGLWidget::convertToGLFormat(image);
         texture = texture.mirrored(currentFace->flip_u, currentFace->flip_v);
 
-        GL.TexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, 0, GL_RGBA,
+        glTexImage2D (GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, 0, GL_RGBA,
                       texture.width(), texture.height(), 0, GL_RGBA,
                       GL_UNSIGNED_BYTE, texture.bits());
 
@@ -398,18 +392,14 @@ void CubeMap::createShaders()
                     "         /* Define new render color */"
                     "        lighting_color  = (ambient + diffuse) * renderColor + specular;"
                     "    }"
-                    "    else"
-                    "    {"
-                    "        lighting_color = renderColor * color;"
-                    "    }"
-                    ""
+
                     "    return lighting_color;"
                     "}"
 
 
                     "void main()"
                     "{"
-                    "   vec4 renderColor = textureCube(cubeMap, gl_TexCoord[0].xyz);"
+                    "   vec4 renderColor = textureCube(cubeMap, gl_TexCoord[0].xyz) * color;"
                     "   gl_FragColor     = computeRenderColor(renderColor);"
                     "}";
 

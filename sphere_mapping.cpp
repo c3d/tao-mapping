@@ -31,8 +31,6 @@ QGLShaderProgram*     SphereMapping::pgm = NULL;
 std::map<text, GLint> SphereMapping::uniforms;
 const QGLContext*     SphereMapping::context = NULL;
 
-#define GL (*graphic_state)
-
 SphereMapping::SphereMapping(float ratio)
 // ----------------------------------------------------------------------------
 //   Construction
@@ -77,26 +75,23 @@ void SphereMapping::Draw()
         // Set shader
         tao->SetShader(prg_id);
 
-        // Check if unit 0 has a texture or not
-        bool hasTexture = GL.ActiveTextureUnits() & 1;
-
         // Set uniform values
-        GL.Uniform(uniforms["colorMap"], 0);
-        GL.Uniform(uniforms["sphereMap"], 1);
-        GL.Uniform(uniforms["hasColorMap"], hasTexture);
-        GL.Uniform(uniforms["ratio"], ratio);
-        GL.UniformMatrix4fv(uniforms["modelMatrix"], 1, 0, &model[0][0]);
+        glUniform1i(uniforms["colorMap"], 0);
+        glUniform1i(uniforms["sphereMap"], 1);
+        glUniform1i(uniforms["hasColorMap"], tao->HasTexture(0));
+        glUniform1f(uniforms["ratio"], ratio);
+        glUniformMatrix4fv(uniforms["modelMatrix"], 1, 0, &model[0][0]);
 
         // Get and set camera position
         Vector3 cam;
         tao->getCamera(&cam, NULL, NULL, NULL);
         GLfloat camera[3] = {(float) cam.x, (float) cam.y, (float) cam.z};
-        GL.Uniform3fv(uniforms["camera"], 1, camera);
+        glUniform3fv(uniforms["camera"], 1, camera);
 
         if(tao->isGLExtensionAvailable("GL_EXT_gpu_shader4"))
         {
-            GLint lightsmask =  GL.LightsMask();
-            GL.Uniform(uniforms["lights"], lightsmask);
+            GLint lightsmask = tao->EnabledLights();
+            glUniform1i(uniforms["lights"], lightsmask);
         }
     }
 }
@@ -272,10 +267,6 @@ void SphereMapping::createShaders()
                     "         /* Define new render color */"
                     "        lighting_color  = (ambient + diffuse) * renderColor + specular;"
                     "    }"
-                    "    else"
-                    "    {"
-                    "        lighting_color = renderColor * color;"
-                    "    }"
 
                     "    return lighting_color;"
                     "}"
@@ -289,11 +280,13 @@ void SphereMapping::createShaders()
                     "   sphereColor = texture2D(sphereMap, gl_TexCoord[1].st);"
 
                     "   /* Get color map */"
-                    "   mainColor = vec4(1.0);"
+                    "   mainColor = texture2D(colorMap, gl_TexCoord[0].st);"
 
                     "   /* Check if there is really a color map */"
                     "   if(hasColorMap)"
-                    "       mainColor = texture2D(colorMap, gl_TexCoord[0].st);"
+                    "      mainColor *= color;"
+                    "   else"
+                    "      mainColor  = color;"
 
                     "   renderColor  = mix(mainColor, sphereColor, ratio);"
                     "   gl_FragColor = computeRenderColor(renderColor);"

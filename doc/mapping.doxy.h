@@ -1,7 +1,8 @@
 /**
- * @~english
  * @taomoduledescription{Mapping, Mapping}
- * <tt>import Mapping</tt> - Define some texture mapping techniques.@n
+ *
+ * @~english
+ * <tt>import Mapping</tt> - Define some texture mapping techniques.
  *
  * Texture mapping is a method for adding detail onto a triangle,
  * thanks to a surface texture (a bitmap or raster image).
@@ -28,8 +29,7 @@
  * @image html displacement.png "Displacement mapping"
  *
  * @~french
- * @taomoduledescription{Mapping, Mapping}
- * <tt>import Mapping</tt> - Techniques de mapping.@n
+ * i<tt>import Mapping</tt> - Techniques de mapping.
  *
  * Le @a mapping de textures est une méthode pour ajouter des détails sur un
  * triangle grâce à une texture (une image @a bitmap). Elle permet d'ajouter
@@ -52,7 +52,25 @@
  * @{
  */
 
-
+/**
+ * @~english
+ * Draws a subdivided plane.
+ *
+ * This plane is centered at (@p x, @p y), with width @p w and height @p h,
+ * and is subdivided according to its line @p l and column @p c numbers.
+ *
+ * @note With a convenient subdivision, this plane can be used to make a
+ * displacement mapping.
+ *
+ * @~french
+ * Affiche un plan subdivisé.
+ *
+ * Le rectangle est centré en (@p x, @p y), a une largeur de @p w pixels et une
+ * hauteur @p h pixels, et est subdivisé en @p l lignes et @p c colonnes.
+ * Avec une subdivision adaptée, ce plan est bien adapté pour faire un
+ * <em>displacement mapping</em>.
+ */
+plane(x:real, y:real, w:real, h:real, l:integer, c:integer);
 
 /**
  * @~english
