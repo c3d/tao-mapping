@@ -125,6 +125,10 @@ bool CubeMap::loadCubeMap()
         textures[cubeMapId] = currentTexture;
     }
 
+    // This binding allows to get texture id in Tao
+    GL.Enable(GL_TEXTURE_CUBE_MAP);
+    GL.BindTexture(GL_TEXTURE_CUBE_MAP, cubeMapId);
+
     return true;
 }
 
