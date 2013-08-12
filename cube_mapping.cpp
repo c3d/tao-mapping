@@ -31,6 +31,8 @@ QGLShaderProgram*     CubeMapping::pgm = NULL;
 std::map<text, GLint> CubeMapping::uniforms;
 const QGLContext*     CubeMapping::context = NULL;
 
+#define GL (*graphic_state)
+
 CubeMapping::CubeMapping(float ratio)
 // ----------------------------------------------------------------------------
 //   Construction
@@ -75,23 +77,26 @@ void CubeMapping::Draw()
         // Set shader
         tao->SetShader(prg_id);
 
+        // Check if unit 0 has a texture or not
+        bool hasTexture = GL.ActiveTextureUnits() & 1;
+
         // Set uniform values
-        glUniform1i(uniforms["colorMap"], 0);
-        glUniform1i(uniforms["cubeMap"], 1);
-        glUniform1i(uniforms["hasColorMap"], tao->HasTexture(0));
-        glUniform1f(uniforms["ratio"], ratio);
-        glUniformMatrix4fv(uniforms["modelMatrix"], 1, 0, &model[0][0]);
+        GL.Uniform(uniforms["colorMap"], 0);
+        GL.Uniform(uniforms["cubeMap"], 1);
+        GL.Uniform(uniforms["hasColorMap"], hasTexture);
+        GL.Uniform(uniforms["ratio"], ratio);
+        GL.UniformMatrix4fv(uniforms["modelMatrix"], 1, 0, &model[0][0]);
 
         // Get and set camera position
         Vector3 cam;
         tao->getCamera(&cam, NULL, NULL, NULL);
         GLfloat camera[3] = {(float) cam.x, (float) cam.y, (float) cam.z};
-        glUniform3fv(uniforms["camera"], 1, camera);
+        GL.Uniform3fv(uniforms["camera"], 1, camera);
 
         if(tao->isGLExtensionAvailable("GL_EXT_gpu_shader4"))
         {
-            GLint lightsmask = tao->EnabledLights();
-            glUniform1i(uniforms["lights"], lightsmask);
+            GLint lightsmask =  GL.LightsMask();
+            GL.Uniform(uniforms["lights"], lightsmask);
         }
     }
 }
@@ -263,6 +268,10 @@ void CubeMapping::createShaders()
                     "         /* Define new render color */"
                     "        lighting_color  = (ambient + diffuse) * renderColor + specular;"
                     "    }"
+                    "    else"
+                    "    {"
+                    "        lighting_color = renderColor * color;"
+                    "    }"
 
                     "    return lighting_color;"
                     "}"
@@ -276,13 +285,11 @@ void CubeMapping::createShaders()
                     "   cubeColor = textureCube(cubeMap, gl_TexCoord[1].xyz);"
 
                     "   /* Get color map */"
-                    "   mainColor = texture2D(colorMap, gl_TexCoord[0].st);"
+                    "   mainColor = vec4(1.0);"
 
                     "   /* Check if there is really a color map */"
                     "   if(hasColorMap)"
-                    "      mainColor *= color;"
-                    "   else"
-                    "      mainColor  = color;"
+                    "       mainColor = texture2D(colorMap, gl_TexCoord[0].st);"
 
                     "   renderColor  = mix(mainColor, cubeColor, ratio);"
                     "   gl_FragColor = computeRenderColor(renderColor);"

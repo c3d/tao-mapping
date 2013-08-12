@@ -27,20 +27,6 @@
 //   MAPPING PARAMETERS
 // ----------------------------------------------------------------------------
 
-PREFIX(Plane,  tree, "plane",
-       PARM(x, real, )
-       PARM(y, real, )
-       PARM(width, real, )
-       PARM(height, real, )
-       PARM(lines_nb, integer, )
-       PARM(columns_nb, integer, ),
-       return plane(self, x, y, width, height, lines_nb, columns_nb),
-       GROUP(module.Mapping)
-       SYNOPSIS("Generate a subdivided plane")
-       DESCRIPTION("Generate a subdivided plane."))
-
-
-
 PREFIX(CubeMap,  tree, "cube_map",
        PARM(size, integer, )
        PARM(p, code, "The program that represent a cube map"),
