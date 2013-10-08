@@ -112,8 +112,9 @@ void NoiseMap::loadNoiseMap()
     IFTRACE(mapping)
             debug() << "Apply noise map" << "\n";
 
-    // Set to the textures list in Tao.
-    //TextureMapping::tao->BindTexture(textures[key], GL_TEXTURE_3D);
+    // This binding allows to get texture id in Tao
+    GL.Enable(GL_TEXTURE_CUBE_MAP);
+    GL.BindTexture(GL_TEXTURE_CUBE_MAP, textures[key]);
 }
 
 
