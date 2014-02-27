@@ -163,6 +163,10 @@ alpha_shader_lights ->
                      // Define new render color
                     lighting_color  = (ambient + diffuse) * renderColor + specular;
                 }
+                else
+                {
+                    lighting_color = renderColor * color;
+                }
 
                 return lighting_color;
             }
@@ -177,14 +181,11 @@ alpha_shader_lights ->
                 && alpha_color.b < threshold)
                     discard;
 
-                // Get color map
-                vec4 mainColor = texture2D(colorMap, gl_TexCoord[0].xy);
+                vec4 mainColor = vec4(1.0);
 
                 // Check if there is really a color map
                 if(hasColorMap)
-                    mainColor *= color;
-                else
-                    mainColor  = color;
+                    mainColor = texture2D(colorMap, gl_TexCoord[0].st);
 
                 gl_FragColor  = computeRenderColor(mainColor);
             }

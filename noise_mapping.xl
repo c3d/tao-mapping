@@ -70,8 +70,6 @@ generate_noise ->
             {
                gl_TexCoord[0] = gl_Vertex;
                gl_Position    = ftransform();
-
-               color = gl_Color;
             }
         >>
         fragment_shader <<
@@ -92,7 +90,6 @@ generate_noise ->
             #extension GL_EXT_gpu_shader4 : require
             uniform int seed;
 
-            varying vec4 color;
             // Pseudo random number base generator use to make noise
             float noise(vec2 v)
             {
@@ -106,7 +103,7 @@ generate_noise ->
             void main()
             {
                 float noiseColor = (noise(gl_TexCoord[0].st)) * 0.5;
-                gl_FragColor     = vec4(noiseColor, noiseColor, noiseColor, 1.0) * color;
+                gl_FragColor     = vec4(noiseColor, noiseColor, noiseColor, 1.0);
             }
         >>
     shader_set seed := NOISE_SEED // Distribution of the noise
@@ -251,6 +248,10 @@ noise_shader_lights ->
                      // Define new render color
                     lighting_color  = (ambient + diffuse) * renderColor + specular;
                 }
+                else
+                {
+                    lighting_color = renderColor * color;
+                }
 
                 return lighting_color;
             }
@@ -266,7 +267,7 @@ noise_shader_lights ->
                 // Compute noise coordinates
                 vec2 noiseCoord = gl_TexCoord[0].st + vec2( noise.r * 0.065, -noise.g * 0.025 ) *  ratio / 10.0;
 
-                vec4 renderColor = texture2D(colorMap, noiseCoord) * color;
+                vec4 renderColor = texture2D(colorMap, noiseCoord);
 
                 gl_FragColor = computeRenderColor(renderColor);
             }
