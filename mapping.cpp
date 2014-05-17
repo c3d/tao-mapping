@@ -54,13 +54,14 @@ Tree_p cube_map_face(Tree_p tree, GLuint face, text filename)
 {
     if (!cubeMap)
     {
-        Ooops("No mapping defined '$1' ", tree);
+        Ooops("Mapping: No mapping defined for cube map face in $1", tree);
         return xl_false;
     }
 
-    if (!cubeMap->setTexture( filename, face))
+    if (!cubeMap->setTexture(filename, face))
     {
-        Ooops("No correct face '$1' ", tree);
+        Ooops("Mapping: Cube map texture '$2' could not be set in $1", tree)
+            .Arg(filename);
         return xl_false;
     }
 
@@ -74,7 +75,7 @@ Tree_p cube_map_flip(Tree_p tree, bool u, bool v)
 {
     if (!cubeMap)
     {
-        Ooops("No mapping defined '$1' ", tree);
+        Ooops("Mapping: No cube map for flip in $1 ", tree);
         return xl_false;
     }
 
@@ -120,7 +121,8 @@ Tree_p noise_map_3D(Tree_p tree, GLuint w, GLuint h, GLuint seed)
 {
     if(seed > MAX_SEEDS)
     {
-        Ooops("Invalid value of seed '$1' ", tree);
+        Ooops("Mapping: Invalid seed value $2 for 3D noise map in $1, "
+              "maximum is $3", tree).Arg(seed).Arg(MAX_SEEDS);
         return xl_false;
     }
 
