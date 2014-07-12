@@ -94,6 +94,9 @@ displacement_shader_lights ->
                normal  = gl_NormalMatrix * gl_Normal;
                viewDir = -vec3(gl_ModelViewMatrix * gl_Vertex);
 
+               // Compute clip vertex (#3492)
+               gl_ClipVertex = gl_ModelViewMatrix * gl_Vertex;
+
                color = gl_Color;
             }
         >>
