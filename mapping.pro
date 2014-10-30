@@ -37,7 +37,14 @@ PICTURES = \
     $$NULL
 
 pics.path  = $$MODINSTPATH
-pics.files = $$PICTURES
+pics.files = $$PICTURES 
+
+xlfiles.path  = $$MODINSTPATH
+xlfiles.files =     normal_mapping.xl \
+    noise_mapping.xl \
+    alpha_mapping.xl \
+    displacement_mapping.xl
+
 
 win32 {
   DEFINES     += GLEW_STATIC
@@ -50,11 +57,12 @@ OTHER_FILES  = mapping.xl mapping.tbl traces.tbl \
     noise_mapping.xl \
     alpha_mapping.xl \
     displacement_mapping.xl
+
 QT          += core \
                gui \
                opengl
 
-INSTALLS    += thismod_icon pics
+INSTALLS    += thismod_icon pics xlfiles
 
 QMAKE_SUBSTITUTES = doc/Doxyfile.in
 DOXYFILE = doc/Doxyfile
