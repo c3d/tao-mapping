@@ -44,9 +44,6 @@ win32 {
   SOURCES     += $${TAOTOPSRC}/tao/include/tao/GL/glew.c
 }
 
-CRYPT_XL_SOURCES = alpha_mapping.xl displacement_mapping.xl normal_mapping.xl noise_mapping.xl
-include(../crypt_xl.pri)
-
 TBL_SOURCES  = mapping.tbl
 OTHER_FILES  = mapping.xl mapping.tbl traces.tbl \
     normal_mapping.xl \
