@@ -125,7 +125,7 @@ void SphereMapping::createShaders()
                 "** All rights reserved.                                                          \n"
                 "** Contact: Taodyne (contact@taodyne.com)                                        \n"
                 "**                                                                               \n"
-                "** This file is part of the Tao Presentations application, developped by Taodyne.\n"
+                "** This file is part of the Tao3D application, developped by Taodyne.\n"
                 "** It can be only used in the software and these modules.                        \n"
                 "**                                                                               \n"
                 "** If you have questions regarding the use of this file, please contact          \n"
@@ -196,7 +196,7 @@ void SphereMapping::createShaders()
                     "** All rights reserved.                                                          \n"
                     "** Contact: Taodyne (contact@taodyne.com)                                        \n"
                     "**                                                                               \n"
-                    "** This file is part of the Tao Presentations application, developped by Taodyne.\n"
+                    "** This file is part of the Tao3D application, developped by Taodyne.\n"
                     "** It can be only used in the software and these modules.                        \n"
                     "**                                                                               \n"
                     "** If you have questions regarding the use of this file, please contact          \n"
@@ -311,7 +311,7 @@ void SphereMapping::createShaders()
                     ** All rights reserved.
                     ** Contact: Taodyne (contact@taodyne.com)
                     **
-                    ** This file is part of the Tao Presentations application, developped by Taodyne.
+                    ** This file is part of the Tao3D application, developped by Taodyne.
                     ** It can be only used in the software and these modules.
                     **
                     ** If you have questions regarding the use of this file, please contact
