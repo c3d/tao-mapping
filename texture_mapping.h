@@ -25,6 +25,8 @@
 #include "tao/graphic_state.h"
 #include "tao/tao_gl.h"
 #include <QObject>
+#include <QGLContext>
+#include <QGLShaderProgram>
 
 using namespace std;
 using namespace Tao;
@@ -32,7 +34,7 @@ using namespace Tao;
 
 #define MAPPING_FEATURE "Mapping 1.008"  // Used in checkLicense etc.
 
-struct TextureMapping : public QObject
+struct TextureMapping : QObject
 {
     TextureMapping(const QGLContext **pcontext = NULL);
     ~TextureMapping();

@@ -31,7 +31,6 @@ QGLShaderProgram*     SphereMapping::pgm = NULL;
 std::map<text, GLint> SphereMapping::uniforms;
 const QGLContext*     SphereMapping::context = NULL;
 
-#define GL (*graphic_state)
 
 SphereMapping::SphereMapping(float ratio)
 // ----------------------------------------------------------------------------
@@ -376,13 +375,13 @@ void SphereMapping::createShaders()
             // Save uniform locations
             uint id = pgm->programId();
 
-            uniforms["ratio"] = glGetUniformLocation(id, "ratio");
-            uniforms["lights"] = glGetUniformLocation(id, "lights");
-            uniforms["colorMap"] = glGetUniformLocation(id, "colorMap");
-            uniforms["sphereMap"] = glGetUniformLocation(id, "sphereMap");
-            uniforms["hasColorMap"] = glGetUniformLocation(id, "hasColorMap");
-            uniforms["camera"] = glGetUniformLocation(id, "camera");
-            uniforms["modelMatrix"] = glGetUniformLocation(id, "modelMatrix");
+            uniforms["ratio"] = GL.GetUniformLocation(id, "ratio");
+            uniforms["lights"] = GL.GetUniformLocation(id, "lights");
+            uniforms["colorMap"] = GL.GetUniformLocation(id, "colorMap");
+            uniforms["sphereMap"] = GL.GetUniformLocation(id, "sphereMap");
+            uniforms["hasColorMap"] = GL.GetUniformLocation(id, "hasColorMap");
+            uniforms["camera"] = GL.GetUniformLocation(id, "camera");
+            uniforms["modelMatrix"] = GL.GetUniformLocation(id, "modelMatrix");
         }
     }
 }

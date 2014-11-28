@@ -30,7 +30,7 @@ using namespace std;
 using namespace Tao;
 
 
-struct CubeMapping : public TextureMapping
+struct CubeMapping : TextureMapping
 {
     CubeMapping(float ratio);
     ~CubeMapping();

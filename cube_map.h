@@ -24,6 +24,7 @@
 #include "tao/module_api.h"
 #include "tao/tao_gl.h"
 #include "texture_mapping.h"
+#include <map>
 
 struct  TextureFace
 // ----------------------------------------------------------------------------
@@ -113,7 +114,7 @@ struct  TextureCube
 };
 
 
-struct CubeMap : public TextureMapping
+struct CubeMap : TextureMapping
 // ----------------------------------------------------------------------------
 //   Apply a cubemap texture
 // ----------------------------------------------------------------------------

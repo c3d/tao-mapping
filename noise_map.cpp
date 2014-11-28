@@ -26,7 +26,6 @@
 
 NoiseMap::context_to_textures NoiseMap::texture_maps;
 
-#define GL (*graphic_state)
 
 NoiseMap::NoiseMap(uint w, uint h, uint seed) : w(w), h(h), seed(seed)
 // ----------------------------------------------------------------------------

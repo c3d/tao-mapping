@@ -33,8 +33,6 @@ std::map<text, GLuint>        CubeMap::uniforms;
 const QGLContext*            CubeMap::context = NULL;
 
 
-#define GL (*graphic_state)
-
 CubeMap::CubeMap(int size)
 // ----------------------------------------------------------------------------
 //   Construction
@@ -473,8 +471,8 @@ void CubeMap::createShaders()
             // Save uniform locations
             uint id = pgm->programId();
 
-            uniforms["cubeMap"] = glGetUniformLocation(id, "cubeMap");
-            uniforms["lights"] = glGetUniformLocation(id, "lights");
+            uniforms["cubeMap"] = GL.GetUniformLocation(id, "cubeMap");
+            uniforms["lights"] = GL.GetUniformLocation(id, "lights");
         }
     }
 }

@@ -31,7 +31,6 @@ QGLShaderProgram*     CubeMapping::pgm = NULL;
 std::map<text, GLint> CubeMapping::uniforms;
 const QGLContext*     CubeMapping::context = NULL;
 
-#define GL (*graphic_state)
 
 CubeMapping::CubeMapping(float ratio)
 // ----------------------------------------------------------------------------
@@ -372,13 +371,13 @@ void CubeMapping::createShaders()
             // Save uniform locations
             uint id = pgm->programId();
 
-            uniforms["ratio"] = glGetUniformLocation(id, "ratio");
-            uniforms["lights"] = glGetUniformLocation(id, "lights");
-            uniforms["colorMap"] = glGetUniformLocation(id, "colorMap");
-            uniforms["cubeMap"] = glGetUniformLocation(id, "cubeMap");
-            uniforms["hasColorMap"] = glGetUniformLocation(id, "hasColorMap");
-            uniforms["camera"] = glGetUniformLocation(id, "camera");
-            uniforms["modelMatrix"] = glGetUniformLocation(id, "modelMatrix");
+            uniforms["ratio"] = GL.GetUniformLocation(id, "ratio");
+            uniforms["lights"] = GL.GetUniformLocation(id, "lights");
+            uniforms["colorMap"] = GL.GetUniformLocation(id, "colorMap");
+            uniforms["cubeMap"] = GL.GetUniformLocation(id, "cubeMap");
+            uniforms["hasColorMap"] = GL.GetUniformLocation(id, "hasColorMap");
+            uniforms["camera"] = GL.GetUniformLocation(id, "camera");
+            uniforms["modelMatrix"] = GL.GetUniformLocation(id, "modelMatrix");
         }
     }
 }
