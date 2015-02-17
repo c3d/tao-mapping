@@ -46,11 +46,6 @@ xlfiles.files =     normal_mapping.xl \
     displacement_mapping.xl
 
 
-win32 {
-  DEFINES     += GLEW_STATIC
-  SOURCES     += $${TAOTOPSRC}/tao/include/tao/GL/glew.c
-}
-
 TBL_SOURCES  = mapping.tbl
 OTHER_FILES  = mapping.xl mapping.tbl traces.tbl \
     normal_mapping.xl \
