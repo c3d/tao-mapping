@@ -86,8 +86,7 @@ bool CubeMap::setTexture(text filename, uint face)
 
 bool CubeMap::loadCubeMap()
 // ----------------------------------------------------------------------------
-//   Create a cubemap texture according to textures of the different faces
-//   and set it to the textures list in Tao
+//   Load files for faces, build texture, add it to Tao's texture list    
 // ----------------------------------------------------------------------------
 {
     checkGLContext();
@@ -152,12 +151,11 @@ void CubeMap::Draw()
     // Enable pixel blur
     GL.HasPixelBlur(true);
 
-    uint prg_id = 0;
-    if(pgm)
+    uint prg_id = GL.CurrentProgram();
+    if(!prg_id && pgm)
+    {
         prg_id = pgm->programId();
 
-    if(prg_id)
-    {
         IFTRACE(mapping)
                 debug() << "Apply cube map" << "\n";
 
@@ -227,8 +225,11 @@ bool CubeMap::loadTexture (uint face)
     {
         if (currentTexture.size <= 0)
             currentTexture.size = image.width();
-        if (currentTexture.size != image.width() || currentTexture.size != image.height())
-            image = image.scaled(currentTexture.size, currentTexture.size, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+        if (currentTexture.size != image.width() ||
+            currentTexture.size != image.height())
+            image = image.scaled(currentTexture.size, currentTexture.size,
+                                 Qt::IgnoreAspectRatio,
+                                 Qt::SmoothTransformation);
 
         QImage texture = QGLWidget::convertToGLFormat(image);
         texture = texture.mirrored(currentFace->flip_u, currentFace->flip_v);
@@ -262,7 +263,7 @@ void CubeMap::createShaders()
 //   Create shader programs
 // ----------------------------------------------------------------------------
 {
-    if(!failed)
+    if(!GL.CurrentProgram() && !failed)
     {
         IFTRACE(mapping)
                 debug() << "Create cube map shader" << "\n";
