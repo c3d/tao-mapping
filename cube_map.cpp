@@ -26,25 +26,35 @@
 //
 // ============================================================================
 
-CubeMap::context_to_textures CubeMap::texture_maps;
-bool                         CubeMap::failed = false;
-QGLShaderProgram*            CubeMap::pgm = NULL;
-std::map<text, GLuint>        CubeMap::uniforms;
-const QGLContext*            CubeMap::context = NULL;
-
-
 CubeMap::CubeMap(int size)
 // ----------------------------------------------------------------------------
 //   Construction
 // ----------------------------------------------------------------------------
-    : TextureMapping(&context), cubeMapId(0), flip_u(false), flip_v(false)
+    : TextureMapping(), cubeMapId(0), cubeMapUID(0), lightsUID(0),
+      flip_u(false), flip_v(false), textureCube()
 {
     IFTRACE(mapping)
-            debug() << "Create cube map" << "\n";
+        debug() << "Create cube map\n";
 
     checkGLContext();
 
-    currentTexture.size = size;
+    textureCube.size = size;
+}
+
+
+CubeMap::CubeMap(text cross)
+// ----------------------------------------------------------------------------
+//   Construction
+// ----------------------------------------------------------------------------
+    : TextureMapping(), cubeMapId(0), cubeMapUID(0), lightsUID(0),
+      flip_u(false), flip_v(false), textureCube()
+{
+    IFTRACE(mapping)
+        debug() << "Create cube map from cross" << cross << "\n";
+
+    checkGLContext();
+    
+    loadCrossTexture(cross);
 }
 
 
@@ -53,6 +63,8 @@ CubeMap::~CubeMap()
 //   Destruction
 // ----------------------------------------------------------------------------
 {
+    if (cubeMapId)
+        GL.DeleteTextures(1, &cubeMapId);
 }
 
 
@@ -77,7 +89,6 @@ bool CubeMap::setTexture(text filename, uint face)
         currentFace->name = filename;
         currentFace->flip_u = flip_u;
         currentFace->flip_v = flip_v;
-
         return true;
     }
     return false;
@@ -90,19 +101,10 @@ bool CubeMap::loadCubeMap()
 // ----------------------------------------------------------------------------
 {
     checkGLContext();
-    cubeMapId = isInclude();
-    if(! cubeMapId)
+    if(!cubeMapId)
     {
-        // Prune the map if it gets too big
-        while (textures.size() > MAX_TEXTURES)
-        {
-            texture_map::iterator first = textures.begin();
-            GL.DeleteTextures(1, (GLuint*) &(*first).first);
-            textures.erase(first);
-        }
-
         IFTRACE(mapping)
-                debug() << "Generate cube map" << "\n";
+            debug() << "Generate cube map\n";
 
         // Load cubemap texture
         GL.GenTextures(1, &cubeMapId);
@@ -114,17 +116,86 @@ bool CubeMap::loadCubeMap()
             if (!loadTexture (i))
             {
                 GL.DeleteTextures(1, &cubeMapId);
+                cubeMapId = 0;
                 return false;
             }
         }
 
-        // Remember for the next time
-        textures[cubeMapId] = currentTexture;
+        // Setup some parameters for texture filters and mapping
+        const uint TCM = GL_TEXTURE_CUBE_MAP;
+        GL.BindTexture(TCM, cubeMapId);
+        GL.TexParameter(TCM, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        GL.TexParameter(TCM, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+        GL.TexParameter(TCM, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        GL.TexParameter(TCM, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        GL.TexParameter(TCM, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
     }
 
     // This binding allows to get texture id in Tao
     GL.Enable(GL_TEXTURE_CUBE_MAP);
     GL.BindTexture(GL_TEXTURE_CUBE_MAP, cubeMapId);
+
+    // Enable pixel blur
+    GL.HasPixelBlur(true);
+    
+    return true;
+}
+
+
+bool CubeMap::loadCrossTexture(text cross)
+// ----------------------------------------------------------------------------
+//   Load files for faces, build texture, add it to Tao's texture list    
+// ----------------------------------------------------------------------------
+{
+    checkGLContext();
+    if(!cubeMapId)
+    {
+        IFTRACE(mapping)
+            debug() << "Generate cube map\n";
+
+        // Load image in tetxure cache
+        QImage image = tao->textureImage(cross);
+
+        // Load cubemap texture
+        GL.GenTextures(1, &cubeMapId);
+        GL.BindTexture(GL_TEXTURE_CUBE_MAP, cubeMapId);
+
+        if (image.isNull())
+        {
+            GL.DeleteTextures(1, &cubeMapId);
+            cubeMapId = 0;
+            return false;
+        }
+
+        textureCube.size = image.height() / 4;
+        for(int i = 0; i < 6; i++)
+        {
+            // Load each face of the cube map
+            if (!loadTexture(i, image))
+            {
+                GL.DeleteTextures(1, &cubeMapId);
+                cubeMapId = 0;
+                return false;
+            }
+        }
+
+        // Setup some parameters for texture filters and mapping
+        const uint TCM = GL_TEXTURE_CUBE_MAP;
+        GL.TexParameter(TCM, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        GL.TexParameter(TCM, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+        GL.TexParameter(TCM, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        GL.TexParameter(TCM, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        GL.TexParameter(TCM, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);        
+    }
+
+    // This binding allows to get texture id in Tao
+    GL.Enable(GL_TEXTURE_CUBE_MAP);
+    GL.BindTexture(GL_TEXTURE_CUBE_MAP, cubeMapId);
+
+    // Enable pixel blur
+    GL.HasPixelBlur(true);
 
     return true;
 }
@@ -140,54 +211,27 @@ void CubeMap::Draw()
     GL.Enable(GL_TEXTURE_CUBE_MAP);
     GL.BindTexture(GL_TEXTURE_CUBE_MAP, cubeMapId);
 
-    // Setup some parameters for texture filters and mapping
-    GL.TexParameter(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    GL.TexParameter(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-    GL.TexParameter(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    GL.TexParameter(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    GL.TexParameter(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-
-    // Enable pixel blur
-    GL.HasPixelBlur(true);
-
     uint prg_id = GL.CurrentProgram();
-    if(!prg_id && pgm)
+    if(!prg_id && program)
     {
-        prg_id = pgm->programId();
+        prg_id = program->programId();
 
         IFTRACE(mapping)
-                debug() << "Apply cube map" << "\n";
+            debug() << "Apply cube map\n";
 
         // Set shader
         tao->SetShader(prg_id);
 
         // Set uniform values
-        GL.Uniform(uniforms["cubeMap"], GL.ActiveTextureUnitIndex() - GL_TEXTURE0);
+        uint tid = GL.ActiveTextureUnitIndex() - GL_TEXTURE0;
+        GL.Uniform(cubeMapUID, tid);
 
         if(tao->isGLExtensionAvailable("GL_EXT_gpu_shader4"))
         {
             GLint lightsmask =  GL.LightsMask();
-            GL.Uniform(uniforms["lights"], lightsmask);
+            GL.Uniform(lightsUID, lightsmask);
         }
     }
-}
-
-
-uint CubeMap::isInclude()
-// ----------------------------------------------------------------------------
-//  Check if the current cubemap texture has been already created
-// ----------------------------------------------------------------------------
-{
-   if(textures.size() != 0)
-   {
-       texture_map::iterator it;
-       for(it = textures.begin(); it != textures.end(); it++)
-           if(textures.find((*it).first) != textures.end())
-                if(textures[(*it).first] == currentTexture)
-                    return (*it).first;
-   }
-   return 0;
 }
 
 
@@ -198,63 +242,77 @@ TextureFace* CubeMap::whichFace(uint face)
 {
     switch(face)
     {
-        case 0:  return &currentTexture.right;  break;
-        case 1:  return &currentTexture.left;   break;
-        case 2:  return &currentTexture.top;    break;
-        case 3:  return &currentTexture.bottom; break;
-        case 4:  return &currentTexture.front ; break;
-        default: return &currentTexture.back;   break;
+        case 0:  return &textureCube.right;  break;
+        case 1:  return &textureCube.left;   break;
+        case 2:  return &textureCube.top;    break;
+        case 3:  return &textureCube.bottom; break;
+        case 4:  return &textureCube.front ; break;
+        default: return &textureCube.back;   break;
     }
 }
 
 
 bool CubeMap::loadTexture (uint face)
 // ----------------------------------------------------------------------------
-//   Load a texture according to a given face and
-//   bind it to the face of the cubemap texture
+//   Load a texture for the given face and bind it to the cubemap texture
 // ----------------------------------------------------------------------------
 {
     TextureFace* currentFace = whichFace(face);
-    QImage image(currentFace->name.c_str());
-    if (image.isNull())
-    {
-        text qualified = "texture:" + currentFace->name;
-        image.load(qualified.c_str());
-    }
+    QImage image = tao->textureImage(currentFace->name);
     if (!image.isNull())
     {
-        if (currentTexture.size <= 0)
-            currentTexture.size = image.width();
-        if (currentTexture.size != image.width() ||
-            currentTexture.size != image.height())
-            image = image.scaled(currentTexture.size, currentTexture.size,
+        if (textureCube.size <= 0)
+            textureCube.size = image.width();
+        if (textureCube.size != image.width() ||
+            textureCube.size != image.height())
+            image = image.scaled(textureCube.size, textureCube.size,
                                  Qt::IgnoreAspectRatio,
                                  Qt::SmoothTransformation);
-
-        QImage texture = QGLWidget::convertToGLFormat(image);
-        texture = texture.mirrored(currentFace->flip_u, currentFace->flip_v);
-
-        GL.TexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, 0, GL_RGBA,
-                      texture.width(), texture.height(), 0, GL_RGBA,
-                      GL_UNSIGNED_BYTE, texture.bits());
-
+        currentFace->loadTexture(face, image);
         return true;
     }
     return false;
 }
 
 
-void CubeMap::checkGLContext()
+bool CubeMap::loadTexture (uint face, QImage &cross)
 // ----------------------------------------------------------------------------
-//   Make sure a texture_map has been allocated for the current GL context
+//   Load a texture for the given face and bind it to the cubemap texture
 // ----------------------------------------------------------------------------
 {
-    TextureMapping::checkGLContext();
-    if (!texture_maps.count(QGLContext::currentContext()))
+    TextureFace* currentFace = whichFace(face);
+    int size = cross.height() / 4;
+    int x = size;
+    int y = size;
+    switch(face)
     {
-        texture_map m;
-        texture_maps[QGLContext::currentContext()] = m;
+    case 0: x = 2*size; break;
+    case 1: x = 0;      break;
+    case 2: y = 0;      break;
+    case 3: y = 2*size; break;
+    case 4: y = 1*size; break;
+    case 5: y = 3*size; break;
+    default: return false;
     }
+    QImage tile = cross.copy(x, y, size, size);
+    if (face == 5)
+        tile = tile.mirrored(true, true); 
+    currentFace->loadTexture(face, tile);
+    return true;
+}
+
+
+void TextureFace::loadTexture(uint face, QImage &image)
+// ----------------------------------------------------------------------------
+//    Load a given image
+// ----------------------------------------------------------------------------
+{    
+    QImage texture = QGLWidget::convertToGLFormat(image);
+    if (flip_u || flip_v)
+        texture = texture.mirrored(flip_u, flip_v);
+    GL.TexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, 0, GL_RGBA,
+                  texture.width(), texture.height(), 0, GL_RGBA,
+                  GL_UNSIGNED_BYTE, texture.bits());
 }
 
 
@@ -263,18 +321,18 @@ void CubeMap::createShaders()
 //   Create shader programs
 // ----------------------------------------------------------------------------
 {
-    if(!GL.CurrentProgram() && !failed)
+    if(!GL.CurrentProgram())
     {
         IFTRACE(mapping)
-                debug() << "Create cube map shader" << "\n";
+                debug() << "Create cube map shader\n";
 
-        delete pgm;
+        delete program;
 
-        pgm = new QGLShaderProgram(*pcontext);
+        program = new QGLShaderProgram(context);
         bool ok = false;
 
         // Basic vertex shader
-        static string vSrc =
+        kstring vSrc =
               "/********************************************************************************\n"
               "**                                                                               \n"
               "** Copyright (C) 2011 Taodyne.                                                   \n"
@@ -312,7 +370,7 @@ void CubeMap::createShaders()
               "    color = gl_Color;"
               "}";
 
-        static string fSrc;
+        kstring fSrc;
         if(tao->isGLExtensionAvailable("GL_EXT_gpu_shader4"))
         {
             // If the extension is available, use this shader
@@ -442,38 +500,36 @@ void CubeMap::createShaders()
                     "}";
         }
 
-        if (pgm->addShaderFromSourceCode(QGLShader::Vertex, vSrc.c_str()))
+        if (program->addShaderFromSourceCode(QGLShader::Vertex, vSrc))
         {
-            if (pgm->addShaderFromSourceCode(QGLShader::Fragment, fSrc.c_str()))
+            if (program->addShaderFromSourceCode(QGLShader::Fragment, fSrc))
             {
                 ok = true;
             }
             else
             {
-                std::cerr << "Error loading fragment shader code: " << "\n";
-                std::cerr << pgm->log().toStdString();
+                std::cerr << "Error loading fragment shader code:\n";
+                std::cerr << program->log().toStdString();
             }
         }
         else
         {
-            std::cerr << "Error loading vertex shader code: " << "\n";
-            std::cerr << pgm->log().toStdString();
+            std::cerr << "Error loading vertex shader code:\n";
+            std::cerr << program->log().toStdString();
         }
         if (!ok)
         {
-            delete pgm;
-            pgm = NULL;
-            failed = true;
+            delete program;
+            program = NULL;
         }
         else
         {
-            pgm->link();
+            program->link();
 
             // Save uniform locations
-            uint id = pgm->programId();
-
-            uniforms["cubeMap"] = GL.GetUniformLocation(id, "cubeMap");
-            uniforms["lights"] = GL.GetUniformLocation(id, "lights");
+            uint id = program->programId();
+            cubeMapUID = GL.GetUniformLocation(id, "cubeMap");
+            lightsUID = GL.GetUniformLocation(id, "lights");
         }
     }
 }

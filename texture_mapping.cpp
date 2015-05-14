@@ -15,7 +15,7 @@
 // ****************************************************************************
 // This software is licensed under the GNU General Public License v3.
 // See file COPYING for details.
-//  (C) 1992-2010 Christophe de Dinechin <christophe@taodyne.com>
+//  (C) 1992-2015 Christophe de Dinechin <christophe@taodyne.com>
 //  (C) 2010 Jerome Forissier <jerome@taodyne.com>
 //  (C) 2010 Taodyne SAS
 // ****************************************************************************
@@ -33,13 +33,12 @@ DLL_PUBLIC Tao::GraphicState * graphic_state = NULL;
 //
 // ============================================================================
 
-TextureMapping::TextureMapping(const QGLContext **pcontext)
+TextureMapping::TextureMapping()
 // ----------------------------------------------------------------------------
 //   Construction
 // ----------------------------------------------------------------------------
-    : pcontext(pcontext)
-{
-}
+    : context(NULL), program(NULL)
+{}
 
 
 TextureMapping::~TextureMapping()
@@ -47,6 +46,7 @@ TextureMapping::~TextureMapping()
 //   Destruction
 // ----------------------------------------------------------------------------
 {
+    delete program;
 }
 
 
@@ -91,12 +91,14 @@ void TextureMapping::checkGLContext()
 // ----------------------------------------------------------------------------
 {
     tao->makeGLContextCurrent();
-    if (*pcontext != QGLContext::currentContext())
+    const QGLContext *currentContext = QGLContext::currentContext();
+    if (context != currentContext)
     {
         IFTRACE(mapping)
-                debug() << "Context has changed" << "\n";
-
-        *pcontext = QGLContext::currentContext();
+            debug() << "Context has changed\n";
+        delete program;
+        program = NULL;
+        context = currentContext;
         createShaders();
     }
 }
@@ -106,8 +108,7 @@ void TextureMapping::createShaders()
 // ----------------------------------------------------------------------------
 //   Create shader programs for the material
 // ----------------------------------------------------------------------------
-{
-}
+{}
 
 
 std::ostream & TextureMapping::debug()
@@ -118,4 +119,3 @@ std::ostream & TextureMapping::debug()
     std::cerr << "[Mapping] " << (void*)this << " ";
     return std::cerr;
 }
-

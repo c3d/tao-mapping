@@ -23,38 +23,10 @@
 #include "texture_mapping.h"
 
 struct NoiseMap : public TextureMapping
+// ----------------------------------------------------------------------------
+//    Create a noise map
+// ----------------------------------------------------------------------------
 {
-    struct Key
-    {
-        Key(uint w, uint h, uint seed): w(w), h(h), seed(seed) {}
-        uint w, h, seed;
-
-        bool operator==(const Key &o) const
-        {
-            return ((seed == o.seed) && (w == o.w) && (h == o.h));
-        }
-
-        bool operator<(const Key &o) const
-        {
-            if (seed < o.seed)
-                return true;
-            if (seed > o.seed)
-                return false;
-            if (w < o.w)
-                return true;
-            if (w > o.w)
-                return false;
-            if (h < o.h)
-                return true;
-            return false;
-        }
-    };
-
-    typedef std::map<Key, uint>  noise_map;
-    typedef std::map<const QGLContext *, noise_map> context_to_textures;
-    enum { MAX_TEXTURES = 20 };
-
-public:
     NoiseMap(uint w, uint h, uint seed);
     ~NoiseMap();
 
@@ -64,15 +36,9 @@ public:
 private:
     uint generateNoiseMap();
     void loadNoiseMap();
-    void checkGLContext();
 
 private:
-    uint w, h, seed;
-
-    // Textures cache
-    static context_to_textures texture_maps;
-#   define textures texture_maps[QGLContext::currentContext()]
-
+    uint w, h, seed, textureID;
 };
 
 #endif // NOISE_MAP_H

@@ -41,9 +41,24 @@ Tree_p cube_map(Context *context, Integer_p size, Tree_p, Tree_p prog)
 
     TextureMapping::tao->AddToLayout2(TextureMapping::render_callback,
                                       TextureMapping::identify_callback,
-                                      cubeMap, TextureMapping::delete_callback);
+                                      cubeMap,
+                                      TextureMapping::delete_callback);
 
     return xl_true;
+}
+
+
+Tree_p cube_map_cross(text cross)
+// ----------------------------------------------------------------------------
+//    Create a cube map from a cross image
+// ----------------------------------------------------------------------------
+{
+    cubeMap = new CubeMap(cross);
+    TextureMapping::tao->AddToLayout2(TextureMapping::render_callback,
+                                      TextureMapping::identify_callback,
+                                      cubeMap,
+                                      TextureMapping::delete_callback);
+    return xl_true;    
 }
 
 
@@ -67,6 +82,7 @@ Tree_p cube_map_face(Tree_p tree, GLuint face, text filename)
 
     return xl_true;
 }
+
 
 Tree_p cube_map_flip(Tree_p tree, bool u, bool v)
 // ----------------------------------------------------------------------------
@@ -93,7 +109,8 @@ Tree_p cube_mapping(Tree_p /*tree*/, Real_p ratio)
     CubeMapping* cubeMapping = new CubeMapping(ratio);
     TextureMapping::tao->AddToLayout2(TextureMapping::render_callback,
                                       TextureMapping::identify_callback,
-                                      cubeMapping, TextureMapping::delete_callback);
+                                      cubeMapping,
+                                      TextureMapping::delete_callback);
 
     return xl_true;
 }
@@ -107,7 +124,8 @@ Tree_p sphere_mapping(Tree_p /*tree*/, Real_p ratio)
     SphereMapping* sphereMapping = new SphereMapping(ratio);
     TextureMapping::tao->AddToLayout2(TextureMapping::render_callback,
                                       TextureMapping::identify_callback,
-                                      sphereMapping, TextureMapping::delete_callback);
+                                      sphereMapping,
+                                      TextureMapping::delete_callback);
 
     return xl_true;
 }
@@ -128,7 +146,8 @@ Tree_p noise_map_3D(Tree_p tree, GLuint w, GLuint h, GLuint seed)
 
     NoiseMap* noiseMap = new NoiseMap(w, h, seed);
     TextureMapping::tao->addToLayout(TextureMapping::render_callback,
-                                     noiseMap, TextureMapping::delete_callback);
+                                     noiseMap,
+                                     TextureMapping::delete_callback);
 
     return xl_true;
 }

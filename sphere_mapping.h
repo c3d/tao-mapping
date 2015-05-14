@@ -44,11 +44,8 @@ protected:
 private:
     float   ratio;
     GLfloat model[4][4]; // model matrix
-
-    static bool failed;
-    static QGLShaderProgram* pgm;
-    static std::map<text, GLint> uniforms;
-    static const QGLContext* context;
+    uint    ratioUID, lightsUID, colorMapUID, sphereMapUID;
+    uint    hasColorMapUID, cameraUID, modelMatrixUID;
 };
 
 

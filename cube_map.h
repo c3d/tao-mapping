@@ -15,10 +15,11 @@
 // ****************************************************************************
 // This software is licensed under the GNU General Public License v3.
 // See file COPYING for details.
-//  (C) 1992-2010 Christophe de Dinechin <christophe@taodyne.com>
+//  (C) 1992-2015 Christophe de Dinechin <christophe@taodyne.com>
 //  (C) 2010 Jerome Forissier <jerome@taodyne.com>
-//  (C) 2010 Taodyne SAS
+//  (C) 2010-2015 Taodyne SAS
 // ****************************************************************************
+
 #include <stdio.h>
 #include "tao/coords3d.h"
 #include "tao/module_api.h"
@@ -61,8 +62,9 @@ struct  TextureFace
     {
         return ! operator ==(o);
     }
-};
 
+    void loadTexture(uint face, QImage &image);
+};
 
 
 struct  TextureCube
@@ -119,45 +121,33 @@ struct CubeMap : TextureMapping
 //   Apply a cubemap texture
 // ----------------------------------------------------------------------------
 {
-    typedef std::map<uint, TextureCube> texture_map;
-    typedef std::map<const QGLContext *, texture_map> context_to_textures;
-    enum { MAX_TEXTURES = 20 };
-
     // Constructor and destructor
     CubeMap(int size = 0);
+    CubeMap(text cross);
     ~CubeMap();
 
     // Draw cubemap
     virtual void    Draw();
 
-    void flip(bool u, bool v);
-    bool setTexture(text filename, uint face);
-    bool loadCubeMap();
+    void            flip(bool u, bool v);
+    bool            setTexture(text filename, uint face);
+    bool            loadCubeMap();
+    bool            loadCrossTexture(text cross);
 
 protected:
     virtual void    createShaders();
 
 private:
-    uint            isInclude();
     TextureFace*    whichFace(uint face);
     bool            loadTexture(uint face);
-    void            checkGLContext();
+    bool            loadTexture(uint face, QImage &cross);
 
 private:
     uint            cubeMapId;
+    GLuint          cubeMapUID, lightsUID;
     bool            flip_u : 1;
     bool            flip_v : 1;
-    TextureCube     currentTexture;
-
-    // Textures cache
-    static context_to_textures texture_maps;
-#   define textures texture_maps[QGLContext::currentContext()]
-
-    static bool failed;
-    static QGLShaderProgram* pgm;
-    static std::map<text, GLuint> uniforms;
-    static const QGLContext* context;
+    TextureCube     textureCube;
 };
-
 
 #endif

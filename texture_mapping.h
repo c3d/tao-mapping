@@ -32,12 +32,15 @@ using namespace std;
 using namespace Tao;
 
 
-#define MAPPING_FEATURE "Mapping 1.008"  // Used in checkLicense etc.
+#define MAPPING_FEATURE "Mapping 1.009"  // Used in checkLicense etc.
 
 struct TextureMapping : QObject
+// ----------------------------------------------------------------------------
+//    Texture mapping
+// ----------------------------------------------------------------------------
 {
-    TextureMapping(const QGLContext **pcontext = NULL);
-    ~TextureMapping();
+                    TextureMapping();
+    virtual         ~TextureMapping();
 
     // Draw mapping
     virtual void    Draw();
@@ -53,7 +56,8 @@ struct TextureMapping : QObject
     static void     delete_callback(void *arg);
 
 public:
-    const QGLContext    **pcontext;
+    const QGLContext *context;
+    QGLShaderProgram *program;
 
 public:
     // Pointer to Tao functions

@@ -15,26 +15,25 @@
 // ****************************************************************************
 // This software is licensed under the GNU General Public License v3.
 // See file COPYING for details.
-//  (C) 1992-2010 Christophe de Dinechin <christophe@taodyne.com>
+//  (C) 1992-2015 Christophe de Dinechin <christophe@taodyne.com>
 //  (C) 2010 Jerome Forissier <jerome@taodyne.com>
-//  (C) 2010 Taodyne SAS
+//  (C) 2010-2015 Taodyne SAS
 // ****************************************************************************
+
 #include <string.h>
 #include <math.h>
 #include "noise_map.h"
 #include "3rdparty/fbm.h"
 
-NoiseMap::context_to_textures NoiseMap::texture_maps;
 
-
-NoiseMap::NoiseMap(uint w, uint h, uint seed) : w(w), h(h), seed(seed)
+NoiseMap::NoiseMap(uint w, uint h, uint seed)
 // ----------------------------------------------------------------------------
 //   Construction
 // ----------------------------------------------------------------------------
+    : w(w), h(h), seed(seed), textureID(0)
 {
     IFTRACE(mapping)
-            debug() << "Create noise map" << "\n";
-
+        debug() << "Create noise map\n";
     loadNoiseMap();
 }
 
@@ -44,6 +43,8 @@ NoiseMap::~NoiseMap()
 //   Destruction
 // ----------------------------------------------------------------------------
 {
+    if (textureID)
+        GL.DeleteTextures(1, &textureID);
 }
 
 
@@ -53,11 +54,10 @@ uint NoiseMap::generateNoiseMap()
 // ----------------------------------------------------------------------------
 {
     IFTRACE(mapping)
-            debug() << "Generate sphere mapping shader" << "\n";
+        debug() << "Generate sphere mapping shader\n";
 
-    uint texId = 0;
-    GL.GenTextures(1, &texId);
-    GL.BindTexture(GL_TEXTURE_3D, texId);
+    GL.GenTextures(1, &textureID);
+    GL.BindTexture(GL_TEXTURE_3D, textureID);
 
     QRgb *data = new QRgb[w * h * seed];
     memset(data, 0, w * h * seed * sizeof(QRgb));
@@ -82,7 +82,15 @@ uint NoiseMap::generateNoiseMap()
 
     delete[] data;
 
-    return texId;
+    // Apply some default parameters to the texture
+    GL.TexParameter(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    GL.TexParameter(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    GL.TexParameter(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    GL.TexParameter(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    GL.TexParameter(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_REPEAT);
+
+    return textureID;
 }
 
 
@@ -92,28 +100,15 @@ void NoiseMap::loadNoiseMap()
 // ----------------------------------------------------------------------------
 {
     checkGLContext();
-    Key key(w, h, seed);
-    noise_map::iterator found = textures.find(key);
-
-    if(found == textures.end())
-    {
-        // Prune the map if it gets too big
-        while (textures.size() > MAX_TEXTURES)
-        {
-            noise_map::iterator first = textures.begin();
-            GL.DeleteTextures(1, &(*first).second);
-            textures.erase(first);
-        }
-
-        textures[key] = generateNoiseMap();
-    }
+    if (!textureID)
+        textureID = generateNoiseMap();
 
     IFTRACE(mapping)
-            debug() << "Apply noise map" << "\n";
+        debug() << "Apply noise map\n";
 
     // This binding allows to get texture id in Tao
     GL.Enable(GL_TEXTURE_CUBE_MAP);
-    GL.BindTexture(GL_TEXTURE_CUBE_MAP, textures[key]);
+    GL.BindTexture(GL_TEXTURE_CUBE_MAP, textureID);
 }
 
 
@@ -127,28 +122,6 @@ void NoiseMap::Draw()
     // Enable pixel blur
     GL.HasPixelBlur(true);
 
-    Key key(w, h, seed);
     GL.Enable(GL_TEXTURE_3D);
-    GL.BindTexture(GL_TEXTURE_3D, textures[key]);
-
-    GL.TexParameter(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    GL.TexParameter(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-    GL.TexParameter(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    GL.TexParameter(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    GL.TexParameter(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_REPEAT);
+    GL.BindTexture(GL_TEXTURE_3D, textureID);
 }
-
-
-void NoiseMap::checkGLContext()
-// ----------------------------------------------------------------------------
-//   Make sure a texture_map has been allocated for the current GL context
-// ----------------------------------------------------------------------------
-{
-    if (!texture_maps.count(QGLContext::currentContext()))
-    {
-        noise_map m;
-        texture_maps[QGLContext::currentContext()] = m;
-    }
-}
-

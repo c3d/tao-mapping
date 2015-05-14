@@ -315,7 +315,42 @@ cube_map 1024,
 cube 0, 0, 0, 30000, 30000, 30000
 @endcode
  */
-cube_map(integer:size, contents:tree);
+cube_map(size:integer, contents:tree);
+
+/**
+ * @~english
+ * Creates a local cube map from a cross-shaped image.
+ *
+ * Define a cube map using a cross-shaped image.
+ * This texture can be used directly to create nice environment or
+ * during a cube mapping to generate reflections.
+ *
+ * @param cross Specify the source image
+ *
+ * An example of use of this effect is described below:
+@code
+cube_map_cross "cross.png"
+cube 0, 0, 0, 30000, 30000, 30000
+@endcode
+ *
+ * @note This texture have a higher priority than a common texture.
+ * @note The cube map does not support multi-texturing without shaders.
+ *
+ * @~french
+ * Définit une cube map à partir d'une image en croix.
+ * Le résultat peut être ensuite utilisé par @ref cube_mapping pour générer
+ * un environnement (un très grand cube qui englobe la caméra) et sur un objet
+ * pour simuler des réflexions de l'environnement sur l'objet.
+ *
+ * @param cross Image source à utiliser
+ *
+ * Voici un exemple :
+@code
+cube_map_cross "cross.png"
+cube 0, 0, 0, 30000, 30000, 30000
+@endcode
+ */
+cube_map_cross(cross:text);
 
 /**
  * @~english

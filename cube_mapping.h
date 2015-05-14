@@ -15,8 +15,9 @@
 // ****************************************************************************
 // This software is licensed under the GNU General Public License v3.
 // See file COPYING for details.
+//  (C) 2015 Christophe de Dinechin <christophe@taodyne.com>
 //  (C) 2011 Baptiste Soulisse <baptiste.soulisse@taodyne.com>
-//  (C) 2011 Taodyne SAS
+//  (C) 2011-2015 Taodyne SAS
 // ****************************************************************************
 
 #include "tao/coords3d.h"
@@ -31,6 +32,9 @@ using namespace Tao;
 
 
 struct CubeMapping : TextureMapping
+// ----------------------------------------------------------------------------
+//   Mapping color plus cube map
+// ----------------------------------------------------------------------------
 {
     CubeMapping(float ratio);
     ~CubeMapping();
@@ -44,12 +48,8 @@ protected:
 private:
     float   ratio;
     GLfloat model[4][4]; // model matrix
-
-    static bool failed;
-    static QGLShaderProgram* pgm;
-    static std::map<text, GLint> uniforms;
-    static const QGLContext* context;
+    uint    ratioUID, lightsUID, colorMapUID, cubeMapUID;
+    uint    hasColorMapUID, cameraUID, modelMatrixUID;
 };
-
 
 #endif
