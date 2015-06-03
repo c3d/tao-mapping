@@ -156,7 +156,7 @@ bool CubeMap::loadCrossTexture(text cross)
 
         // Load image in tetxure cache
         QImage image = tao->textureImage(cross);
-
+        
         // Load cubemap texture
         GL.GenTextures(1, &cubeMapId);
         GL.BindTexture(GL_TEXTURE_CUBE_MAP, cubeMapId);
@@ -182,6 +182,7 @@ bool CubeMap::loadCrossTexture(text cross)
 
         // Setup some parameters for texture filters and mapping
         const uint TCM = GL_TEXTURE_CUBE_MAP;
+        GL.BindTexture(TCM, cubeMapId);
         GL.TexParameter(TCM, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         GL.TexParameter(TCM, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
@@ -292,7 +293,7 @@ bool CubeMap::loadTexture (uint face, QImage &cross)
     case 3: y = 2*size; break;
     case 4: y = 1*size; break;
     case 5: y = 3*size; break;
-    default: return false;
+    default: abort(); return false;
     }
     QImage tile = cross.copy(x, y, size, size);
     if (face == 5)
