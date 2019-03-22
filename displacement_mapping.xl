@@ -1,8 +1,8 @@
-// ****************************************************************************
-//  displacement_mapping.xl                                         Tao project
-// ****************************************************************************
+// *****************************************************************************
+// displacement_mapping.xl                                         Tao3D project
+// *****************************************************************************
 //
-//   File Description:
+// File description:
 //
 //    Implement displacement mapping
 //    For further informations, see http://en.wikipedia.org/wiki/Displacement_mapping
@@ -15,54 +15,30 @@
 //
 //
 //
-// ****************************************************************************
+// *****************************************************************************
 // This software is licensed under the GNU General Public License v3
-// See file COPYING for details.
-//  (C) 2011 Christophe de Dinechin <christophe@taodyne.com>
-//  (C) 2011 Jérôme Forissier <jerome@taodyne.com>
-//  (C) 2011 Catherine Burvelle <cathy@taodyne.com>
-//  (C) 2011 Taodyne SAS
-// ****************************************************************************
-
-
-// ----------------------------------------------------------------------------
-//   DISPLACEMENT MAPPING
-// ----------------------------------------------------------------------------
-
-// Define displacement ratio
-DISPLACEMENT_RATIO -> 0.0
-
-displacement_mapping ratio:real ->
-    /**
-    * Apply displacement mapping.
-    **/
-    has_color_map
-    DISPLACEMENT_RATIO := ratio
-    if SHADER4_AVAILABLE_MAPPING = false then
-        displacement_shader_no_lights
-    else
-        displacement_shader_lights
-
-displacement_shader_lights ->
-    /**
-    * Define displacement shader with a full support of lights.
-    **/
-    shader_program
-        shader_log
-        vertex_shader <<
-            /********************************************************************************
-            **
-            ** Copyright (C) 2011 Taodyne.
-            ** All rights reserved.
-            ** Contact: Taodyne (contact@taodyne.com)
-            **
-            ** This file is part of the Tao3D application, developped by Taodyne.
-            ** It can be only used in the software and these modules.
-            **
-            ** If you have questions regarding the use of this file, please contact
-            ** Taodyne at contact@taodyne.com.
-            **
-            ********************************************************************************/
+// (C) 2011-2013, Baptiste Soulisse <baptiste.soulisse@taodyne.com>
+// (C) 2011-2013, Catherine Burvelle <catherine@taodyne.com>
+// (C) 2011-2014,2019, Christophe de Dinechin <christophe@dinechin.org>
+// (C) 2011-2013, Jérôme Forissier <jerome@taodyne.com>
+// (C) 2011-2013, Baptiste Soulisse <baptiste.soulisse@taodyne.com>
+// *****************************************************************************
+// This file is part of Tao3D
+//
+// Tao3D is free software: you can r redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Tao3D is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Tao3D, in a file named COPYING.
+// If not, see <https://www.gnu.org/licenses/>.
+// *****************************************************************************
 
             // Mapping paramaters
             uniform float     ratio;

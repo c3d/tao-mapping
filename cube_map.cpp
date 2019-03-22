@@ -1,8 +1,8 @@
-// ****************************************************************************
-//  cube_map.cpp                                                    Tao project
-// ****************************************************************************
+// *****************************************************************************
+// cube_map.cpp                                                    Tao3D project
+// *****************************************************************************
 //
-//   File Description:
+// File description:
 //
 //   Cube map implementation.
 //
@@ -12,12 +12,30 @@
 //
 //
 //
-// ****************************************************************************
-// This software is licensed under the GNU General Public License v3.
-// See file COPYING for details.
-//  (C) 2011 Baptiste Soulisse <baptiste.soulisse@taodyne.com>
-//  (C) 2011 Taodyne SAS
-// ****************************************************************************
+// *****************************************************************************
+// This software is licensed under the GNU General Public License v3
+// (C) 2011-2013, Baptiste Soulisse <baptiste.soulisse@taodyne.com>
+// (C) 2011-2013, Catherine Burvelle <catherine@taodyne.com>
+// (C) 2011-2015,2019, Christophe de Dinechin <christophe@dinechin.org>
+// (C) 2011-2013, Jérôme Forissier <jerome@taodyne.com>
+// (C) 2011-2013, Baptiste Soulisse <baptiste.soulisse@taodyne.com>
+// *****************************************************************************
+// This file is part of Tao3D
+//
+// Tao3D is free software: you can r redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Tao3D is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Tao3D, in a file named COPYING.
+// If not, see <https://www.gnu.org/licenses/>.
+// *****************************************************************************
 #include "cube_map.h"
 
 // ============================================================================
@@ -53,7 +71,7 @@ CubeMap::CubeMap(text cross)
         debug() << "Create cube map from cross" << cross << "\n";
 
     checkGLContext();
-    
+
     loadCrossTexture(cross);
 }
 
@@ -97,7 +115,7 @@ bool CubeMap::setTexture(text filename, uint face)
 
 bool CubeMap::loadCubeMap()
 // ----------------------------------------------------------------------------
-//   Load files for faces, build texture, add it to Tao's texture list    
+//   Load files for faces, build texture, add it to Tao's texture list
 // ----------------------------------------------------------------------------
 {
     checkGLContext();
@@ -138,14 +156,14 @@ bool CubeMap::loadCubeMap()
 
     // Enable pixel blur
     GL.HasPixelBlur(true);
-    
+
     return true;
 }
 
 
 bool CubeMap::loadCrossTexture(text cross)
 // ----------------------------------------------------------------------------
-//   Load files for faces, build texture, add it to Tao's texture list    
+//   Load files for faces, build texture, add it to Tao's texture list
 // ----------------------------------------------------------------------------
 {
     checkGLContext();
@@ -156,7 +174,7 @@ bool CubeMap::loadCrossTexture(text cross)
 
         // Load image in tetxure cache
         QImage image = tao->textureImage(cross);
-        
+
         // Load cubemap texture
         GL.GenTextures(1, &cubeMapId);
         GL.BindTexture(GL_TEXTURE_CUBE_MAP, cubeMapId);
@@ -188,7 +206,7 @@ bool CubeMap::loadCrossTexture(text cross)
 
         GL.TexParameter(TCM, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         GL.TexParameter(TCM, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        GL.TexParameter(TCM, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);        
+        GL.TexParameter(TCM, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
     }
 
     // This binding allows to get texture id in Tao
@@ -297,7 +315,7 @@ bool CubeMap::loadTexture (uint face, QImage &cross)
     }
     QImage tile = cross.copy(x, y, size, size);
     if (face == 5)
-        tile = tile.mirrored(true, true); 
+        tile = tile.mirrored(true, true);
     currentFace->loadTexture(face, tile);
     return true;
 }
@@ -307,7 +325,7 @@ void TextureFace::loadTexture(uint face, QImage &image)
 // ----------------------------------------------------------------------------
 //    Load a given image
 // ----------------------------------------------------------------------------
-{    
+{
     QImage texture = QGLWidget::convertToGLFormat(image);
     if (flip_u || flip_v)
         texture = texture.mirrored(flip_u, flip_v);
